@@ -1,0 +1,580 @@
+{
+  "schema_version": "cua.capability/v1",
+  "id": "corelink.account.open_share_sub_account",
+  "version": "1.0.0",
+  "status": "draft",
+  "title": "Open a share sub-account and reach confirmation",
+  "description": "Open a new share sub-account (certificate, money market, club) for an existing member, funded from one of the member's existing shares, and return the confirmation number. IRREVERSIBLE: posts a transaction.",
+  "app": {
+    "product": "CoreLink",
+    "versions": "7.4.1",
+    "surface": "java-swing",
+    "profile": "corelink"
+  },
+  "inputs": [
+    {
+      "name": "member_number",
+      "type": "string",
+      "description": "5-digit member number",
+      "pattern": "^\\d{5}$",
+      "required": true,
+      "sensitive": true
+    },
+    {
+      "name": "account_type",
+      "type": "enum",
+      "description": "Product to open",
+      "enum": [
+        "Share Certificate",
+        "Money Market",
+        "Christmas Club",
+        "Holiday Club",
+        "Youth Savings"
+      ],
+      "required": true,
+      "sensitive": false
+    },
+    {
+      "name": "initial_deposit",
+      "type": "decimal",
+      "description": "Opening deposit in USD",
+      "pattern": "^\\d+(\\.\\d{2})?$",
+      "required": true,
+      "sensitive": false
+    },
+    {
+      "name": "fund_from",
+      "type": "string",
+      "description": "Suffix of the funding share",
+      "pattern": "^S\\d{2}$",
+      "required": true,
+      "sensitive": false
+    }
+  ],
+  "outputs": [
+    {
+      "name": "confirmation_number",
+      "type": "string",
+      "description": "CoreLink confirmation number for the posted transaction",
+      "sensitive": false
+    }
+  ],
+  "business_outcomes": [
+    {
+      "code": "MEMBER_NOT_FOUND",
+      "description": "No member exists with that number."
+    },
+    {
+      "code": "MEMBER_RESTRICTED",
+      "description": "Member is restricted; supervisor review required before servicing."
+    },
+    {
+      "code": "MEMBER_CLOSED",
+      "description": "Membership is closed."
+    },
+    {
+      "code": "PERMISSION_DENIED",
+      "description": "The signed-on operator is not authorized for this transaction."
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "description": "The application rejected an input value."
+    },
+    {
+      "code": "OPERATOR_DECLINED",
+      "description": ""
+    }
+  ],
+  "risk": "irreversible",
+  "preconditions": [
+    "signed_on",
+    "no_modal_dialog"
+  ],
+  "steps": [
+    {
+      "id": "s1",
+      "intent": "Open the Open Sub-Account transaction from the Accounts menu.",
+      "action": "click",
+      "target": {
+        "description": "menu item 'Open Sub-Account' in window 'CoreLink 7.4.1 - Heritage Federal Credit Union'",
+        "scope": {
+          "window": "main"
+        },
+        "strategies": [
+          {
+            "kind": "a11y",
+            "role": "menu item",
+            "name": "Open Sub-Account",
+            "unique_at_record": true
+          },
+          {
+            "kind": "path",
+            "role": "menu item",
+            "path": "0.1.1.2.0",
+            "unique_at_record": true
+          }
+        ]
+      },
+      "risk": "safe",
+      "expect": [
+        {
+          "kind": "container_present",
+          "pattern": "^Open Sub-Account  \\[TRAN 0417\\]$",
+          "description": "work window 'Open Sub-Account  [TRAN 0417]' opened"
+        }
+      ],
+      "timeout_ms": 8000
+    },
+    {
+      "id": "s2",
+      "intent": "Enter the member number.",
+      "action": "set_text",
+      "target": {
+        "description": "text 'Member Number' in 'Open Sub-Account  [TRAN 0417]'",
+        "scope": {
+          "window": "main",
+          "container": "^Open Sub-Account  \\[TRAN 0417\\]$"
+        },
+        "strategies": [
+          {
+            "kind": "label",
+            "role": "text",
+            "label": "Member Number",
+            "unique_at_record": true
+          },
+          {
+            "kind": "group",
+            "role": "text",
+            "group": "New Share Sub-Account",
+            "index": 0,
+            "unique_at_record": true
+          },
+          {
+            "kind": "path",
+            "role": "text",
+            "path": "0.1.0.0.0.1",
+            "unique_at_record": true
+          },
+          {
+            "kind": "coords",
+            "rel_x": 0.4929,
+            "rel_y": 0.3088,
+            "unique_at_record": true
+          }
+        ]
+      },
+      "value": {
+        "source": "param",
+        "param": "member_number"
+      },
+      "risk": "safe",
+      "expect": [
+        {
+          "kind": "element_value",
+          "pattern": ".+",
+          "description": "field holds the entered value"
+        }
+      ],
+      "timeout_ms": 8000
+    },
+    {
+      "id": "s3",
+      "intent": "Load the member so the funding accounts populate.",
+      "action": "click",
+      "target": {
+        "description": "push button 'Load' in 'Open Sub-Account  [TRAN 0417]'",
+        "scope": {
+          "window": "main",
+          "container": "^Open Sub-Account  \\[TRAN 0417\\]$"
+        },
+        "strategies": [
+          {
+            "kind": "a11y",
+            "role": "push button",
+            "name": "Load",
+            "unique_at_record": true
+          },
+          {
+            "kind": "group",
+            "role": "push button",
+            "group": "New Share Sub-Account",
+            "index": 0,
+            "unique_at_record": true
+          },
+          {
+            "kind": "path",
+            "role": "push button",
+            "path": "0.1.0.0.0.2",
+            "unique_at_record": true
+          },
+          {
+            "kind": "coords",
+            "rel_x": 0.7232,
+            "rel_y": 0.3088,
+            "unique_at_record": true
+          }
+        ]
+      },
+      "risk": "safe",
+      "expect": [
+        {
+          "kind": "text_present",
+          "pattern": "MEMBER LOADED",
+          "description": "status line shows 'MEMBER LOADED'"
+        }
+      ],
+      "timeout_ms": 8000
+    },
+    {
+      "id": "s4",
+      "intent": "Choose the product to open.",
+      "action": "select",
+      "target": {
+        "description": "combo box 'Account Type' in 'Open Sub-Account  [TRAN 0417]'",
+        "scope": {
+          "window": "main",
+          "container": "^Open Sub-Account  \\[TRAN 0417\\]$"
+        },
+        "strategies": [
+          {
+            "kind": "label",
+            "role": "combo box",
+            "label": "Account Type",
+            "unique_at_record": true
+          },
+          {
+            "kind": "group",
+            "role": "combo box",
+            "group": "New Share Sub-Account",
+            "index": 0,
+            "unique_at_record": true
+          },
+          {
+            "kind": "path",
+            "role": "combo box",
+            "path": "0.1.0.0.0.6",
+            "unique_at_record": true
+          },
+          {
+            "kind": "coords",
+            "rel_x": 0.4839,
+            "rel_y": 0.4956,
+            "unique_at_record": true
+          }
+        ]
+      },
+      "value": {
+        "source": "param",
+        "param": "account_type"
+      },
+      "risk": "safe",
+      "expect": [
+        {
+          "kind": "element_value",
+          "pattern": ".+",
+          "description": "field holds the entered value"
+        }
+      ],
+      "timeout_ms": 8000
+    },
+    {
+      "id": "s5",
+      "intent": "Enter the opening deposit.",
+      "action": "set_text",
+      "target": {
+        "description": "text 'Initial Deposit' in 'Open Sub-Account  [TRAN 0417]'",
+        "scope": {
+          "window": "main",
+          "container": "^Open Sub-Account  \\[TRAN 0417\\]$"
+        },
+        "strategies": [
+          {
+            "kind": "label",
+            "role": "text",
+            "label": "Initial Deposit",
+            "unique_at_record": true
+          },
+          {
+            "kind": "group",
+            "role": "text",
+            "group": "New Share Sub-Account",
+            "index": 1,
+            "unique_at_record": true
+          },
+          {
+            "kind": "path",
+            "role": "text",
+            "path": "0.1.0.0.0.8",
+            "unique_at_record": true
+          },
+          {
+            "kind": "coords",
+            "rel_x": 0.4482,
+            "rel_y": 0.5941,
+            "unique_at_record": true
+          }
+        ]
+      },
+      "value": {
+        "source": "param",
+        "param": "initial_deposit"
+      },
+      "risk": "safe",
+      "expect": [
+        {
+          "kind": "element_value",
+          "pattern": ".+",
+          "description": "field holds the entered value"
+        }
+      ],
+      "timeout_ms": 8000
+    },
+    {
+      "id": "s6",
+      "intent": "Choose the funding share.",
+      "action": "select",
+      "target": {
+        "description": "combo box 'Fund From' in 'Open Sub-Account  [TRAN 0417]'",
+        "scope": {
+          "window": "main",
+          "container": "^Open Sub-Account  \\[TRAN 0417\\]$"
+        },
+        "strategies": [
+          {
+            "kind": "label",
+            "role": "combo box",
+            "label": "Fund From",
+            "unique_at_record": true
+          },
+          {
+            "kind": "group",
+            "role": "combo box",
+            "group": "New Share Sub-Account",
+            "index": 1,
+            "unique_at_record": true
+          },
+          {
+            "kind": "path",
+            "role": "combo box",
+            "path": "0.1.0.0.0.10",
+            "unique_at_record": true
+          },
+          {
+            "kind": "coords",
+            "rel_x": 0.5286,
+            "rel_y": 0.6926,
+            "unique_at_record": true
+          }
+        ]
+      },
+      "value": {
+        "source": "param",
+        "param": "fund_from"
+      },
+      "risk": "safe",
+      "expect": [
+        {
+          "kind": "element_value",
+          "pattern": ".+",
+          "description": "field holds the entered value"
+        }
+      ],
+      "timeout_ms": 8000
+    },
+    {
+      "id": "s7",
+      "intent": "Validate and go to the review screen.",
+      "action": "click",
+      "target": {
+        "description": "push button 'Review >>' in 'Open Sub-Account  [TRAN 0417]'",
+        "scope": {
+          "window": "main",
+          "container": "^Open Sub-Account  \\[TRAN 0417\\]$"
+        },
+        "strategies": [
+          {
+            "kind": "a11y",
+            "role": "push button",
+            "name": "Review >>",
+            "unique_at_record": true
+          },
+          {
+            "kind": "group",
+            "role": "push button",
+            "group": "New Share Sub-Account",
+            "index": 1,
+            "unique_at_record": true
+          },
+          {
+            "kind": "path",
+            "role": "push button",
+            "path": "0.1.0.0.0.11",
+            "unique_at_record": true
+          },
+          {
+            "kind": "coords",
+            "rel_x": 0.4554,
+            "rel_y": 0.7971,
+            "unique_at_record": true
+          }
+        ]
+      },
+      "risk": "risky",
+      "expect": [
+        {
+          "kind": "text_present",
+          "pattern": "REVIEW TRANSACTION AND POST",
+          "description": "status line shows 'REVIEW TRANSACTION AND POST'"
+        }
+      ],
+      "timeout_ms": 8000
+    },
+    {
+      "id": "s8",
+      "intent": "Post the transaction (irreversible, needs approval).",
+      "action": "click",
+      "target": {
+        "description": "push button 'Post Transaction' in 'Open Sub-Account  [TRAN 0417]'",
+        "scope": {
+          "window": "main",
+          "container": "^Open Sub-Account  \\[TRAN 0417\\]$"
+        },
+        "strategies": [
+          {
+            "kind": "a11y",
+            "role": "push button",
+            "name": "Post Transaction",
+            "unique_at_record": true
+          },
+          {
+            "kind": "group",
+            "role": "push button",
+            "group": "Review Transaction",
+            "index": 1,
+            "unique_at_record": true
+          },
+          {
+            "kind": "path",
+            "role": "push button",
+            "path": "0.1.0.0.1.1.1",
+            "unique_at_record": true
+          },
+          {
+            "kind": "coords",
+            "rel_x": 0.858,
+            "rel_y": 0.9206,
+            "unique_at_record": true
+          }
+        ]
+      },
+      "risk": "irreversible",
+      "expect": [
+        {
+          "kind": "window_present",
+          "pattern": "^Confirm Posting$",
+          "description": "dialog 'Confirm Posting' is shown"
+        }
+      ],
+      "timeout_ms": 8000
+    },
+    {
+      "id": "s9",
+      "intent": "Confirm the posting.",
+      "action": "click",
+      "target": {
+        "description": "push button 'Yes' in window 'Confirm Posting'",
+        "scope": {
+          "window": "^Confirm Posting$"
+        },
+        "strategies": [
+          {
+            "kind": "a11y",
+            "role": "push button",
+            "name": "Yes",
+            "unique_at_record": true
+          },
+          {
+            "kind": "path",
+            "role": "push button",
+            "path": "0.1.0.0.1.0",
+            "unique_at_record": true
+          },
+          {
+            "kind": "coords",
+            "rel_x": 0.4141,
+            "rel_y": 0.7481,
+            "unique_at_record": true
+          }
+        ]
+      },
+      "risk": "irreversible",
+      "expect": [
+        {
+          "kind": "text_present",
+          "pattern": "TRANSACTION POSTED - CONF CL-\\d+-S\\d+",
+          "description": "status line shows 'TRANSACTION POSTED - CONF CL-104221-S32'"
+        }
+      ],
+      "timeout_ms": 8000
+    },
+    {
+      "id": "s10",
+      "intent": "Read the confirmation number.",
+      "action": "extract",
+      "target": {
+        "description": "label 'CONFIRMATION #: CL-104221-S32' in 'Open Sub-Account  [TRAN 0417]'",
+        "scope": {
+          "window": "main",
+          "container": "^Open Sub-Account  \\[TRAN 0417\\]$"
+        },
+        "strategies": [
+          {
+            "kind": "group",
+            "role": "label",
+            "group": "Transaction Complete",
+            "index": 1,
+            "unique_at_record": true
+          },
+          {
+            "kind": "path",
+            "role": "label",
+            "path": "0.1.0.0.2.0.1",
+            "unique_at_record": true
+          },
+          {
+            "kind": "coords",
+            "rel_x": 0.5,
+            "rel_y": 0.6838,
+            "unique_at_record": true
+          }
+        ]
+      },
+      "extract": {
+        "output": "confirmation_number",
+        "read": "name",
+        "parse": "text",
+        "pattern": "CONFIRMATION #: (\\S+)"
+      },
+      "risk": "safe",
+      "expect": [],
+      "timeout_ms": 8000
+    }
+  ],
+  "success": [
+    {
+      "kind": "text_present",
+      "pattern": "TRANSACTION POSTED",
+      "description": "screen shows 'TRANSACTION POSTED'"
+    }
+  ],
+  "outcome_rules": [],
+  "inherit_outcome_rules": true,
+  "provenance": {
+    "discovered_by": "scripted-test",
+    "discovery_run": "discover-20260924-015658-0149",
+    "goal": "Open a new sub-account of type account_type for the member given by member_number, with opening deposit initial_deposit funded from the member's share whose suffix is fund_from. Post it and read the confirmation number.",
+    "tenant": "heritage",
+    "created_at": "2026-09-24T05:57:11+00:00",
+    "notes": []
+  }
+}

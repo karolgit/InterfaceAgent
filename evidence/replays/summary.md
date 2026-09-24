@@ -1,0 +1,17 @@
+| Scenario | Tenant | Injected | Result | Code | Recoveries | Pass |
+|---|---|---|---|---|---|---|
+| 01-balance-happy-path | heritage | - | success | success | - | yes |
+| 02-balance-member-not-found | heritage | - | business_outcome | MEMBER_NOT_FOUND | - | yes |
+| 03-balance-invalid-input | heritage | - | rejected | INVALID_INPUT | - | yes |
+| 04-balance-member-restricted | heritage | - | business_outcome | MEMBER_RESTRICTED | - | yes |
+| 05-balance-unexpected-popup | heritage | popup=true | success | success | UNEXPECTED_DIALOG | yes |
+| 06-balance-slow-host | heritage | slow_ms=4500 | success | success | SLOW_RESPONSE | yes |
+| 07-balance-session-expired | heritage | session_expired=true | success | success | SESSION_EXPIRED | yes |
+| 08-balance-host-error | heritage | app_error=true | failed | HOST_ERROR | - | yes |
+| 09-balance-second-tenant | lakeshore | - | success | success | - | yes |
+| 10-open-account-approved | heritage | - | success | success | - | yes |
+| 11-open-account-below-minimum | heritage | - | business_outcome | VALIDATION_ERROR | - | yes |
+| 12-open-account-permission-denied | heritage | - | business_outcome | PERMISSION_DENIED | - | yes |
+| 13-open-account-no-approval-grant | heritage | - | failed | HUMAN_TIMEOUT | - | yes |
+| 14-open-account-operator-approves | heritage | - | success | success | - | yes |
+| 15-open-account-supervisor-handoff | heritage | - | success | success | - | yes |

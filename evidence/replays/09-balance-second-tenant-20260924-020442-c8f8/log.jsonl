@@ -1,0 +1,38 @@
+{"ts": "2026-09-24T06:04:42.782+00:00", "t_ms": 0, "event": "replay_started", "capability": "corelink.member.get_share_savings_balance@1.0.0", "tenant": "lakeshore", "params": {"member_number": "23456"}, "status": "draft"}
+{"ts": "2026-09-24T06:04:42.832+00:00", "t_ms": 47, "event": "sign_on_started"}
+{"ts": "2026-09-24T06:04:42.832+00:00", "t_ms": 47, "event": "step_started", "step": "so1", "intent": "Enter operator ID", "action": "set_text"}
+{"ts": "2026-09-24T06:04:42.863+00:00", "t_ms": 78, "event": "target_resolved", "step": "so1", "strategy": 0, "kind": "label", "ref": "w1.0.1.0.1"}
+{"ts": "2026-09-24T06:04:42.863+00:00", "t_ms": 78, "event": "policy", "step": "so1", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-24T06:04:42.871+00:00", "t_ms": 78, "event": "acted", "step": "so1", "action": "set_text", "target": "Operator ID field", "value_source": "secret"}
+{"ts": "2026-09-24T06:04:43.262+00:00", "t_ms": 469, "event": "step_started", "step": "so2", "intent": "Enter operator password", "action": "set_text"}
+{"ts": "2026-09-24T06:04:43.280+00:00", "t_ms": 484, "event": "target_resolved", "step": "so2", "strategy": 0, "kind": "label", "ref": "w1.0.1.0.3"}
+{"ts": "2026-09-24T06:04:43.280+00:00", "t_ms": 484, "event": "policy", "step": "so2", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-24T06:04:43.284+00:00", "t_ms": 500, "event": "acted", "step": "so2", "action": "set_text", "target": "Password field", "value_source": "secret"}
+{"ts": "2026-09-24T06:04:43.681+00:00", "t_ms": 891, "event": "step_started", "step": "so3", "intent": "Submit sign-on", "action": "click"}
+{"ts": "2026-09-24T06:04:43.688+00:00", "t_ms": 891, "event": "target_resolved", "step": "so3", "strategy": 0, "kind": "a11y", "ref": "w1.0.1.0.5"}
+{"ts": "2026-09-24T06:04:43.688+00:00", "t_ms": 891, "event": "policy", "step": "so3", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-24T06:04:43.696+00:00", "t_ms": 906, "event": "acted", "step": "so3", "action": "click", "target": "Sign On button", "value_source": null}
+{"ts": "2026-09-24T06:04:43.782+00:00", "t_ms": 1000, "event": "checkpoint_met", "step": "so3", "checks": ["status bar confirms sign-on"]}
+{"ts": "2026-09-24T06:04:43.782+00:00", "t_ms": 1000, "event": "sign_on_completed"}
+{"ts": "2026-09-24T06:04:43.805+00:00", "t_ms": 1016, "event": "step_started", "step": "s1", "intent": "Open the Member Inquiry screen from the Member menu.", "action": "click"}
+{"ts": "2026-09-24T06:04:43.812+00:00", "t_ms": 1016, "event": "target_resolved", "step": "s1", "strategy": 0, "kind": "a11y", "ref": "w0.0.1.1.1.0"}
+{"ts": "2026-09-24T06:04:43.813+00:00", "t_ms": 1016, "event": "policy", "step": "s1", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-24T06:04:43.815+00:00", "t_ms": 1031, "event": "acted", "step": "s1", "action": "click", "target": "menu item 'Member Inquiry' in window 'CoreLink 7.4.1 - Heritage Federal Credit Union'", "value_source": null}
+{"ts": "2026-09-24T06:04:43.959+00:00", "t_ms": 1172, "event": "checkpoint_met", "step": "s1", "checks": ["work window 'Member Inquiry' opened"]}
+{"ts": "2026-09-24T06:04:43.961+00:00", "t_ms": 1172, "event": "step_started", "step": "s2", "intent": "Enter the member number.", "action": "set_text"}
+{"ts": "2026-09-24T06:04:43.992+00:00", "t_ms": 1203, "event": "target_resolved", "step": "s2", "strategy": 1, "kind": "label", "ref": "w0.0.1.0.1.0.0.1.0.0.1"}
+{"ts": "2026-09-24T06:04:43.992+00:00", "t_ms": 1203, "event": "locator_fallback", "step": "s2", "strategy": 1, "kind": "label", "notes": ["strategy 0 (a11y): 0 matches"]}
+{"ts": "2026-09-24T06:04:43.993+00:00", "t_ms": 1203, "event": "policy", "step": "s2", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-24T06:04:43.996+00:00", "t_ms": 1203, "event": "acted", "step": "s2", "action": "set_text", "target": "text 'Member #:' in 'Member Inquiry'", "value_source": "param"}
+{"ts": "2026-09-24T06:04:44.002+00:00", "t_ms": 1219, "event": "checkpoint_met", "step": "s2", "checks": ["field holds the entered value"]}
+{"ts": "2026-09-24T06:04:44.003+00:00", "t_ms": 1219, "event": "step_started", "step": "s3", "intent": "Run the inquiry.", "action": "click"}
+{"ts": "2026-09-24T06:04:44.012+00:00", "t_ms": 1219, "event": "target_resolved", "step": "s3", "strategy": 0, "kind": "a11y", "ref": "w0.0.1.0.1.0.0.1.0.0.2"}
+{"ts": "2026-09-24T06:04:44.013+00:00", "t_ms": 1219, "event": "policy", "step": "s3", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-24T06:04:44.015+00:00", "t_ms": 1219, "event": "acted", "step": "s3", "action": "click", "target": "push button 'Inquire' in 'Member Inquiry'", "value_source": null}
+{"ts": "2026-09-24T06:04:44.117+00:00", "t_ms": 1328, "event": "checkpoint_met", "step": "s3", "checks": ["status line shows 'INQUIRY COMPLETE - 2 SHARE(S)'"]}
+{"ts": "2026-09-24T06:04:44.118+00:00", "t_ms": 1328, "event": "step_started", "step": "s4", "intent": "Read the Share Savings balance from the accounts table.", "action": "extract"}
+{"ts": "2026-09-24T06:04:44.125+00:00", "t_ms": 1328, "event": "target_resolved", "step": "s4", "strategy": 0, "kind": "group", "ref": "w0.0.1.0.1.0.0.1.0.1.1.0.0"}
+{"ts": "2026-09-24T06:04:44.126+00:00", "t_ms": 1344, "event": "policy", "step": "s4", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-24T06:04:44.126+00:00", "t_ms": 1344, "event": "extracted", "step": "s4", "output": "savings_balance", "value": "[SAVINGS_BALANCE]"}
+{"ts": "2026-09-24T06:04:44.138+00:00", "t_ms": 1344, "event": "success_verified", "checks": ["screen shows 'INQUIRY COMPLETE - 2 SHARE(S)'"]}
+{"ts": "2026-09-24T06:04:44.253+00:00", "t_ms": 1469, "event": "replay_finished", "status": "success", "outcome": null, "failure": null, "duration_ms": 1469}

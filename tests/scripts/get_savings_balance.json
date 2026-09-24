@@ -1,0 +1,12 @@
+[
+  {"tool": "click", "find": {"role": "menu item", "name": "Member Inquiry"},
+   "input": {"why": "Open the Member Inquiry screen from the Member menu."}},
+  {"tool": "type_text", "find": {"role": "text", "container": "Member Inquiry"},
+   "input": {"param": "member_number", "why": "Enter the member number."}},
+  {"tool": "click", "find": {"role": "push button", "name": "Inquire"},
+   "input": {"why": "Run the inquiry."}},
+  {"tool": "extract", "find": {"role": "table", "container": "Member Inquiry"},
+   "input": {"output": "savings_balance", "row_column": "Description", "row_contains": "Share Savings",
+             "column": "Balance", "why": "Read the Share Savings balance from the accounts table."}},
+  {"tool": "finish", "input": {"success": true, "summary": "Balance captured.", "proof_text": "INQUIRY COMPLETE"}}
+]

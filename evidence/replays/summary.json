@@ -1,0 +1,232 @@
+[
+  {
+    "scenario": "01-balance-happy-path",
+    "tenant": "heritage",
+    "faults": {},
+    "status": "success",
+    "code": "success",
+    "expected": "success",
+    "pass": true,
+    "recoveries": [],
+    "fallbacks": 0,
+    "handoffs": [],
+    "seconds": 2.4,
+    "run_dir": "01-balance-happy-path-20260924-020417-84b8"
+  },
+  {
+    "scenario": "02-balance-member-not-found",
+    "tenant": "heritage",
+    "faults": {},
+    "status": "business_outcome",
+    "code": "MEMBER_NOT_FOUND",
+    "expected": "MEMBER_NOT_FOUND",
+    "pass": true,
+    "recoveries": [],
+    "fallbacks": 0,
+    "handoffs": [],
+    "seconds": 2.4,
+    "run_dir": "02-balance-member-not-found-20260924-020420-081a"
+  },
+  {
+    "scenario": "03-balance-invalid-input",
+    "tenant": "heritage",
+    "faults": {},
+    "status": "rejected",
+    "code": "INVALID_INPUT",
+    "expected": "INVALID_INPUT",
+    "pass": true,
+    "recoveries": [],
+    "fallbacks": 0,
+    "handoffs": [],
+    "seconds": 1.0,
+    "run_dir": "03-balance-invalid-input-20260924-020422-a450"
+  },
+  {
+    "scenario": "04-balance-member-restricted",
+    "tenant": "heritage",
+    "faults": {},
+    "status": "business_outcome",
+    "code": "MEMBER_RESTRICTED",
+    "expected": "MEMBER_RESTRICTED",
+    "pass": true,
+    "recoveries": [],
+    "fallbacks": 0,
+    "handoffs": [],
+    "seconds": 2.4,
+    "run_dir": "04-balance-member-restricted-20260924-020423-cbfb"
+  },
+  {
+    "scenario": "05-balance-unexpected-popup",
+    "tenant": "heritage",
+    "faults": {
+      "popup": "true"
+    },
+    "status": "success",
+    "code": "success",
+    "expected": "success",
+    "pass": true,
+    "recoveries": [
+      "UNEXPECTED_DIALOG"
+    ],
+    "fallbacks": 0,
+    "handoffs": [],
+    "seconds": 3.2,
+    "run_dir": "05-balance-unexpected-popup-20260924-020425-ec37"
+  },
+  {
+    "scenario": "06-balance-slow-host",
+    "tenant": "heritage",
+    "faults": {
+      "slow_ms": "4500"
+    },
+    "status": "success",
+    "code": "success",
+    "expected": "success",
+    "pass": true,
+    "recoveries": [
+      "SLOW_RESPONSE"
+    ],
+    "fallbacks": 0,
+    "handoffs": [],
+    "seconds": 6.9,
+    "run_dir": "06-balance-slow-host-20260924-020429-ccfb"
+  },
+  {
+    "scenario": "07-balance-session-expired",
+    "tenant": "heritage",
+    "faults": {
+      "session_expired": "true"
+    },
+    "status": "success",
+    "code": "success",
+    "expected": "success",
+    "pass": true,
+    "recoveries": [
+      "SESSION_EXPIRED"
+    ],
+    "fallbacks": 0,
+    "handoffs": [],
+    "seconds": 4.3,
+    "run_dir": "07-balance-session-expired-20260924-020436-28d5"
+  },
+  {
+    "scenario": "08-balance-host-error",
+    "tenant": "heritage",
+    "faults": {
+      "app_error": "true"
+    },
+    "status": "failed",
+    "code": "HOST_ERROR",
+    "expected": "HOST_ERROR",
+    "pass": true,
+    "recoveries": [],
+    "fallbacks": 0,
+    "handoffs": [],
+    "seconds": 2.4,
+    "run_dir": "08-balance-host-error-20260924-020440-bebe"
+  },
+  {
+    "scenario": "09-balance-second-tenant",
+    "tenant": "lakeshore",
+    "faults": {},
+    "status": "success",
+    "code": "success",
+    "expected": "success",
+    "pass": true,
+    "recoveries": [],
+    "fallbacks": 1,
+    "handoffs": [],
+    "seconds": 2.4,
+    "run_dir": "09-balance-second-tenant-20260924-020442-c8f8"
+  },
+  {
+    "scenario": "10-open-account-approved",
+    "tenant": "heritage",
+    "faults": {},
+    "status": "success",
+    "code": "success",
+    "expected": "success",
+    "pass": true,
+    "recoveries": [],
+    "fallbacks": 0,
+    "handoffs": [],
+    "seconds": 2.9,
+    "run_dir": "10-open-account-approved-20260924-020445-205f"
+  },
+  {
+    "scenario": "11-open-account-below-minimum",
+    "tenant": "heritage",
+    "faults": {},
+    "status": "business_outcome",
+    "code": "VALIDATION_ERROR",
+    "expected": "VALIDATION_ERROR",
+    "pass": true,
+    "recoveries": [],
+    "fallbacks": 0,
+    "handoffs": [],
+    "seconds": 2.5,
+    "run_dir": "11-open-account-below-minimum-20260924-020447-849d"
+  },
+  {
+    "scenario": "12-open-account-permission-denied",
+    "tenant": "heritage",
+    "faults": {},
+    "status": "business_outcome",
+    "code": "PERMISSION_DENIED",
+    "expected": "PERMISSION_DENIED",
+    "pass": true,
+    "recoveries": [],
+    "fallbacks": 0,
+    "handoffs": [],
+    "seconds": 2.3,
+    "run_dir": "12-open-account-permission-denied-20260924-020450-293c"
+  },
+  {
+    "scenario": "13-open-account-no-approval-grant",
+    "tenant": "heritage",
+    "faults": {},
+    "status": "failed",
+    "code": "HUMAN_TIMEOUT",
+    "expected": "HUMAN_TIMEOUT",
+    "pass": true,
+    "recoveries": [],
+    "fallbacks": 0,
+    "handoffs": [
+      "abort"
+    ],
+    "seconds": 8.8,
+    "run_dir": "13-open-account-no-approval-grant-20260924-020452-7847"
+  },
+  {
+    "scenario": "14-open-account-operator-approves",
+    "tenant": "heritage",
+    "faults": {},
+    "status": "success",
+    "code": "success",
+    "expected": "success",
+    "pass": true,
+    "recoveries": [],
+    "fallbacks": 0,
+    "handoffs": [
+      "approve"
+    ],
+    "seconds": 4.8,
+    "run_dir": "14-open-account-operator-approves-20260924-020501-3b70"
+  },
+  {
+    "scenario": "15-open-account-supervisor-handoff",
+    "tenant": "heritage",
+    "faults": {},
+    "status": "success",
+    "code": "success",
+    "expected": "success",
+    "pass": true,
+    "recoveries": [],
+    "fallbacks": 0,
+    "handoffs": [
+      "resume"
+    ],
+    "seconds": 6.5,
+    "run_dir": "15-open-account-supervisor-handoff-20260924-020506-6e61"
+  }
+]

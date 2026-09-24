@@ -1,0 +1,20 @@
+capability_id: corelink.account.open_share_sub_account
+version: 1.0.0
+title: Open a share sub-account and reach confirmation
+description: >-
+  Open a new share sub-account (certificate, money market, club) for an existing member, funded from one of
+  the member's existing shares, and return the confirmation number. IRREVERSIBLE: posts a transaction.
+app_profile: corelink
+goal: >-
+  Open a new sub-account of type account_type for the member given by member_number, with opening deposit
+  initial_deposit funded from the member's share whose suffix is fund_from. Post it and read the confirmation number.
+inputs:
+  - {name: member_number, type: string, pattern: '^\d{5}$', sensitive: true, description: 5-digit member number}
+  - {name: account_type, type: enum, enum: [Share Certificate, Money Market, Christmas Club, Holiday Club, Youth Savings], description: Product to open}
+  - {name: initial_deposit, type: decimal, pattern: '^\d+(\.\d{2})?$', description: Opening deposit in USD}
+  - {name: fund_from, type: string, pattern: '^S\d{2}$', description: Suffix of the funding share, e.g. S01}
+outputs:
+  - {name: confirmation_number, type: string, description: CoreLink confirmation number for the posted transaction}
+business_outcomes: [MEMBER_NOT_FOUND, MEMBER_RESTRICTED, MEMBER_CLOSED, PERMISSION_DENIED, VALIDATION_ERROR, OPERATOR_DECLINED]
+example_inputs: {member_number: "12345", account_type: Share Certificate, initial_deposit: "1000.00", fund_from: S01}
+max_steps: 25

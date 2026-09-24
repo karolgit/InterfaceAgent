@@ -1,0 +1,11 @@
+.tools/
+mockcore/out/
+bridge/out/
+runs/
+faults.properties
+__pycache__/
+.venv/
+.env
+*.pyc
+.pytest_cache/
+bridge/cua-bridge.jar

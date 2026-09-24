@@ -1,0 +1,30 @@
+# Safety policy for automating CoreLink. Enforced on every action in discovery AND replay.
+name: corelink-default
+
+# Action verbs the automation may use at all.
+allowed_actions: [click, set_text, select, key, extract, wait_for]
+
+# Windows the automation may act in (title regex). Anything else, including other
+# applications on the same desktop, is out of bounds.
+allowed_windows:
+  - '^CoreLink \d+\.\d+.* - .+$'
+  - '^CoreLink Sign On$'
+  - '^CoreLink$'
+  - '^System Broadcast$'
+  - '^System Error$'
+  - '^Access Denied$'
+  - '^Confirm Posting$'
+  - '^Disclosure Acknowledgement$'
+
+allowed_keys: [ENTER, ESCAPE, TAB, F2, F5]
+
+# First match wins. Unmatched actions are "safe".
+risk_rules:
+  # Never: session/app lifecycle and anything outside member servicing.
+  - {risk: blocked, match: {role: menu item, name: '^(Exit|Sign Off)$'}}
+  - {risk: blocked, match: {role: push button, name: '^Cancel$', window: '^CoreLink Sign On$'}}
+  # Irreversible: money movement / posting, and confirming it.
+  - {risk: irreversible, match: {role: push button, name: '(?i)^(post|submit|transfer|approve|delete|close account)'}}
+  - {risk: irreversible, match: {role: push button, name: '^Yes$', window: '^Confirm Posting$'}}
+  # Risky but reversible: advancing to a review screen.
+  - {risk: risky, match: {role: push button, name: '^Review'}}

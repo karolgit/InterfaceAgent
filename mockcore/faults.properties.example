@@ -1,0 +1,13 @@
+# Copy to ./faults.properties in the working directory the app was started from.
+# The app re-reads this file on every operator action, so you can edit it while it runs.
+
+# Delay member inquiry by N milliseconds (tests waiting and slow loads)
+slow_ms=0
+# Show a modal "System Broadcast" dialog before inquiry results (tests unexpected dialogs)
+popup=false
+# Expire the session once on the next action, per edit of this file (tests re-sign-on and retry)
+session_expired=false
+# Host communication failure on inquiry and on posting (tests hard failures)
+app_error=false
+# Deny tran code 0417 even for tellers (tests permission denial)
+permission_denied=false

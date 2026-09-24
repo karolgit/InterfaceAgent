@@ -1,0 +1,987 @@
+{
+  "$defs": {
+    "A11yLocator": {
+      "properties": {
+        "kind": {
+          "const": "a11y",
+          "default": "a11y",
+          "title": "Kind",
+          "type": "string"
+        },
+        "role": {
+          "title": "Role",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "unique_at_record": {
+          "default": true,
+          "title": "Unique At Record",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "role",
+        "name"
+      ],
+      "title": "A11yLocator",
+      "type": "object"
+    },
+    "AppRef": {
+      "properties": {
+        "product": {
+          "title": "Product",
+          "type": "string"
+        },
+        "versions": {
+          "default": "*",
+          "title": "Versions",
+          "type": "string"
+        },
+        "surface": {
+          "default": "java-swing",
+          "title": "Surface",
+          "type": "string"
+        },
+        "profile": {
+          "title": "Profile",
+          "type": "string"
+        }
+      },
+      "required": [
+        "product",
+        "profile"
+      ],
+      "title": "AppRef",
+      "type": "object"
+    },
+    "Checkpoint": {
+      "description": "A condition that must hold after a step. All checkpoints of a step must hold.",
+      "properties": {
+        "kind": {
+          "enum": [
+            "container_present",
+            "window_present",
+            "text_present",
+            "element_value",
+            "element_present"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pattern"
+        },
+        "target": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Target"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "title": "Checkpoint",
+      "type": "object"
+    },
+    "CoordLocator": {
+      "properties": {
+        "kind": {
+          "const": "coords",
+          "default": "coords",
+          "title": "Kind",
+          "type": "string"
+        },
+        "rel_x": {
+          "title": "Rel X",
+          "type": "number"
+        },
+        "rel_y": {
+          "title": "Rel Y",
+          "type": "number"
+        },
+        "unique_at_record": {
+          "default": true,
+          "title": "Unique At Record",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "rel_x",
+        "rel_y"
+      ],
+      "title": "CoordLocator",
+      "type": "object"
+    },
+    "Extraction": {
+      "properties": {
+        "output": {
+          "title": "Output",
+          "type": "string"
+        },
+        "read": {
+          "default": "value",
+          "enum": [
+            "value",
+            "name",
+            "table_cell"
+          ],
+          "title": "Read",
+          "type": "string"
+        },
+        "row_match": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RowMatch"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "column": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Column"
+        },
+        "parse": {
+          "default": "text",
+          "enum": [
+            "text",
+            "currency",
+            "integer"
+          ],
+          "title": "Parse",
+          "type": "string"
+        },
+        "pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pattern"
+        }
+      },
+      "required": [
+        "output"
+      ],
+      "title": "Extraction",
+      "type": "object"
+    },
+    "GroupLocator": {
+      "description": "Nth control of a role inside a named group/panel, e.g. the table under 'Share Accounts'.",
+      "properties": {
+        "kind": {
+          "const": "group",
+          "default": "group",
+          "title": "Kind",
+          "type": "string"
+        },
+        "role": {
+          "title": "Role",
+          "type": "string"
+        },
+        "group": {
+          "title": "Group",
+          "type": "string"
+        },
+        "index": {
+          "default": 0,
+          "title": "Index",
+          "type": "integer"
+        },
+        "unique_at_record": {
+          "default": true,
+          "title": "Unique At Record",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "role",
+        "group"
+      ],
+      "title": "GroupLocator",
+      "type": "object"
+    },
+    "LabelLocator": {
+      "properties": {
+        "kind": {
+          "const": "label",
+          "default": "label",
+          "title": "Kind",
+          "type": "string"
+        },
+        "role": {
+          "title": "Role",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "unique_at_record": {
+          "default": true,
+          "title": "Unique At Record",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "role",
+        "label"
+      ],
+      "title": "LabelLocator",
+      "type": "object"
+    },
+    "LiteralValue": {
+      "properties": {
+        "source": {
+          "const": "literal",
+          "default": "literal",
+          "title": "Source",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "LiteralValue",
+      "type": "object"
+    },
+    "OutcomeRef": {
+      "description": "A business outcome the caller should expect and handle (documented in the contract).",
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code"
+      ],
+      "title": "OutcomeRef",
+      "type": "object"
+    },
+    "OutcomeRule": {
+      "description": "Maps an observed UI condition to a classified result. Usually declared in the app profile.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "when_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "When Text"
+        },
+        "when_dialog": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "When Dialog"
+        },
+        "kind": {
+          "enum": [
+            "business_outcome",
+            "recoverable",
+            "hard_failure",
+            "escalate"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "default": "",
+          "title": "Message",
+          "type": "string"
+        },
+        "recovery": {
+          "$ref": "#/$defs/Recovery",
+          "default": {
+            "kind": "none",
+            "button": null,
+            "max_attempts": 1
+          }
+        },
+        "capture_text": {
+          "default": true,
+          "title": "Capture Text",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "code"
+      ],
+      "title": "OutcomeRule",
+      "type": "object"
+    },
+    "OutputSpec": {
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "type": {
+          "default": "string",
+          "enum": [
+            "string",
+            "currency",
+            "integer",
+            "decimal",
+            "list"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "sensitive": {
+          "default": false,
+          "title": "Sensitive",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "OutputSpec",
+      "type": "object"
+    },
+    "ParamSpec": {
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "type": {
+          "default": "string",
+          "enum": [
+            "string",
+            "integer",
+            "decimal",
+            "enum"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pattern"
+        },
+        "enum": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Enum"
+        },
+        "required": {
+          "default": true,
+          "title": "Required",
+          "type": "boolean"
+        },
+        "sensitive": {
+          "default": false,
+          "title": "Sensitive",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "ParamSpec",
+      "type": "object"
+    },
+    "ParamValue": {
+      "properties": {
+        "source": {
+          "const": "param",
+          "default": "param",
+          "title": "Source",
+          "type": "string"
+        },
+        "param": {
+          "title": "Param",
+          "type": "string"
+        }
+      },
+      "required": [
+        "param"
+      ],
+      "title": "ParamValue",
+      "type": "object"
+    },
+    "PathLocator": {
+      "properties": {
+        "kind": {
+          "const": "path",
+          "default": "path",
+          "title": "Kind",
+          "type": "string"
+        },
+        "role": {
+          "title": "Role",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "unique_at_record": {
+          "default": true,
+          "title": "Unique At Record",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "role",
+        "path"
+      ],
+      "title": "PathLocator",
+      "type": "object"
+    },
+    "Provenance": {
+      "properties": {
+        "discovered_by": {
+          "title": "Discovered By",
+          "type": "string"
+        },
+        "discovery_run": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Discovery Run"
+        },
+        "goal": {
+          "default": "",
+          "title": "Goal",
+          "type": "string"
+        },
+        "tenant": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tenant"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "reviewed_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reviewed By"
+        },
+        "notes": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Notes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "discovered_by"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "Recovery": {
+      "properties": {
+        "kind": {
+          "default": "none",
+          "enum": [
+            "dismiss",
+            "wait",
+            "resign_on_and_restart",
+            "none"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "button": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Button"
+        },
+        "max_attempts": {
+          "default": 1,
+          "title": "Max Attempts",
+          "type": "integer"
+        }
+      },
+      "title": "Recovery",
+      "type": "object"
+    },
+    "RowMatch": {
+      "properties": {
+        "column": {
+          "title": "Column",
+          "type": "string"
+        },
+        "contains": {
+          "title": "Contains",
+          "type": "string"
+        }
+      },
+      "required": [
+        "column",
+        "contains"
+      ],
+      "title": "RowMatch",
+      "type": "object"
+    },
+    "Scope": {
+      "description": "Where to look. 'main' is the primary app window; dialogs match by title regex.",
+      "properties": {
+        "window": {
+          "default": "main",
+          "title": "Window",
+          "type": "string"
+        },
+        "container": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Container"
+        }
+      },
+      "title": "Scope",
+      "type": "object"
+    },
+    "SecretValue": {
+      "properties": {
+        "source": {
+          "const": "secret",
+          "default": "secret",
+          "title": "Source",
+          "type": "string"
+        },
+        "secret": {
+          "title": "Secret",
+          "type": "string"
+        }
+      },
+      "required": [
+        "secret"
+      ],
+      "title": "SecretValue",
+      "type": "object"
+    },
+    "Step": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "intent": {
+          "title": "Intent",
+          "type": "string"
+        },
+        "action": {
+          "enum": [
+            "click",
+            "set_text",
+            "select",
+            "key",
+            "extract",
+            "wait_for"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "target": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Target"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "value": {
+          "anyOf": [
+            {
+              "discriminator": {
+                "mapping": {
+                  "literal": "#/$defs/LiteralValue",
+                  "param": "#/$defs/ParamValue",
+                  "secret": "#/$defs/SecretValue"
+                },
+                "propertyName": "source"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/LiteralValue"
+                },
+                {
+                  "$ref": "#/$defs/ParamValue"
+                },
+                {
+                  "$ref": "#/$defs/SecretValue"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Key"
+        },
+        "extract": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Extraction"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "risk": {
+          "default": "safe",
+          "enum": [
+            "safe",
+            "risky",
+            "irreversible"
+          ],
+          "title": "Risk",
+          "type": "string"
+        },
+        "expect": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Checkpoint"
+          },
+          "title": "Expect",
+          "type": "array"
+        },
+        "timeout_ms": {
+          "default": 8000,
+          "title": "Timeout Ms",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "intent",
+        "action"
+      ],
+      "title": "Step",
+      "type": "object"
+    },
+    "Target": {
+      "properties": {
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "scope": {
+          "$ref": "#/$defs/Scope",
+          "default": {
+            "window": "main",
+            "container": null
+          }
+        },
+        "strategies": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "a11y": "#/$defs/A11yLocator",
+                "coords": "#/$defs/CoordLocator",
+                "group": "#/$defs/GroupLocator",
+                "label": "#/$defs/LabelLocator",
+                "path": "#/$defs/PathLocator"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/A11yLocator"
+              },
+              {
+                "$ref": "#/$defs/LabelLocator"
+              },
+              {
+                "$ref": "#/$defs/GroupLocator"
+              },
+              {
+                "$ref": "#/$defs/PathLocator"
+              },
+              {
+                "$ref": "#/$defs/CoordLocator"
+              }
+            ]
+          },
+          "title": "Strategies",
+          "type": "array"
+        }
+      },
+      "required": [
+        "description",
+        "strategies"
+      ],
+      "title": "Target",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "schema_version": {
+      "const": "cua.capability/v1",
+      "default": "cua.capability/v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "version": {
+      "default": "1.0.0",
+      "title": "Version",
+      "type": "string"
+    },
+    "status": {
+      "default": "draft",
+      "enum": [
+        "draft",
+        "approved",
+        "deprecated"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "description": {
+      "title": "Description",
+      "type": "string"
+    },
+    "app": {
+      "$ref": "#/$defs/AppRef"
+    },
+    "inputs": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/ParamSpec"
+      },
+      "title": "Inputs",
+      "type": "array"
+    },
+    "outputs": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/OutputSpec"
+      },
+      "title": "Outputs",
+      "type": "array"
+    },
+    "business_outcomes": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/OutcomeRef"
+      },
+      "title": "Business Outcomes",
+      "type": "array"
+    },
+    "risk": {
+      "default": "read_only",
+      "enum": [
+        "read_only",
+        "state_changing",
+        "irreversible"
+      ],
+      "title": "Risk",
+      "type": "string"
+    },
+    "preconditions": {
+      "default": [
+        "signed_on",
+        "no_modal_dialog"
+      ],
+      "items": {
+        "type": "string"
+      },
+      "title": "Preconditions",
+      "type": "array"
+    },
+    "steps": {
+      "items": {
+        "$ref": "#/$defs/Step"
+      },
+      "title": "Steps",
+      "type": "array"
+    },
+    "success": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Checkpoint"
+      },
+      "title": "Success",
+      "type": "array"
+    },
+    "outcome_rules": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/OutcomeRule"
+      },
+      "title": "Outcome Rules",
+      "type": "array"
+    },
+    "inherit_outcome_rules": {
+      "default": true,
+      "title": "Inherit Outcome Rules",
+      "type": "boolean"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    }
+  },
+  "required": [
+    "id",
+    "title",
+    "description",
+    "app",
+    "steps",
+    "provenance"
+  ],
+  "title": "Capability",
+  "type": "object"
+}

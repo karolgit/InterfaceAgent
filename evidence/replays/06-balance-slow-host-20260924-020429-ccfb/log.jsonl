@@ -1,0 +1,66 @@
+{"ts": "2026-09-24T06:04:29.137+00:00", "t_ms": 0, "event": "replay_started", "capability": "corelink.member.get_share_savings_balance@1.0.0", "tenant": "heritage", "params": {"member_number": "12345"}, "status": "draft"}
+{"ts": "2026-09-24T06:04:29.184+00:00", "t_ms": 46, "event": "sign_on_started"}
+{"ts": "2026-09-24T06:04:29.184+00:00", "t_ms": 46, "event": "step_started", "step": "so1", "intent": "Enter operator ID", "action": "set_text"}
+{"ts": "2026-09-24T06:04:29.207+00:00", "t_ms": 78, "event": "target_resolved", "step": "so1", "strategy": 0, "kind": "label", "ref": "w1.0.1.0.1"}
+{"ts": "2026-09-24T06:04:29.208+00:00", "t_ms": 78, "event": "policy", "step": "so1", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-24T06:04:29.216+00:00", "t_ms": 78, "event": "acted", "step": "so1", "action": "set_text", "target": "Operator ID field", "value_source": "secret"}
+{"ts": "2026-09-24T06:04:29.605+00:00", "t_ms": 468, "event": "step_started", "step": "so2", "intent": "Enter operator password", "action": "set_text"}
+{"ts": "2026-09-24T06:04:29.621+00:00", "t_ms": 483, "event": "target_resolved", "step": "so2", "strategy": 0, "kind": "label", "ref": "w1.0.1.0.3"}
+{"ts": "2026-09-24T06:04:29.622+00:00", "t_ms": 483, "event": "policy", "step": "so2", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-24T06:04:29.631+00:00", "t_ms": 500, "event": "acted", "step": "so2", "action": "set_text", "target": "Password field", "value_source": "secret"}
+{"ts": "2026-09-24T06:04:30.022+00:00", "t_ms": 889, "event": "step_started", "step": "so3", "intent": "Submit sign-on", "action": "click"}
+{"ts": "2026-09-24T06:04:30.035+00:00", "t_ms": 905, "event": "target_resolved", "step": "so3", "strategy": 0, "kind": "a11y", "ref": "w1.0.1.0.5"}
+{"ts": "2026-09-24T06:04:30.035+00:00", "t_ms": 905, "event": "policy", "step": "so3", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-24T06:04:30.038+00:00", "t_ms": 905, "event": "acted", "step": "so3", "action": "click", "target": "Sign On button", "value_source": null}
+{"ts": "2026-09-24T06:04:30.151+00:00", "t_ms": 1014, "event": "checkpoint_met", "step": "so3", "checks": ["status bar confirms sign-on"]}
+{"ts": "2026-09-24T06:04:30.152+00:00", "t_ms": 1014, "event": "sign_on_completed"}
+{"ts": "2026-09-24T06:04:30.162+00:00", "t_ms": 1030, "event": "step_started", "step": "s1", "intent": "Open the Member Inquiry screen from the Member menu.", "action": "click"}
+{"ts": "2026-09-24T06:04:30.167+00:00", "t_ms": 1030, "event": "target_resolved", "step": "s1", "strategy": 0, "kind": "a11y", "ref": "w0.0.1.1.1.0"}
+{"ts": "2026-09-24T06:04:30.167+00:00", "t_ms": 1030, "event": "policy", "step": "s1", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-24T06:04:30.170+00:00", "t_ms": 1030, "event": "acted", "step": "s1", "action": "click", "target": "menu item 'Member Inquiry' in window 'CoreLink 7.4.1 - Heritage Federal Credit Union'", "value_source": null}
+{"ts": "2026-09-24T06:04:30.319+00:00", "t_ms": 1186, "event": "checkpoint_met", "step": "s1", "checks": ["work window 'Member Inquiry' opened"]}
+{"ts": "2026-09-24T06:04:30.319+00:00", "t_ms": 1186, "event": "step_started", "step": "s2", "intent": "Enter the member number.", "action": "set_text"}
+{"ts": "2026-09-24T06:04:30.348+00:00", "t_ms": 1218, "event": "target_resolved", "step": "s2", "strategy": 0, "kind": "a11y", "ref": "w0.0.1.0.1.0.0.1.0.0.1"}
+{"ts": "2026-09-24T06:04:30.349+00:00", "t_ms": 1218, "event": "policy", "step": "s2", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-24T06:04:30.352+00:00", "t_ms": 1218, "event": "acted", "step": "s2", "action": "set_text", "target": "text 'Member #:' in 'Member Inquiry'", "value_source": "param"}
+{"ts": "2026-09-24T06:04:30.357+00:00", "t_ms": 1218, "event": "checkpoint_met", "step": "s2", "checks": ["field holds the entered value"]}
+{"ts": "2026-09-24T06:04:30.358+00:00", "t_ms": 1218, "event": "step_started", "step": "s3", "intent": "Run the inquiry.", "action": "click"}
+{"ts": "2026-09-24T06:04:30.366+00:00", "t_ms": 1233, "event": "target_resolved", "step": "s3", "strategy": 0, "kind": "a11y", "ref": "w0.0.1.0.1.0.0.1.0.0.2"}
+{"ts": "2026-09-24T06:04:30.368+00:00", "t_ms": 1233, "event": "policy", "step": "s3", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-24T06:04:30.369+00:00", "t_ms": 1233, "event": "acted", "step": "s3", "action": "click", "target": "push button 'Inquire' in 'Member Inquiry'", "value_source": null}
+{"ts": "2026-09-24T06:04:30.460+00:00", "t_ms": 1328, "event": "rule_matched", "rule": "processing", "kind": "recoverable", "code": "SLOW_RESPONSE", "ui_text": "PROCESSING...", "step": "s3"}
+{"ts": "2026-09-24T06:04:30.462+00:00", "t_ms": 1328, "event": "recovery", "rule": "processing", "code": "SLOW_RESPONSE", "action": "wait", "attempt": 1, "step": "s3", "ui_text": "PROCESSING..."}
+{"ts": "2026-09-24T06:04:30.623+00:00", "t_ms": 1483, "event": "rule_matched", "rule": "processing", "kind": "recoverable", "code": "SLOW_RESPONSE", "ui_text": "PROCESSING...", "step": "s3"}
+{"ts": "2026-09-24T06:04:30.785+00:00", "t_ms": 1655, "event": "rule_matched", "rule": "processing", "kind": "recoverable", "code": "SLOW_RESPONSE", "ui_text": "PROCESSING...", "step": "s3"}
+{"ts": "2026-09-24T06:04:30.946+00:00", "t_ms": 1811, "event": "rule_matched", "rule": "processing", "kind": "recoverable", "code": "SLOW_RESPONSE", "ui_text": "PROCESSING...", "step": "s3"}
+{"ts": "2026-09-24T06:04:31.122+00:00", "t_ms": 1983, "event": "rule_matched", "rule": "processing", "kind": "recoverable", "code": "SLOW_RESPONSE", "ui_text": "PROCESSING...", "step": "s3"}
+{"ts": "2026-09-24T06:04:31.283+00:00", "t_ms": 2155, "event": "rule_matched", "rule": "processing", "kind": "recoverable", "code": "SLOW_RESPONSE", "ui_text": "PROCESSING...", "step": "s3"}
+{"ts": "2026-09-24T06:04:31.445+00:00", "t_ms": 2311, "event": "rule_matched", "rule": "processing", "kind": "recoverable", "code": "SLOW_RESPONSE", "ui_text": "PROCESSING...", "step": "s3"}
+{"ts": "2026-09-24T06:04:31.606+00:00", "t_ms": 2468, "event": "rule_matched", "rule": "processing", "kind": "recoverable", "code": "SLOW_RESPONSE", "ui_text": "PROCESSING...", "step": "s3"}
+{"ts": "2026-09-24T06:04:31.766+00:00", "t_ms": 2625, "event": "rule_matched", "rule": "processing", "kind": "recoverable", "code": "SLOW_RESPONSE", "ui_text": "PROCESSING...", "step": "s3"}
+{"ts": "2026-09-24T06:04:31.927+00:00", "t_ms": 2796, "event": "rule_matched", "rule": "processing", "kind": "recoverable", "code": "SLOW_RESPONSE", "ui_text": "PROCESSING...", "step": "s3"}
+{"ts": "2026-09-24T06:04:32.087+00:00", "t_ms": 2953, "event": "rule_matched", "rule": "processing", "kind": "recoverable", "code": "SLOW_RESPONSE", "ui_text": "PROCESSING...", "step": "s3"}
+{"ts": "2026-09-24T06:04:32.247+00:00", "t_ms": 3108, "event": "rule_matched", "rule": "processing", "kind": "recoverable", "code": "SLOW_RESPONSE", "ui_text": "PROCESSING...", "step": "s3"}
+{"ts": "2026-09-24T06:04:32.407+00:00", "t_ms": 3264, "event": "rule_matched", "rule": "processing", "kind": "recoverable", "code": "SLOW_RESPONSE", "ui_text": "PROCESSING...", "step": "s3"}
+{"ts": "2026-09-24T06:04:32.570+00:00", "t_ms": 3436, "event": "rule_matched", "rule": "processing", "kind": "recoverable", "code": "SLOW_RESPONSE", "ui_text": "PROCESSING...", "step": "s3"}
+{"ts": "2026-09-24T06:04:32.734+00:00", "t_ms": 3593, "event": "rule_matched", "rule": "processing", "kind": "recoverable", "code": "SLOW_RESPONSE", "ui_text": "PROCESSING...", "step": "s3"}
+{"ts": "2026-09-24T06:04:32.894+00:00", "t_ms": 3764, "event": "rule_matched", "rule": "processing", "kind": "recoverable", "code": "SLOW_RESPONSE", "ui_text": "PROCESSING...", "step": "s3"}
+{"ts": "2026-09-24T06:04:33.069+00:00", "t_ms": 3936, "event": "rule_matched", "rule": "processing", "kind": "recoverable", "code": "SLOW_RESPONSE", "ui_text": "PROCESSING...", "step": "s3"}
+{"ts": "2026-09-24T06:04:33.228+00:00", "t_ms": 4093, "event": "rule_matched", "rule": "processing", "kind": "recoverable", "code": "SLOW_RESPONSE", "ui_text": "PROCESSING...", "step": "s3"}
+{"ts": "2026-09-24T06:04:33.389+00:00", "t_ms": 4250, "event": "rule_matched", "rule": "processing", "kind": "recoverable", "code": "SLOW_RESPONSE", "ui_text": "PROCESSING...", "step": "s3"}
+{"ts": "2026-09-24T06:04:33.548+00:00", "t_ms": 4421, "event": "rule_matched", "rule": "processing", "kind": "recoverable", "code": "SLOW_RESPONSE", "ui_text": "PROCESSING...", "step": "s3"}
+{"ts": "2026-09-24T06:04:33.710+00:00", "t_ms": 4578, "event": "rule_matched", "rule": "processing", "kind": "recoverable", "code": "SLOW_RESPONSE", "ui_text": "PROCESSING...", "step": "s3"}
+{"ts": "2026-09-24T06:04:33.871+00:00", "t_ms": 4733, "event": "rule_matched", "rule": "processing", "kind": "recoverable", "code": "SLOW_RESPONSE", "ui_text": "PROCESSING...", "step": "s3"}
+{"ts": "2026-09-24T06:04:34.030+00:00", "t_ms": 4889, "event": "rule_matched", "rule": "processing", "kind": "recoverable", "code": "SLOW_RESPONSE", "ui_text": "PROCESSING...", "step": "s3"}
+{"ts": "2026-09-24T06:04:34.190+00:00", "t_ms": 5061, "event": "rule_matched", "rule": "processing", "kind": "recoverable", "code": "SLOW_RESPONSE", "ui_text": "PROCESSING...", "step": "s3"}
+{"ts": "2026-09-24T06:04:34.350+00:00", "t_ms": 5218, "event": "rule_matched", "rule": "processing", "kind": "recoverable", "code": "SLOW_RESPONSE", "ui_text": "PROCESSING...", "step": "s3"}
+{"ts": "2026-09-24T06:04:34.511+00:00", "t_ms": 5375, "event": "rule_matched", "rule": "processing", "kind": "recoverable", "code": "SLOW_RESPONSE", "ui_text": "PROCESSING...", "step": "s3"}
+{"ts": "2026-09-24T06:04:34.670+00:00", "t_ms": 5530, "event": "rule_matched", "rule": "processing", "kind": "recoverable", "code": "SLOW_RESPONSE", "ui_text": "PROCESSING...", "step": "s3"}
+{"ts": "2026-09-24T06:04:34.831+00:00", "t_ms": 5703, "event": "rule_matched", "rule": "processing", "kind": "recoverable", "code": "SLOW_RESPONSE", "ui_text": "PROCESSING...", "step": "s3"}
+{"ts": "2026-09-24T06:04:35.001+00:00", "t_ms": 5875, "event": "checkpoint_met", "step": "s3", "checks": ["status line shows 'INQUIRY COMPLETE - 2 SHARE(S)'"]}
+{"ts": "2026-09-24T06:04:35.002+00:00", "t_ms": 5875, "event": "step_started", "step": "s4", "intent": "Read the Share Savings balance from the accounts table.", "action": "extract"}
+{"ts": "2026-09-24T06:04:35.011+00:00", "t_ms": 5875, "event": "target_resolved", "step": "s4", "strategy": 0, "kind": "group", "ref": "w0.0.1.0.1.0.0.1.0.1.1.0.0"}
+{"ts": "2026-09-24T06:04:35.012+00:00", "t_ms": 5875, "event": "policy", "step": "s4", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-24T06:04:35.012+00:00", "t_ms": 5875, "event": "extracted", "step": "s4", "output": "savings_balance", "value": "[SAVINGS_BALANCE]"}
+{"ts": "2026-09-24T06:04:35.017+00:00", "t_ms": 5889, "event": "success_verified", "checks": ["screen shows 'INQUIRY COMPLETE - 2 SHARE(S)'"]}
+{"ts": "2026-09-24T06:04:35.133+00:00", "t_ms": 6000, "event": "replay_finished", "status": "success", "outcome": null, "failure": null, "duration_ms": 6000}

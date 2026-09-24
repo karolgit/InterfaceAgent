@@ -1,0 +1,134 @@
+# App profile for the "CoreLink" vendor core-banking product.
+#
+# One profile per vendor PRODUCT, shared by every tenant that runs it. Capabilities reference it
+# for sign-on, the shared error taxonomy, and PII labels. Tenant differences live in `tenants:`
+# as small overrides instead of re-recorded capabilities.
+id: corelink
+product: CoreLink
+surface: java-swing
+main_window: '^CoreLink \d+\.\d+.* - .+$'
+sign_on_window: '^CoreLink Sign On$'
+
+# Labels whose adjacent values are PII: masked in logs, screenshots, and LLM prompts.
+pii_labels: ["Name", "SSN", "Date of Birth", "Address", "Member Name"]
+
+# Hand-reviewed session routine (vendor-level, not per capability). Secrets are references.
+sign_on:
+  - id: so1
+    intent: Enter operator ID
+    action: set_text
+    target:
+      description: Operator ID field
+      scope: {window: '^CoreLink Sign On$'}
+      strategies:
+        - {kind: label, role: text, label: "Operator ID:"}
+        - {kind: a11y, role: text, name: "Operator ID:"}
+    value: {source: secret, secret: operator_id}
+  - id: so2
+    intent: Enter operator password
+    action: set_text
+    target:
+      description: Password field
+      scope: {window: '^CoreLink Sign On$'}
+      strategies:
+        - {kind: label, role: password text, label: "Password:"}
+    value: {source: secret, secret: operator_password}
+  - id: so3
+    intent: Submit sign-on
+    action: click
+    target:
+      description: Sign On button
+      scope: {window: '^CoreLink Sign On$'}
+      strategies:
+        - {kind: a11y, role: push button, name: "Sign On"}
+    expect:
+      - {kind: text_present, pattern: 'SIGNED ON AS', description: status bar confirms sign-on}
+
+# Shared outcome taxonomy for every CoreLink capability. Order matters: first match wins.
+outcome_rules:
+  - id: session_expired
+    when_dialog: '^CoreLink$'
+    when_text: 'SESSION EXPIRED'
+    kind: recoverable
+    code: SESSION_EXPIRED
+    message: Session expired; sign on again and restart the capability from the top.
+    recovery: {kind: resign_on_and_restart, button: OK, max_attempts: 1}
+  - id: broadcast_popup
+    when_dialog: '^System Broadcast$'
+    kind: recoverable
+    code: UNEXPECTED_DIALOG
+    message: Informational broadcast dialog; dismiss and continue.
+    recovery: {kind: dismiss, button: OK, max_attempts: 3}
+  - id: processing
+    when_text: 'PROCESSING\.\.\.'
+    kind: recoverable
+    code: SLOW_RESPONSE
+    message: Host is slow; keep waiting within the step timeout.
+    recovery: {kind: wait, max_attempts: 5}
+  - id: host_error
+    when_dialog: '^System Error$'
+    kind: hard_failure
+    code: HOST_ERROR
+    message: Host communication failure reported by the application.
+    recovery: {kind: dismiss, button: OK}
+  - id: permission_denied_dialog
+    when_dialog: '^Access Denied$'
+    kind: business_outcome
+    code: PERMISSION_DENIED
+    message: The signed-on operator is not authorized for this transaction.
+    recovery: {kind: dismiss, button: OK}
+  - id: permission_denied
+    when_text: 'NOT AUTHORIZED'
+    kind: business_outcome
+    code: PERMISSION_DENIED
+    message: The signed-on operator is not authorized for this transaction.
+  - id: sign_on_rejected
+    when_text: 'INVALID OPERATOR ID OR PASSWORD'
+    kind: escalate
+    code: SIGN_ON_REJECTED
+    message: Stored operator credentials were rejected; a human must sign on (possible lockout or rotation).
+  - id: supervisor_override
+    when_dialog: '^Supervisor Override Required$'
+    kind: escalate
+    code: SUPERVISOR_OVERRIDE_REQUIRED
+    message: Amount exceeds the operator limit; a supervisor must key an override.
+  - id: member_not_found
+    when_text: 'MBR NOT ON FILE'
+    kind: business_outcome
+    code: MEMBER_NOT_FOUND
+    message: No member exists with that number.
+  - id: member_restricted
+    when_text: 'RESTRICTED'
+    kind: business_outcome
+    code: MEMBER_RESTRICTED
+    message: Member is restricted; supervisor review required before servicing.
+  - id: member_closed
+    when_text: 'MEMBERSHIP CLOSED|MEMBER CLOSED'
+    kind: business_outcome
+    code: MEMBER_CLOSED
+    message: Membership is closed.
+  - id: validation_error
+    when_text: 'INVALID [A-Z ]+|MINIMUM OPENING DEPOSIT.*|INSUFFICIENT FUNDS.*|DISCLOSURE NOT ACKNOWLEDGED'
+    kind: business_outcome
+    code: VALIDATION_ERROR
+    message: The application rejected an input value.
+  - id: operator_limit
+    when_text: 'EXCEEDS OPERATOR LIMIT'
+    kind: escalate
+    code: SUPERVISOR_OVERRIDE_REQUIRED
+    message: Amount exceeds the operator limit.
+
+# Per-tenant overrides: same product, different configuration/branding/version.
+tenants:
+  heritage:
+    product_version: 7.4.1
+  lakeshore:
+    product_version: 7.6.2
+    label_aliases: {"Member #:": "Account No.:"}
+    name_aliases: {"Inquire": "Search"}
+    extra_outcome_rules:
+      - id: disclosure_ack
+        when_dialog: '^Disclosure Acknowledgement$'
+        kind: escalate
+        code: DISCLOSURE_CONFIRMATION
+        message: Tenant requires the operator to confirm the member received the disclosure.

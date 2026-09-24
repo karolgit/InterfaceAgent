@@ -1,0 +1,16 @@
+# Capability request: what we want the discovery agent to learn.
+capability_id: corelink.member.get_share_savings_balance
+version: 1.0.0
+title: Get member Share Savings balance
+description: >-
+  Look up a credit-union member by member number in CoreLink Member Inquiry and return the current
+  balance of the member's Share Savings account. Read-only.
+app_profile: corelink
+goal: Look up the member given by member_number and read the current balance of their Share Savings account.
+inputs:
+  - {name: member_number, type: string, pattern: '^\d{5}$', sensitive: true, description: 5-digit CoreLink member number}
+outputs:
+  - {name: savings_balance, type: currency, sensitive: true, description: Current Share Savings balance in USD, as a decimal string}
+business_outcomes: [MEMBER_NOT_FOUND, MEMBER_RESTRICTED, MEMBER_CLOSED, PERMISSION_DENIED, VALIDATION_ERROR]
+example_inputs: {member_number: "12345"}
+max_steps: 15

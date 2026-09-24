@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Member Assistant</title>
+<style>
+:root{--bg:#eef1f5;--card:#fff;--ink:#17202e;--muted:#5b6474;--line:#d7dce4;--brand:#1f3a68;--brand-ink:#fff;
+--me:#1f3a68;--me-ink:#fff;--bot:#f3f5f8;--warn:#9a5b00;--ok:#0b6b2e}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#11151b;--card:#1a1f27;--ink:#e7e9ee;--muted:#9aa2b1;
+--line:#2b323d;--brand:#8fb0ea;--brand-ink:#0d1320;--me:#2f5596;--me-ink:#fff;--bot:#232a34}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+header{background:var(--brand);color:var(--brand-ink);padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header h1{font-size:17px;margin:0;font-weight:650}
+.tag{font-size:12px;padding:2px 8px;border-radius:99px;background:rgba(255,255,255,.18)}
+.wrap{max-width:760px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.banner{background:#fff4e0;color:#6b4200;border:1px solid #f0d49a;border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:13px}
+@media (prefers-color-scheme: dark){.banner{background:#3a2c10;color:#f3d9a4;border-color:#5a4520}}
+.members{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:12px}
+button{font:inherit;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:9px 14px;cursor:pointer}
+button.primary{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+button:disabled{opacity:.5;cursor:default}
+#log{height:min(58vh,520px);overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:4px}
+.msg{max-width:82%;padding:10px 13px;border-radius:14px;white-space:pre-wrap}
+.me{align-self:flex-end;background:var(--me);color:var(--me-ink);border-bottom-right-radius:4px}
+.bot{align-self:flex-start;background:var(--bot);border-bottom-left-radius:4px}
+.sys{align-self:center;color:var(--muted);font-size:13px}
+.confirm{align-self:flex-start;border:1px solid var(--warn);border-radius:12px;padding:12px;background:var(--card);max-width:90%}
+.confirm .row{display:flex;gap:8px;margin-top:10px}
+form{display:flex;gap:8px;margin-top:12px}
+input[type=text]{flex:1;min-width:0;font:inherit;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+#mic.on{background:#b00020;color:#fff;border-color:#b00020}
+.hint{color:var(--muted);font-size:13px;margin-top:8px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.chips button{padding:5px 10px;font-size:13px}
+</style>
+</head>
+<body>
+<header><h1>Heritage Federal CU &middot; Member Assistant</h1><span class="tag" id="mode">...</span>
+<span class="tag" id="who" hidden></span></header>
+<div class="wrap">
+  <div class="banner" id="draft" hidden>Demo mode: serving DRAFT capabilities. Production serves only human-approved ones.</div>
+
+  <section class="card" id="signin">
+    <b>Sign in</b>
+    <div class="hint">Mock sign-in. Pick a demo member. All data is fake.</div>
+    <div class="members" id="members"></div>
+  </section>
+
+  <section class="card" id="chat" hidden>
+    <div id="log" aria-live="polite"></div>
+    <div class="chips">
+      <button data-say="What's my savings balance?">Savings balance</button>
+      <button data-say="Open a share certificate with $1,000 from my savings.">Open a $1,000 certificate</button>
+      <button data-say="Open a Christmas club with $50 from savings.">Christmas club $50</button>
+    </div>
+    <form id="f"><input type="text" id="t" placeholder="Type or press the mic and speak" autocomplete="off">
+      <button type="button" id="mic" title="Speak">Mic</button>
+      <button class="primary" id="send">Send</button></form>
+    <div class="hint"><label><input type="checkbox" id="speak" checked> Read replies aloud</label>
+      &middot; Each request runs a recorded, verified automation on the credit union's legacy core system.</div>
+  </section>
+</div>
+<script>
+let session=null;
+const $=id=>document.getElementById(id);
+function add(cls,text){const d=document.createElement('div');d.className='msg '+cls;d.textContent=text;$('log').appendChild(d);$('log').scrollTop=1e9;return d}
+function say(text){if(!$('speak').checked||!('speechSynthesis' in window))return;speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);u.rate=1.03;speechSynthesis.speak(u)}
+async function post(url,body){const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!r.ok)throw new Error(await r.text());return r.json()}
+
+(async()=>{const i=await (await fetch('/api/info')).json();
+  $('mode').textContent=i.mode==='llm'?('AI: '+i.model):'Offline mode (no API key)';
+  $('draft').hidden=!i.draft_mode;
+  for(const [num,name] of Object.entries(i.members)){const b=document.createElement('button');
+    b.textContent=name;b.onclick=()=>signin(num);$('members').appendChild(b)}
+  // Demo deep link: /?member=12345&ask=What%27s%20my%20balance
+  const q=new URLSearchParams(location.search);
+  if(q.get('member')){await signin(q.get('member'));if(q.get('ask'))send(q.get('ask'))}})();
+
+async function signin(num){const r=await post('/api/login',{member_number:num});session=r.session;
+  $('signin').hidden=true;$('chat').hidden=false;$('who').hidden=false;$('who').textContent='Signed in: '+r.name;
+  const hi=`Hi ${r.name.split(' ')[0]}. I can check your balance or open a new account. How can I help?`;add('bot',hi);say(hi)}
+
+async function send(text){if(!text.trim())return;add('me',text);$('t').value='';$('send').disabled=true;
+  const w=add('sys','Working on the core system...');
+  try{const r=await post('/api/chat',{session,text});w.remove();add('bot',r.reply);say(r.reply);
+    if(r.pending)confirmCard(r.pending)}
+  catch(e){w.remove();add('sys','Error: '+e.message)}finally{$('send').disabled=false}}
+
+function confirmCard(p){const d=document.createElement('div');d.className='confirm';
+  const details=Object.entries(p.details||{}).map(([k,v])=>`${k.replace(/_/g,' ')}: ${v}`).join('\n');
+  d.innerHTML=`<b>Please confirm</b><div style="white-space:pre-wrap;margin-top:6px"></div>
+  <div class="hint">This posts a real transaction and cannot be undone.</div>
+  <div class="row"><button class="primary">Confirm</button><button>Cancel</button></div>`;
+  d.querySelector('div').textContent=(p.capability||'')+'\n'+details;
+  const [ok,no]=d.querySelectorAll('button');
+  const go=async accept=>{ok.disabled=no.disabled=true;const w=add('sys',accept?'Posting on the core system...':'Cancelling...');
+    try{const r=await post('/api/confirm',{session,pending_id:p.pending_id,accept});w.remove();add('bot',r.reply);say(r.reply)}
+    catch(e){w.remove();add('sys','Error: '+e.message)}};
+  ok.onclick=()=>go(true);no.onclick=()=>go(false);$('log').appendChild(d);$('log').scrollTop=1e9}
+
+$('f').onsubmit=e=>{e.preventDefault();send($('t').value)};
+document.querySelectorAll('[data-say]').forEach(b=>b.onclick=()=>send(b.dataset.say));
+
+// Voice input: browser speech recognition (Chrome/Edge). Falls back to typing.
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(!SR){$('mic').disabled=true;$('mic').title='Voice input needs Chrome or Edge'}
+else{const rec=new SR();rec.lang='en-US';rec.interimResults=true;
+  rec.onresult=e=>{const t=[...e.results].map(r=>r[0].transcript).join('');$('t').value=t;
+    if(e.results[e.results.length-1].isFinal){$('mic').classList.remove('on');send(t)}};
+  rec.onend=()=>$('mic').classList.remove('on');
+  $('mic').onclick=()=>{speechSynthesis.cancel();$('mic').classList.add('on');rec.start()}}
+</script>
+</body>
+</html>

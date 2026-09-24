@@ -1,0 +1,26 @@
+{
+  "run_id": "14-open-account-operator-approves-[CARD_OR_ACCOUNT]3b70",
+  "capability": "corelink.account.open_share_sub_account@1.0.0",
+  "status": "success",
+  "outputs": {
+    "confirmation_number": "CL-104221-S32"
+  },
+  "outcome": null,
+  "failure": null,
+  "recoveries": [],
+  "handoffs": [
+    {
+      "intervention": "int-020503-5f2e",
+      "kind": "approval",
+      "reason": "Irreversible step needs approval: Post the transaction (irreversible, needs approval).",
+      "decision": "approve",
+      "operator": "sim-supervisor",
+      "notes": "SIMULATED operator reviewed the Review screen and chose to approve.",
+      "human_actions": 0,
+      "expired": false
+    }
+  ],
+  "locator_fallbacks": [],
+  "duration_ms": 3750,
+  "evidence_dir": "evidence\\replays\\14-open-account-operator-approves-[CARD_OR_ACCOUNT]3b70"
+}
