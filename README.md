@@ -15,7 +15,11 @@ and modal dialogs, and faults can be injected at runtime. All data is fake.
 |---|---|---|
 | ![Member inquiry](docs/screenshots/02-member-inquiry.png) | ![Operator console](docs/screenshots/11-operator-console.png) | ![Member assistant](docs/screenshots/12-member-assistant.png) |
 
-The design write-up is in [REPORT.md](REPORT.md). Run evidence is in [evidence/](evidence/).
+The design write-up is in [REPORT.md](REPORT.md), and there is also a printable
+[PDF report](docs/InterfaceAgent-Report.pdf) with the architecture diagram, a requirements coverage matrix, and results.
+Run evidence is in [evidence/](evidence/).
+
+![Architecture](docs/architecture.png)
 
 ---
 

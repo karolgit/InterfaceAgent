@@ -16,6 +16,7 @@ Rule kinds:
 """
 from __future__ import annotations
 
+import os
 import re
 import time
 from decimal import Decimal, InvalidOperation
@@ -87,6 +88,8 @@ class ReplayEngine:
         self.approval_source = "caller_grant" if approve_irreversible else None
         self.secrets = secrets or SecretStore()
         self.max_restarts = max_restarts
+        # Demo/recording aid only: pause after each action so viewers can follow. Never set in production.
+        self.demo_delay_s = int(os.environ.get("CUA_DEMO_DELAY_MS", "0")) / 1000
         self.rules: list[OutcomeRule] = []
         self.rule_hits: dict[str, int] = {}
         self.baseline: Observation | None = None
@@ -257,6 +260,8 @@ class ReplayEngine:
             self.s.act("select", ref=node.ref, option=self._value(step, params))
         elif op == "key":
             self.s.act("key", key=step.key)
+        if self.demo_delay_s:
+            time.sleep(self.demo_delay_s)
         self.ev.log("acted", step=step.id, action=op, target=step.target and step.target.description,
                     value_source=step.value.source if step.value else None)
         self._await_checkpoints(step)

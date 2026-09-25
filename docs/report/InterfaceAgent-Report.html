@@ -1,0 +1,852 @@
+<!doctype html><html><head><meta charset="utf-8"><title>InterfaceAgent Report</title>
+<style>
+@page { size: Letter; margin: 16mm 15mm 16mm 15mm; }
+* { box-sizing: border-box; }
+body { font: 10.2pt/1.45 "Segoe UI", Helvetica, Arial, sans-serif; color: #17202e; margin: 0; }
+h1 { font-size: 20pt; margin: 0 0 6pt; color: #1f3a68; }
+h2 { font-size: 14.5pt; color: #1f3a68; border-bottom: 1.5px solid #c9d3e3; padding-bottom: 3pt; margin: 18pt 0 8pt; }
+h3 { font-size: 11.5pt; margin: 12pt 0 4pt; }
+p, li { orphans: 3; widows: 3; }
+table { border-collapse: collapse; width: 100%; margin: 6pt 0 10pt; font-size: 8.8pt; page-break-inside: auto; }
+tr { page-break-inside: avoid; }
+th, td { border: 1px solid #d3d9e3; padding: 4pt 5pt; vertical-align: top; text-align: left; }
+th { background: #eef2f8; }
+code { font: 8.6pt Consolas, "Courier New", monospace; background: #f3f5f8; padding: 0 2pt; border-radius: 2px; }
+pre { background: #f5f7fa; border: 1px solid #dde2ea; border-radius: 4px; padding: 7pt; font-size: 8.2pt; white-space: pre-wrap;
+      page-break-inside: avoid; }
+pre code { background: none; padding: 0; }
+.cover { height: 245mm; display: flex; flex-direction: column; justify-content: center; }
+.cover .kicker { color: #5b6474; font-size: 11pt; letter-spacing: .5px; text-transform: uppercase; }
+.cover h1 { font-size: 30pt; margin: 8pt 0; }
+.cover .sub { font-size: 13pt; color: #3c4658; max-width: 150mm; }
+.cover .meta { margin-top: 26pt; font-size: 10.5pt; color: #3c4658; line-height: 1.7; }
+.cover img { margin-top: 26pt; width: 100%; border: 1px solid #dde2ea; border-radius: 6px; }
+.pb { page-break-before: always; }
+.fig { width: 100%; border: 1px solid #dde2ea; border-radius: 4px; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10pt; }
+.grid figure { margin: 0; page-break-inside: avoid; }
+.grid img { width: 100%; border: 1px solid #dde2ea; border-radius: 4px; }
+figcaption { font-size: 8.4pt; color: #4b5566; margin-top: 2pt; }
+.note { border-left: 3px solid #b39200; background: #fffbe8; padding: 6pt 9pt; font-size: 9.2pt; margin: 8pt 0; }
+</style></head><body>
+<section class="cover">
+  <div class="kicker">interface.ai take-home · Computer-Use Automation System</div>
+  <h1>InterfaceAgent</h1>
+  <div class="sub">An LLM discovers how to do a task in a legacy banking app once. The run becomes a typed, versioned
+  capability that replays deterministically, classifies runtime errors, stays inside safety policy, and hands the
+  live session to a human when it must.</div>
+  <div class="meta">Karol Stuart · September 24, 2026<br>Repository: https://github.com/karolgit/InterfaceAgent</div>
+  <img src="../architecture.png">
+</section>
+
+<section class="pb"><h2>Summary</h2>
+<p>The target is <strong>CoreLink</strong>, a legacy-style Java Swing core-banking desktop client built as the proxy app. It has no
+DOM and no test IDs, its labels aren't linked to their fields, it uses internal frames and modal dialogs, and faults can
+be injected at runtime. All data is fake. Four pieces carry the design:</p>
+<ul>
+<li><strong>A surface driver.</strong> A Java agent reads the unmodified app's accessibility tree, acts through accessibility
+  actions, and owns the human-handoff control lock.</li>
+<li><strong>A discovery agent.</strong> Claude Opus 5 acts on element references and never sees raw PII.</li>
+<li><strong>A capability artifact.</strong> It has a contract part for calling agents and a flow part for replay.</li>
+<li><strong>A replay engine.</strong> It sorts every run into a business outcome, a recovered condition, or a hard failure.</li>
+</ul>
+<p>The thread runs end to end: goal, LLM run, saved capability, deterministic replay with parameters, outputs, and error
+handling, human handoff on the live session, and evidence for each. Every core requirement in the brief is covered, as
+the matrix below shows. The stretch goals built are the agent-facing capability interface and
+cross-tenant reuse with per-tenant overrides. Unattended replay is also gated on draft or approved status.</p>
+<div class="note"><b>Discovery evidence status:</b> no LLM discovery run is recorded in <code>evidence/discovery/</code> yet. Run <code>scripts\demo.ps1</code> with an API key, then rebuild this report.</div>
+<h2>Requirements coverage</h2><table>
+<thead>
+<tr>
+<th>Brief requirement</th>
+<th>How it is met</th>
+<th>Where in the repo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>3.1</strong> Goal + target in, observe, decide, act loop, stop conditions</td>
+<td>A task YAML declares the goal, typed inputs, and outputs. The loop takes one action per turn. It stops on max steps, timeout, <code>finish</code>, or the human aborting.</td>
+<td><code>cua/agent/discover.py</code>, <code>tasks/</code></td>
+</tr>
+<tr>
+<td><strong>3.1</strong> Real UI, works without a clean DOM</td>
+<td>Perception is the accessibility tree plus a screenshot of an unmodified Swing desktop app. Actions go through accessibility actions.</td>
+<td><code>bridge/</code>, <code>cua/surface/</code></td>
+</tr>
+<tr>
+<td><strong>3.2</strong> Typed, versioned, reviewable artifact</td>
+<td><code>cua.capability/v1</code> splits a contract (inputs, outputs, outcomes, risk) from a flow (steps, locators, checkpoints). It carries semver, draft or approved status, and provenance. JSON Schema is exported.</td>
+<td><code>cua/artifact.py</code>, <code>schemas/</code>, <code>capabilities/</code></td>
+</tr>
+<tr>
+<td><strong>3.2</strong> How targets are identified, and why that is robust</td>
+<td>Five ranked strategies: a11y name, label, group, index path, then coordinates. Each records whether it was unique at record time. Replay reports fallbacks.</td>
+<td><code>cua/locate.py</code></td>
+</tr>
+<tr>
+<td><strong>3.3</strong> Replay with no LLM, stable targeting, checkpoints, outputs</td>
+<td>Fixed start state, locator resolution with waits, checkpoint waits instead of sleeps, typed extraction, and success verification.</td>
+<td><code>cua/replay.py</code></td>
+</tr>
+<tr>
+<td><strong>3.3</strong> Business outcome vs recoverable vs hard failure</td>
+<td>Outcome rules come from the product profile. Results are <code>business_outcome</code> (with a code), <code>success</code> (with <code>recoveries[]</code>), or <code>failed</code> (step, expected, observed, evidence).</td>
+<td><code>configs/apps/corelink.yaml</code>, <code>cua/replay.py</code></td>
+</tr>
+<tr>
+<td><strong>3.4</strong> Configurable allowlist, risky actions handled conservatively</td>
+<td>Actions, windows, and keys are allowlisted. Every target gets a risk class. Irreversible actions need an approval grant or a human.</td>
+<td><code>configs/policies/corelink.yaml</code>, <code>cua/policy.py</code></td>
+</tr>
+<tr>
+<td><strong>3.4</strong> No secrets or raw PII persisted</td>
+<td>Secrets are referenced by name. Three-layer text redaction, screenshot blackout from accessibility bounds, and fingerprinted sensitive outputs. A unit test guards the artifacts.</td>
+<td><code>cua/redact.py</code>, <code>cua/secrets.py</code>, <code>tests/</code></td>
+</tr>
+<tr>
+<td><strong>3.5</strong> Structured log plus a richer failure signal</td>
+<td>JSONL log of every decision (with the model's <code>why</code>), policy verdict, and checkpoint. Redacted screenshots and accessibility tree dumps on failure.</td>
+<td><code>cua/evidence.py</code>, <code>evidence/</code></td>
+</tr>
+<tr>
+<td><strong>3.6</strong> Detect and route with context</td>
+<td>The intervention request carries the capability or goal, the step, the reason code, a redacted screenshot, and the session.</td>
+<td><code>cua/handoff.py</code></td>
+</tr>
+<tr>
+<td><strong>3.6</strong> Human takes the same live session, then hands back</td>
+<td>Control lock (agent, paused, human) inside the app. Human input is blocked while the agent holds control and recorded while the human does. Resume re-verifies the checkpoint.</td>
+<td><code>bridge/</code>, <code>cua/handoff.py</code>, <code>cua/console.py</code></td>
+</tr>
+<tr>
+<td><strong>3.7</strong> Surface abstraction</td>
+<td><code>Observation</code> and <code>Node</code> plus a small verb set. Surface-specific code lives only in drivers.</td>
+<td><code>cua/surface/base.py</code>, REPORT §4</td>
+</tr>
+<tr>
+<td><strong>3.7</strong> Multi-tenant reuse and drift</td>
+<td>A product-level app profile with tenant overrides. The Heritage-recorded capability replays on Lakeshore (v7.6.2, renamed controls, extra dialog).</td>
+<td><code>configs/apps/corelink.yaml</code>, scenario 09</td>
+</tr>
+<tr>
+<td><strong>Stretch</strong> Agent-facing capability interface</td>
+<td>A gateway exposes approved capabilities as typed tools. A member assistant (chat and voice) invokes them, with identity binding and member confirmation.</td>
+<td><code>cua/gateway.py</code>, <code>portal/</code></td>
+</tr>
+<tr>
+<td><strong>Stretch</strong> Confidence and approval</td>
+<td>Unattended replay requires <code>approved</code>. <code>cua approve</code> records the reviewer.</td>
+<td><code>cua/replay.py</code>, <code>cua/__main__.py</code></td>
+</tr>
+<tr>
+<td><strong>Stretch</strong> Cross-tenant reuse with per-variant overrides</td>
+<td>Tenant label and name aliases, plus extra outcome rules.</td>
+<td><code>configs/apps/corelink.yaml</code></td>
+</tr>
+</tbody>
+</table></section>
+
+<section class="pb"><h2>Architecture diagram</h2><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1300 640" width="100%" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#44506a"/>
+    </marker>
+    <marker id="ahA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#a15c00"/>
+    </marker>
+    <style>
+      .t{font-size:15px;font-weight:650;fill:#16202f}
+      .s{font-size:12px;fill:#3c4658}
+      .l{font-size:11px;fill:#44506a;font-style:italic}
+      .edge{stroke:#44506a;stroke-width:1.6;fill:none;marker-end:url(#ah)}
+      .human{stroke:#a15c00;stroke-width:1.6;fill:none;stroke-dasharray:6 4;marker-end:url(#ahA)}
+      .ev{stroke:#7a8496;stroke-width:1.3;fill:none;stroke-dasharray:4 4;marker-end:url(#ah)}
+    </style>
+  </defs>
+  <rect width="100%" fill="#ffffff"/>
+
+  <!-- Row A -->
+  <rect x="40" y="30" width="240" height="80" rx="10" fill="#e8f0fd" stroke="#4a78c4"/>
+  <text x="160" y="62" text-anchor="middle" class="t">Capability request</text>
+  <text x="160" y="82" text-anchor="middle" class="s">goal + typed inputs / outputs</text>
+  <text x="160" y="98" text-anchor="middle" class="s">tasks/*.yaml</text>
+
+  <rect x="560" y="30" width="220" height="80" rx="10" fill="#f1ebfb" stroke="#7a55c0"/>
+  <text x="670" y="62" text-anchor="middle" class="t">Member Assistant</text>
+  <text x="670" y="82" text-anchor="middle" class="s">chat + voice · LLM picks tools</text>
+  <text x="670" y="98" text-anchor="middle" class="s">member confirms irreversible</text>
+
+  <rect x="840" y="30" width="220" height="80" rx="10" fill="#f1ebfb" stroke="#7a55c0"/>
+  <text x="950" y="62" text-anchor="middle" class="t">Capability Gateway</text>
+  <text x="950" y="82" text-anchor="middle" class="s">catalog of approved capabilities</text>
+  <text x="950" y="98" text-anchor="middle" class="s">identity binding · pending confirm</text>
+
+  <rect x="1100" y="30" width="170" height="80" rx="10" fill="#fdf1e0" stroke="#a15c00"/>
+  <text x="1185" y="62" text-anchor="middle" class="t">Operator Console</text>
+  <text x="1185" y="82" text-anchor="middle" class="s">queue · claim · resolve</text>
+  <text x="1185" y="98" text-anchor="middle" class="s">human drives live session</text>
+
+  <!-- Row B -->
+  <rect x="40" y="170" width="240" height="90" rx="10" fill="#e8f0fd" stroke="#4a78c4" stroke-width="1.8"/>
+  <text x="160" y="200" text-anchor="middle" class="t">Discovery Agent (LLM)</text>
+  <text x="160" y="220" text-anchor="middle" class="s">observe → decide → act, one step/turn</text>
+  <text x="160" y="237" text-anchor="middle" class="s">redacted outline + screenshot</text>
+  <text x="160" y="252" text-anchor="middle" class="s">acts on refs · inputs by name</text>
+
+  <rect x="330" y="170" width="170" height="90" rx="10" fill="#eef1f6" stroke="#6b7689"/>
+  <text x="415" y="200" text-anchor="middle" class="t">Compiler</text>
+  <text x="415" y="220" text-anchor="middle" class="s">trace → ranked locators,</text>
+  <text x="415" y="237" text-anchor="middle" class="s">checkpoints, params,</text>
+  <text x="415" y="252" text-anchor="middle" class="s">risk classes</text>
+
+  <rect x="550" y="170" width="230" height="90" rx="10" fill="#fff8d9" stroke="#b39200" stroke-width="1.8"/>
+  <text x="665" y="200" text-anchor="middle" class="t">Capability Artifact</text>
+  <text x="665" y="220" text-anchor="middle" class="s">contract: inputs · outputs · outcomes</text>
+  <text x="665" y="237" text-anchor="middle" class="s">flow: steps · locators · checkpoints</text>
+  <text x="665" y="252" text-anchor="middle" class="s">versioned JSON · draft → approved</text>
+
+  <rect x="840" y="170" width="220" height="90" rx="10" fill="#e6f5ea" stroke="#2e8a4a" stroke-width="1.8"/>
+  <text x="950" y="200" text-anchor="middle" class="t">Replay Engine (no LLM)</text>
+  <text x="950" y="220" text-anchor="middle" class="s">resolve · gate · act · verify</text>
+  <text x="950" y="237" text-anchor="middle" class="s">outcome rules → success /</text>
+  <text x="950" y="252" text-anchor="middle" class="s">business outcome / recover / fail</text>
+
+  <rect x="1100" y="170" width="170" height="90" rx="10" fill="#eef1f6" stroke="#6b7689"/>
+  <text x="1185" y="200" text-anchor="middle" class="t">App Profile</text>
+  <text x="1185" y="220" text-anchor="middle" class="s">per vendor product:</text>
+  <text x="1185" y="237" text-anchor="middle" class="s">sign-on · error taxonomy</text>
+  <text x="1185" y="252" text-anchor="middle" class="s">PII labels · tenant overrides</text>
+
+  <!-- Row C -->
+  <rect x="40" y="310" width="1020" height="52" rx="10" fill="#fcebea" stroke="#b8453b"/>
+  <text x="550" y="332" text-anchor="middle" class="t">Policy &amp; redaction (every action, discovery and replay)</text>
+  <text x="550" y="350" text-anchor="middle" class="s">allowlist of actions / windows / keys · risk classes: safe, risky, irreversible (needs approval), blocked · PII masked in logs, screenshots, prompts</text>
+
+  <rect x="1100" y="300" width="170" height="72" rx="10" fill="#f6f7f9" stroke="#8a93a4" stroke-dasharray="5 4"/>
+  <text x="1185" y="326" text-anchor="middle" class="t">Evidence</text>
+  <text x="1185" y="344" text-anchor="middle" class="s">redacted JSONL logs,</text>
+  <text x="1185" y="360" text-anchor="middle" class="s">screenshots, tree dumps</text>
+
+  <!-- Row D -->
+  <rect x="40" y="410" width="1020" height="70" rx="10" fill="#e9eef6" stroke="#44506a" stroke-width="1.8"/>
+  <text x="550" y="436" text-anchor="middle" class="t">Surface driver: Java accessibility bridge (loaded with -javaagent into the unmodified app)</text>
+  <text x="550" y="456" text-anchor="middle" class="s">accessibility tree (roles, names, labels, bounds) · accessibility actions · offscreen screenshots</text>
+  <text x="550" y="472" text-anchor="middle" class="s">control lock: agent | paused | human (human input blocked while agent holds control) · human-input recorder</text>
+
+  <rect x="1100" y="410" width="170" height="70" rx="10" fill="#ffffff" stroke="#8a93a4" stroke-dasharray="5 4"/>
+  <text x="1185" y="434" text-anchor="middle" class="t">Same seam, designed</text>
+  <text x="1185" y="452" text-anchor="middle" class="s">Windows UIA · web a11y</text>
+  <text x="1185" y="468" text-anchor="middle" class="s">3270 · OCR / vision</text>
+
+  <!-- Row E -->
+  <rect x="40" y="520" width="1020" height="56" rx="10" fill="#dde3ec" stroke="#44506a"/>
+  <text x="550" y="545" text-anchor="middle" class="t">CoreLink: legacy Swing core-banking client</text>
+  <text x="550" y="564" text-anchor="middle" class="s">MDI frames · modal dialogs · no test IDs · unlinked labels · runtime faults · two tenants on different versions</text>
+
+  <!-- Edges -->
+  <path class="edge" d="M160,110 V168"/>
+  <path class="edge" d="M280,215 H328"/>
+  <path class="edge" d="M500,215 H548"/>
+  <path class="edge" d="M780,215 H838"/>
+  <text x="809" y="207" text-anchor="middle" class="l">load</text>
+  <path class="edge" d="M780,70 H838"/>
+  <text x="809" y="62" text-anchor="middle" class="l">tool call</text>
+  <path class="edge" d="M950,110 V168"/>
+  <text x="942" y="145" text-anchor="end" class="l">invoke(params)</text>
+  <path class="edge" d="M1100,215 H1062"/>
+  <path class="edge" d="M160,260 V308"/>
+  <path class="edge" d="M950,260 V308"/>
+  <path class="edge" d="M550,362 V408"/>
+  <path class="edge" d="M550,480 V518"/>
+  <path class="edge" d="M600,518 V482"/>
+  <path class="human" d="M1040,170 C1060,140 1110,135 1130,112"/>
+  <text x="1068" y="128" text-anchor="end" class="l" fill="#a15c00">stuck / approval</text>
+  <path class="human" d="M1170,112 C1150,150 1100,160 1062,178"/>
+  <text x="1168" y="158" class="l" fill="#a15c00">resume</text>
+  <path class="ev" d="M1060,245 C1085,265 1095,285 1110,300"/>
+
+  <!-- Legend -->
+  <g transform="translate(40,600)" font-size="12" fill="#3c4658">
+    <rect width="14" height="14" rx="3" fill="#e8f0fd" stroke="#4a78c4"/><text x="20" y="12">LLM, once per capability</text>
+    <rect x="200" width="14" height="14" rx="3" fill="#e6f5ea" stroke="#2e8a4a"/><text x="220" y="12">deterministic, production path</text>
+    <rect x="430" width="14" height="14" rx="3" fill="#fdf1e0" stroke="#a15c00"/><text x="450" y="12">human in the loop</text>
+    <rect x="590" width="14" height="14" rx="3" fill="#fcebea" stroke="#b8453b"/><text x="610" y="12">safety</text>
+    <rect x="680" width="14" height="14" rx="3" fill="#f1ebfb" stroke="#7a55c0"/><text x="700" y="12">agent-facing (stretch)</text>
+  </g>
+</svg>
+</section>
+
+<section class="pb"><h2>1. Architecture</h2>
+<p><strong>Target choice.</strong> The proxy is CoreLink, a Java Swing desktop client I built to look like a legacy
+core-banking teller app. It uses an MDI desktop, modal option dialogs, upper-case status-bar errors, and no
+test IDs. On one form the labels are not wired to their fields. I chose a desktop app over a web demo because
+the brief says the common case has no clean DOM. A desktop app forces the perception and locator design to
+cope with that. I built it myself because every runtime condition the brief lists has to be reproducible on
+demand. Faults are injected through a properties file that the app re-reads on every action.</p>
+<p><strong>Layers.</strong> Each layer talks only to the one below it.</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Responsibility</th>
+<th>Code</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Surface driver</td>
+<td>Perceive (tree, screenshot), act (click, set text, select, key, close), control lock, input recorder</td>
+<td><code>bridge/</code> (Java), <code>cua/surface/</code></td>
+</tr>
+<tr>
+<td>Policy + redaction</td>
+<td>Allow, deny, or require approval for every action. Mask PII before anything leaves memory</td>
+<td><code>cua/policy.py</code>, <code>cua/redact.py</code></td>
+</tr>
+<tr>
+<td>Discovery</td>
+<td>LLM observe, decide, act loop that records a trace</td>
+<td><code>cua/agent/discover.py</code></td>
+</tr>
+<tr>
+<td>Compiler</td>
+<td>Trace to capability artifact, decoupled from the transcript</td>
+<td><code>cua/agent/compile.py</code></td>
+</tr>
+<tr>
+<td>Replay</td>
+<td>Deterministic execution and outcome classification</td>
+<td><code>cua/replay.py</code></td>
+</tr>
+<tr>
+<td>Handoff</td>
+<td>Pause, cede control, record the human, resume</td>
+<td><code>cua/handoff.py</code>, <code>cua/console.py</code></td>
+</tr>
+<tr>
+<td>Gateway</td>
+<td>Catalog of approved capabilities as typed tools, with an invoke path</td>
+<td><code>cua/gateway.py</code>, <code>portal/</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key decisions and trade-offs.</strong>
+- <strong>An in-process accessibility bridge, not screenshots plus coordinates.</strong> A <code>-javaagent</code> jar attaches to
+  the unmodified app and reads <code>javax.accessibility</code>. That is the same role, name, state, and bounds data the
+  Windows Java Access Bridge exposes to screen readers. Accessibility data is available for desktop apps
+  (JAB, UI Automation) and for legacy web apps, so the design does not depend on a DOM. It is also far more
+  stable than pixels. Actions go through accessibility actions rather than OS mouse events. They work while
+  the desktop is locked and never collide with a person's input. The trade-off is that a vendor app might
+  block agent injection. The fallback is the external Access Bridge, or UI Automation for non-Java apps,
+  with the same Surface interface above it.
+- <strong>The model points, the harness records.</strong> The model acts only on element refs from the current
+  outline. The compiler turns each targeted element into ranked locators computed from the live tree. The
+  model never writes selectors, which keeps its hallucinations out of the artifact.
+- <strong>Model:</strong> Claude Opus 5 through the official SDK, with adaptive thinking and summarized reasoning logged
+  as evidence. It uses a manual tool loop with an append-only history and one action per turn.
+  Discovery is rare and correctness matters more than cost there. Replay never calls a model.
+- <strong>One process, file-based intervention queue.</strong> A desktop session is single-threaded by nature. The
+  gateway serializes invocations with a lock. Queues and workers are deliberately not built; see Cuts.</p>
+<h2>2. Artifact schema</h2>
+<p>The schema is <code>cua.capability/v1</code>. It is Pydantic, exported as JSON Schema in <code>schemas/</code>. An example is
+<code>capabilities/corelink.member.get_share_savings_balance.v1.0.0.json</code>. The artifact is split into a
+<strong>contract</strong> and a <strong>flow</strong> because it has two readers.</p>
+<p><strong>Contract</strong> is what a calling agent reads:
+- <code>id</code>, <code>version</code> (semver), and <code>status</code>, which is draft, approved, or deprecated.
+- <code>title</code> and <code>description</code>.
+- <code>inputs</code>: typed <code>ParamSpec</code> with pattern or enum and a <code>sensitive</code> flag.
+- <code>outputs</code>: typed <code>OutputSpec</code> such as <code>currency</code>, with a <code>sensitive</code> flag.
+- <code>business_outcomes</code>: the codes the caller must handle, such as <code>MEMBER_NOT_FOUND</code>.
+- <code>risk</code>: read_only, state_changing, or irreversible.</p>
+<p><code>cua catalog</code> prints only this part.</p>
+<p><strong>Flow</strong> is what replay and a reviewer read:
+- <code>steps</code>: each step has an <code>intent</code> in plain English, an <code>action</code>, a <code>target</code>, a <code>value</code>, a <code>risk</code>, a
+  list of <code>expect</code> checkpoints, and a <code>timeout_ms</code>.
+- <code>target = scope + strategies[]</code>. The scope names the window ("main" or a dialog-title regex) and the
+  work-window container. Strategies are ranked and independent, and each records <code>unique_at_record</code>:
+  1. <code>a11y</code>: role plus accessible name. This is the most semantic, and it is what a screen reader
+     announces.
+  2. <code>label</code>: role plus visible label text, taken from the label relation or inferred from geometry
+     (the nearest label on the same row, to the left). Legacy forms rarely wire labels, and a human finds
+     the field this way too.
+  3. <code>group</code>: the nth control of a role inside a named panel, for example the table under "Share Accounts".
+  4. <code>path</code>: index path within the container. This is exact but breaks on layout change.
+  5. <code>coords</code>: a relative point in the container, the last resort. It also carries over to
+     screenshot-only surfaces.</p>
+<p>Replay reports which strategy matched. A fallback to strategy 3 shows drift before it becomes a
+  failure.
+- <code>value</code>: <code>literal</code>, <code>param</code>, or <code>secret</code>. A secret is a name only. Credentials and example PII never
+  appear in the artifact, and a unit test enforces that.
+- <code>extract</code>: value, name, or table cell (row match plus column), then a capture regex, then a parse type.
+- <code>success</code>: final checkpoints.
+- <code>outcome_rules</code>: capability-specific rules. Product-wide rules are inherited from the app profile.
+- <code>provenance</code>: discovering model, run id, goal, tenant, reviewer, and notes. Notes flag any step where a
+  human intervened during discovery.</p>
+<p><strong>Why this shape.</strong> A capability is a function signature plus a reviewable procedure. Putting the contract
+first lets an agent choose a capability without parsing steps. Per-step <code>intent</code> and checkpoints let a
+reviewer approve it without watching a video. Declaring outcomes as data, mostly at the product level,
+means a new capability gets the full error taxonomy without new code.</p>
+<h2>3. Determinism &amp; error handling</h2>
+<p><strong>Determinism.</strong>
+- <strong>Fixed start state.</strong> Replay signs on if needed through the vendor-profile routine and closes every open
+  work window before the first step.
+- <strong>Ranked locators.</strong> Each strategy must resolve to exactly one element. An ambiguous match falls through
+  to the next strategy.
+- <strong>No sleeps.</strong> Each step waits for its checkpoints, bounded by <code>timeout_ms</code>:
+  - <code>container_present</code> and <code>window_present</code> for new windows and frames;
+  - <code>text_present</code> for status lines, generalized as <code>INQUIRY COMPLETE - \d+ SHARE\(S\)</code>;
+  - <code>element_value</code> for typed fields.</p>
+<p>Text checkpoints count only text that is new since the action, so a stale status line can't satisfy one.
+  The mock stamps status lines with a time, as many legacy cores do.
+- <strong>Settle detection.</strong> The UI counts as settled when the tree fingerprint stops changing.
+- <strong>Input contract.</strong> Inputs are validated against the contract before the UI is touched. A bad input is
+  <code>rejected / INVALID_INPUT</code>, not a UI failure.</p>
+<p><strong>Error taxonomy.</strong> While resolving a target or waiting on a checkpoint, the engine evaluates outcome rules
+against modal dialogs and newly appeared text. Text we typed ourselves is excluded. First match wins, in
+this order: capability rules, then tenant extras, then product rules.</p>
+<table>
+<thead>
+<tr>
+<th>Class</th>
+<th>Result <code>status</code></th>
+<th>Examples in CoreLink</th>
+<th>Handling</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Business outcome</td>
+<td><code>business_outcome</code> + <code>code</code></td>
+<td><code>MEMBER_NOT_FOUND</code>, <code>MEMBER_RESTRICTED</code>, <code>MEMBER_CLOSED</code>, <code>VALIDATION_ERROR</code>, <code>PERMISSION_DENIED</code>, <code>OPERATOR_DECLINED</code></td>
+<td>Stop, return the code, the UI's own message, and a screenshot. This is not an error.</td>
+</tr>
+<tr>
+<td>Recoverable</td>
+<td><code>success</code> with <code>recoveries[]</code></td>
+<td><code>UNEXPECTED_DIALOG</code> (dismiss), <code>SLOW_RESPONSE</code> (keep waiting, bounded), <code>SESSION_EXPIRED</code> (dismiss, re-sign-on, restart once)</td>
+<td>Bounded attempts. Every recovery is recorded in the result.</td>
+</tr>
+<tr>
+<td>Hard failure</td>
+<td><code>failed</code> + <code>failure</code></td>
+<td><code>HOST_ERROR</code>, <code>TARGET_NOT_FOUND</code>, <code>CHECKPOINT_NOT_MET</code>, <code>EXTRACTION_FAILED</code>, <code>POLICY_DENIED</code>, <code>RECOVERY_EXHAUSTED</code>, <code>HUMAN_TIMEOUT</code></td>
+<td>Stop. Report the step id and intent, what was expected, what was observed, a redacted screenshot, and a redacted tree snapshot.</td>
+</tr>
+<tr>
+<td>Escalate</td>
+<td>continues or <code>failed</code></td>
+<td><code>SUPERVISOR_OVERRIDE_REQUIRED</code>, <code>SIGN_ON_REJECTED</code>, tenant <code>DISCLOSURE_CONFIRMATION</code></td>
+<td>Human handoff on the live session, then re-verify the checkpoint (section 5).</td>
+</tr>
+</tbody>
+</table>
+<p>Sensitive outputs are returned to the caller but fingerprinted in the persisted <code>result.json</code>.</p>
+<p><strong>Evidence.</strong> <code>evidence/replays/summary.md</code> shows 15 scenarios, all passing:
+- the happy path and a second tenant;
+- not-found, restricted, and invalid input;
+- a popup, a slow host, and session expiry, all recovered;
+- a host error, which fails hard;
+- an irreversible post with a caller grant, with operator approval, and with no approval, which times out;
+- a validation error and a permission denial;
+- the supervisor handoff.</p>
+<p><strong>Drift (secondary).</strong> Locator fallbacks are logged per step. A tenant can override label and name
+aliases without re-recording. Structural drift that breaks every strategy fails with <code>TARGET_NOT_FOUND</code>
+and a full evidence bundle.</p>
+<h2>4. Heterogeneity &amp; multi-tenant</h2>
+<p><strong>Surface seam.</strong> Everything above <code>cua/surface/</code> sees only <code>Observation</code> (windows and nodes with role,
+name, value, label, group, and bounds) and a small verb set: click, set text, select, key, and close. The artifact stores semantic targets, not a
+technology's selectors.</p>
+<table>
+<thead>
+<tr>
+<th>Surface</th>
+<th>Perceive</th>
+<th>Act</th>
+<th>What changes in the artifact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Java Swing (built)</td>
+<td>In-process accessibility (JAB-equivalent)</td>
+<td>Accessibility actions</td>
+<td>Nothing</td>
+</tr>
+<tr>
+<td>Other Windows desktop apps (.NET, PowerBuilder, Delphi)</td>
+<td>UI Automation tree</td>
+<td>UIA invoke and value patterns, with SendInput fallback</td>
+<td>Nothing. Roles are mapped to the same vocabulary.</td>
+</tr>
+<tr>
+<td>Legacy web (framesets, nested tables)</td>
+<td>Browser accessibility tree across frames</td>
+<td>CDP or Playwright</td>
+<td><code>scope.window</code> becomes a frame path</td>
+</tr>
+<tr>
+<td>3270/5250 green screen</td>
+<td>Screen buffer fields via an emulator API</td>
+<td>Keystrokes</td>
+<td>Label strategy maps to a protected field</td>
+</tr>
+<tr>
+<td>Citrix or pixels only</td>
+<td>Screenshot, OCR, and a vision model fill Node with role guesses and bounds</td>
+<td>Coordinates</td>
+<td><code>label</code> and <code>coords</code> strategies carry the load</td>
+</tr>
+</tbody>
+</table>
+<p>Label inference and coordinate locators are already geometric, so they work unchanged on OCR output.</p>
+<p><strong>Multi-tenant reuse.</strong> Capabilities are scoped to a vendor product and a version range, not to a tenant.
+The app profile (<code>configs/apps/corelink.yaml</code>) holds what is shared by everyone running the product:
+- the sign-on routine;
+- PII labels;
+- the outcome taxonomy;
+- a <code>tenants:</code> block with small overrides: label and name aliases, extra outcome rules, and the product
+  version.</p>
+<p>The second tenant, Lakeshore, runs CoreLink 7.6.2. Its "Member #:" label is "Account No.:", its "Inquire"
+button is "Search", and it adds a disclosure dialog. The Heritage-recorded capability replays there
+unchanged, through the overrides (scenario 09). The resolution order is: capability, then tenant override,
+then product. That makes an override a small reviewable diff, not a fork.</p>
+<p><strong>Drift detection at scale.</strong> Four signals, in order of cost:
+1. Locator fallback telemetry per capability per tenant.
+2. The product version string, read at sign-on, checked against the capability's <code>versions</code> range.
+3. Scheduled canary replays against a test member per tenant.
+4. When a canary fails, a bounded re-discovery on that tenant diffs its artifact against the base. The
+   compiler then proposes a tenant override, or a new capability version, for human review.</p>
+<h2>5. Escalation &amp; handoff</h2>
+<p><strong>Detecting "stuck."</strong>
+- <strong>Discovery:</strong> the model calls <code>ask_human</code>, or policy returns require-approval, or the step or time
+  budget runs out.
+- <strong>Replay:</strong> an <code>escalate</code> rule matches, an irreversible step has no grant, or recovery is exhausted.
+  Failures are reported and do not wait; see Cuts.</p>
+<p><strong>Control-transfer model.</strong> One holder at a time, enforced inside the app by the bridge:</p>
+<pre><code>agent --request--&gt; paused --operator claims--&gt; human --operator resolves--&gt; agent
+                     \------------- timeout / abort ------------------------&gt; run ends
+</code></pre>
+<ul>
+<li><strong><code>agent</code>:</strong> the bridge drops real keyboard and mouse input and shows an on-screen banner, so the operator
+  cannot fight the automation. The automation's own input is marked as synthetic and passes through.</li>
+<li><strong><code>paused</code>:</strong> the automation stops touching the app and writes an intervention request. It carries the
+  capability or goal, the step id and intent, the reason and rule code, a redacted screenshot, and the
+  session address.</li>
+<li><strong><code>human</code>:</strong> the operator works in the same CoreLink window, with the same process, session, and
+  signed-on operator. The bridge records their clicks, typing, and keys, with targets described
+  semantically. Password fields are recorded as <code>[SECRET]</code>.</li>
+<li><strong>Resolve:</strong> the operator chooses resume, approve, deny, or abort. The recorded actions are attached to the
+  intervention and the run evidence, control returns to <code>agent</code>, and the engine re-verifies the current
+  step's checkpoint. It never assumes the human left the app in the expected state.</li>
+</ul>
+<p><strong>Operator surface.</strong> The console (<code>cua console</code>) is intentionally minimal. It shows the queue, context,
+screenshot, a live session view, and the claim and resolve buttons. The CLI has the same verbs. The queue is
+a directory of JSON files, so a pager or ticketing hook is a small adapter.</p>
+<p><strong>Evidence.</strong> Scenario 15 shows a supervisor override. The handoff record lists five recorded human
+actions and a resume. For unattended evidence, <code>scripts/sim_operator.py</code> stands in for the person. It
+injects real input events so the recorder sees them. Its interventions are labeled <code>sim-supervisor</code> so they
+are never mistaken for a real human.</p>
+<h2>6. Safety</h2>
+<p><strong>Guardrail model.</strong> Enforced before every action, in discovery and in replay alike:
+- an <strong>allowlist</strong> of action verbs, window titles, and keys;
+- <strong>risk rules</strong> that classify each target as safe, risky, irreversible, or blocked.</p>
+<p><strong>Irreversible means approval required.</strong> I chose that over a hard block, because the system must do real
+work, and over flag-only, because a posted transaction cannot be recalled. Approval comes from one of three
+places:
+- a human operator;
+- a per-invocation grant from the caller, for an approved capability;
+- in the member assistant, the member pressing Confirm in the UI. The model cannot confirm for them.</p>
+<p>One approval covers one transaction per run. Draft capabilities can't run unattended.</p>
+<p><strong>Identity binding.</strong> The gateway removes caller-bound parameters, such as the signed-in member's own
+number, from the tool schema. Bound values override anything the model passes. A prompt-injected "check
+member 23456" has nothing to act on.</p>
+<p><strong>Data handling.</strong> Redaction happens before anything leaves memory: logs, evidence, intervention records,
+and prompts to the discovery model. Three layers work together:
+- patterns for SSNs, dates, card and account numbers, and amounts;
+- label rules from the app profile, such as the value next to "SSN:";
+- run-scoped literals for inputs and outputs marked sensitive.</p>
+<p>Screenshots are redacted by blacking out the accessibility bounds of sensitive nodes. The model never sees
+raw PII or credentials. Secrets are referenced by name and resolved from env/.env, standing in for a vault.
+Sensitive outputs are persisted only as fingerprints. A unit test fails if an artifact contains a sample
+member number, an SSN prefix, a balance, or a credential.</p>
+<p><strong>Limits.</strong>
+- Label and pattern redaction can miss PII in free text, such as a note field. Production needs a
+  classifier and allowlisted fields.
+- The member assistant sends the member's own balance to the model to phrase the answer.
+- The live console view is unredacted, which assumes an authorized operator.
+- The policy trusts window titles, and a hostile app could spoof them.
+- The bridge listens on localhost without authentication.
+- Approval grants are not yet cryptographically bound to the reviewed artifact hash.</p>
+<h2>7. Cuts</h2>
+<p><strong>Mocked or stubbed, on purpose:</strong>
+- <strong>Target app.</strong> CoreLink is a proxy. No real bank system was used.
+- <strong>Operator console.</strong> It is minimal, with no browser-based remote input. The operator uses the real
+  window.
+- <strong>Simulated operator.</strong> It is used for unattended evidence runs only.
+- <strong>Member sign-in.</strong> The portal login is a mock.
+- <strong>Secret store.</strong> It reads env/.env instead of a vault.
+- <strong>Surfaces.</strong> Only one is implemented. UIA, web, and terminal are designed, not built.</p>
+<p><strong>Not built:</strong>
+- queues, workers, and multi-session scaling (per the brief);
+- tenant-level scheduling;
+- artifact storage beyond files plus git;
+- authentication on the bridge, console, and gateway;
+- LLM-assisted fallback during replay;
+- multi-run stability scoring (the scenario matrix is a start).</p>
+<p><strong>Next, in order:</strong>
+1. <strong>Bounded assisted fallback.</strong> On <code>TARGET_NOT_FOUND</code>, allow one policy-checked LLM re-grounding of that
+   single step, then record the proposed locator as a draft override.
+2. <strong>Canary replays and drift diffing,</strong> from section 4.
+3. <strong>A UI Automation surface,</strong> to prove the seam on a second desktop technology.
+4. <strong>Artifact signing.</strong> Approval binds to the hash of the reviewed artifact.
+5. <strong>Hardening.</strong> Authentication and mTLS on the bridge, and a PII classifier on free text.</p></section>
+
+<section class="pb"><h2>Appendix A. Demo commands</h2><pre><code>.\scripts\build.ps1                                        # setup: venv, portable JDK, Java builds
+python -m cua discover --task tasks\get_savings_balance.yaml   # 1. LLM discovery, then artifact
+python -m cua catalog                                        # 2. contract view
+python -m cua approve corelink.member.get_share_savings_balance --reviewer &lt;name&gt;
+python -m cua replay corelink.member.get_share_savings_balance -p member_number=12345      # 3. replay
+python -m cua replay corelink.member.get_share_savings_balance -p member_number=99999      # 4. not found
+python -m cua replay ... --fault session_expired=true | --fault app_error=true             #    recover / fail
+python -m cua console                                        # 5. operator console (handoff)
+python scripts\scenarios.py --out evidence\replays           # 6. full scenario matrix
+python -m portal.app --allow-draft                           # 7. member assistant, chat + voice
+</code></pre>
+<h2>Appendix B. Replay scenario results</h2><table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Tenant</th>
+<th>Injected</th>
+<th>Result</th>
+<th>Code</th>
+<th>Recoveries</th>
+<th>Pass</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01-balance-happy-path</td>
+<td>heritage</td>
+<td>-</td>
+<td>success</td>
+<td>success</td>
+<td>-</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>02-balance-member-not-found</td>
+<td>heritage</td>
+<td>-</td>
+<td>business_outcome</td>
+<td>MEMBER_NOT_FOUND</td>
+<td>-</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>03-balance-invalid-input</td>
+<td>heritage</td>
+<td>-</td>
+<td>rejected</td>
+<td>INVALID_INPUT</td>
+<td>-</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>04-balance-member-restricted</td>
+<td>heritage</td>
+<td>-</td>
+<td>business_outcome</td>
+<td>MEMBER_RESTRICTED</td>
+<td>-</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>05-balance-unexpected-popup</td>
+<td>heritage</td>
+<td>popup=true</td>
+<td>success</td>
+<td>success</td>
+<td>UNEXPECTED_DIALOG</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>06-balance-slow-host</td>
+<td>heritage</td>
+<td>slow_ms=4500</td>
+<td>success</td>
+<td>success</td>
+<td>SLOW_RESPONSE</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>07-balance-session-expired</td>
+<td>heritage</td>
+<td>session_expired=true</td>
+<td>success</td>
+<td>success</td>
+<td>SESSION_EXPIRED</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>08-balance-host-error</td>
+<td>heritage</td>
+<td>app_error=true</td>
+<td>failed</td>
+<td>HOST_ERROR</td>
+<td>-</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>09-balance-second-tenant</td>
+<td>lakeshore</td>
+<td>-</td>
+<td>success</td>
+<td>success</td>
+<td>-</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>10-open-account-approved</td>
+<td>heritage</td>
+<td>-</td>
+<td>success</td>
+<td>success</td>
+<td>-</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>11-open-account-below-minimum</td>
+<td>heritage</td>
+<td>-</td>
+<td>business_outcome</td>
+<td>VALIDATION_ERROR</td>
+<td>-</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>12-open-account-permission-denied</td>
+<td>heritage</td>
+<td>-</td>
+<td>business_outcome</td>
+<td>PERMISSION_DENIED</td>
+<td>-</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>13-open-account-no-approval-grant</td>
+<td>heritage</td>
+<td>-</td>
+<td>failed</td>
+<td>HUMAN_TIMEOUT</td>
+<td>-</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>14-open-account-operator-approves</td>
+<td>heritage</td>
+<td>-</td>
+<td>success</td>
+<td>success</td>
+<td>-</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>15-open-account-supervisor-handoff</td>
+<td>heritage</td>
+<td>-</td>
+<td>success</td>
+<td>success</td>
+<td>-</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<p>Each scenario runs in a fresh app instance. The evidence for each is in <code>evidence/replays/&lt;scenario&gt;/</code>.
+Scenarios 14 and 15 use a clearly labeled simulated operator in place of a person at the keyboard.</p></section>
+
+<section class="pb"><h2>Appendix C. Artifact excerpt</h2><h3>Contract (what a calling agent sees)</h3><pre><code>{
+  "id": "corelink.member.get_share_savings_balance",
+  "version": "1.0.0",
+  "status": "draft",
+  "risk": "read_only",
+  "inputs": [
+    {
+      "name": "member_number",
+      "type": "string",
+      "description": "5-digit CoreLink member number",
+      "pattern": "^\\d{5}$",
+      "required": true,
+      "sensitive": true
+    }
+  ],
+  "outputs": [
+    {
+      "name": "savings_balance",
+      "type": "currency",
+      "description": "Current Share Savings balance in USD",
+      "sensitive": true
+    }
+  ],
+  "business_outcomes": [
+    "MEMBER_NOT_FOUND",
+    "MEMBER_RESTRICTED",
+    "MEMBER_CLOSED",
+    "PERMISSION_DENIED",
+    "VALIDATION_ERROR"
+  ]
+}</code></pre><h3>One flow step (what replay executes)</h3><pre><code>{
+  "id": "s2",
+  "intent": "Enter the member number.",
+  "action": "set_text",
+  "target": {
+    "description": "text 'Member #:' in 'Member Inquiry'",
+    "scope": {
+      "window": "main",
+      "container": "^Member Inquiry$"
+    },
+    "strategies": [
+      {
+        "kind": "a11y",
+        "role": "text",
+        "name": "Member #:",
+        "unique_at_record": true
+      },
+      {
+        "kind": "label",
+        "role": "text",
+        "label": "Member #:",
+        "unique_at_record": true
+      },
+      {
+        "kind": "path",
+        "role": "text",
+        "path": "0.1.0.0.1",
+        "unique_at_record": true
+      },
+      {
+        "kind": "coords",
+        "rel_x": 0.1871,
+        "rel_y": 0.1071,
+        "unique_at_record": true
+      }
+    ]
+  },
+  "value": {
+    "source": "param",
+    "param": "member_number"
+  },
+  "risk": "safe",
+  "expect": [
+    {
+      "kind": "element_value",
+      "pattern": ".+",
+      "description": "field holds the entered value"
+    }
+  ],
+  "timeout_ms": 8000
+}</code></pre></section>
+
+<section class="pb"><h2>Appendix D. Screens</h2><div class="grid"><figure><img src="../screenshots/01-corelink-sign-on.png"><figcaption>Sign-on. Credentials are resolved from the secret store by name.</figcaption></figure><figure><img src="../screenshots/02-member-inquiry.png"><figcaption>Member Inquiry: the flow the first capability automates.</figcaption></figure><figure><img src="../screenshots/03-member-not-found.png"><figcaption>Business outcome: MBR NOT ON FILE becomes MEMBER_NOT_FOUND.</figcaption></figure><figure><img src="../screenshots/04-open-sub-account-form.png"><figcaption>The labels are not linked to their fields. Replay locates them by label geometry.</figcaption></figure><figure><img src="../screenshots/05-review-transaction.png"><figcaption>The review screen, before the irreversible post.</figcaption></figure><figure><img src="../screenshots/06-confirm-posting-dialog.png"><figcaption>An irreversible confirmation. Policy requires approval.</figcaption></figure><figure><img src="../screenshots/07-transaction-posted.png"><figcaption>The output: a confirmation number extracted with a capture pattern.</figcaption></figure><figure><img src="../screenshots/08-supervisor-override.png"><figcaption>Escalation: a supervisor override is handed to a human.</figcaption></figure><figure><img src="../screenshots/09-second-tenant-lakeshore.png"><figcaption>Second tenant (v7.6.2, renamed controls). The same capability replays through overrides.</figcaption></figure><figure><img src="../screenshots/10-redacted-evidence.png"><figcaption>Evidence screenshot, redacted using accessibility bounds.</figcaption></figure><figure><img src="../screenshots/11-operator-console.png"><figcaption>Operator console: the queue, context, redacted snapshot, and live session.</figcaption></figure><figure><img src="../screenshots/12-member-assistant.png"><figcaption>Member assistant answering from a deterministic replay.</figcaption></figure><figure><img src="../screenshots/13-member-confirmation.png"><figcaption>The member must confirm an irreversible action. The model cannot.</figcaption></figure></div></section>
+</body></html>
