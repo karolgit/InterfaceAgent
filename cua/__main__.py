@@ -91,6 +91,13 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.cmd == "discover":
+        import os
+        from . import secrets as _load_dotenv  # noqa: F401  (loads .env)
+        if args.planner == "claude" and not (os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN")):
+            print("No API key found. Add a line like this to .env in the repo root (and save the file):\n"
+                  "    ANTHROPIC_API_KEY=sk-ant-...\n"
+                  "or set it for this terminal:  $env:ANTHROPIC_API_KEY = \"sk-ant-...\"", file=sys.stderr)
+            return 2
         from .runtime import app_session, run_discovery, write_faults
         write_faults({})
         with app_session(args.tenant, attach=args.attach, keep_open=args.keep_open) as s:
