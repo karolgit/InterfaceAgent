@@ -91,6 +91,7 @@ offline mode need none.
 | `CUA_PLANNER` | Forces `claude` or `gemini` when both keys are set |
 | `CORELINK_OPERATOR_ID` / `_PASSWORD` | The fake demo operator the bot signs on as. Defaults are `teller01` / `demo123`. |
 | `CUA_PORT` | Bridge port, default 8740. Change it to run tests while you have the app open by hand. |
+| `PORTAL_MODEL` | Model for the member assistant's AI mode. It defaults to `CUA_MODEL`. `claude-sonnet-5` is cheaper. |
 | `CUA_DEMO_DELAY_MS` | Slows replays down for screen recording only |
 
 The CoreLink credentials are fake demo values built into the mock app. Only secret names appear in
@@ -203,6 +204,35 @@ never a tool parameter. Irreversible actions wait for the member to press **Conf
 | Member assistant in offline mode | No |
 | Harness check with the scripted planner: `cua discover --planner scripted --script tests\scripts\get_savings_balance.json` | No. It is a test double and is labeled `discovered_by: scripted-test` |
 | Real discovery and the member assistant's AI mode | Yes |
+
+## Cost
+
+LLM spend happens only where a model is called. Everything on the production path is free.
+
+| What you run | Model calls | Typical cost |
+|---|---|---|
+| Discovery (`cua discover`, or `demo.ps1` without flags) | Yes, once per capability | About $0.30 to $0.90 per run with `claude-opus-5` |
+| Replay, the scenario matrix, unit tests, operator console, handoff | None | $0 |
+| Member assistant with an API key set | The chat model only. The replay behind it is free. | About $0.02 to $0.05 per question |
+| Member assistant with no key (offline mode) | None | $0 |
+
+These are the measured discovery runs in [evidence/discovery/](evidence/discovery/), at $5 per million input
+tokens and $25 per million output tokens:
+
+| Discovery run | Actions | Input tokens | Output tokens | Approx. cost |
+|---|---|---|---|---|
+| Get Share Savings balance | 5 | 59,332 | 949 | $0.32 |
+| Open share sub-account (irreversible) | 10 | 163,751 | 1,827 | $0.86 |
+
+- **Where the cost comes from.** Input tokens dominate, because every turn resends the growing
+  conversation plus a redacted screenshot.
+- **Paying less.**
+  - Set `CUA_MODEL=claude-sonnet-5` for discovery, or use the Gemini planner, which has a free tier.
+  - Set `PORTAL_MODEL=claude-sonnet-5` for the member assistant.
+  - Run `.\scripts\demo.ps1 -SkipDiscovery` to regenerate replay evidence without re-running discovery.
+- **Why this is the business case.** A capability is discovered once. Every later request, whether from an
+  operator, a member, or an AI agent, is a deterministic replay with zero model cost and about 1.5 seconds
+  of latency.
 
 ## Screens
 
