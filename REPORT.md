@@ -226,7 +226,12 @@ member 23456" has nothing to act on.
 and prompts to the discovery model. Three layers work together:
 - patterns for SSNs, dates, card and account numbers, and amounts;
 - label rules from the app profile, such as the value next to "SSN:";
-- run-scoped literals for inputs and outputs marked sensitive.
+- run-scoped literals for inputs and outputs marked sensitive, plus PII values learned from labeled fields
+  on each screen, so a name seen next to "Name:" is masked wherever it shows up later.
+
+That fourth source exists because a unit test that scans all evidence for the mock app's PII caught a leak
+during development. A member's name reappeared in a "what changed" note to the model, which the
+pattern and label rules had missed. The scan now runs as part of the test suite.
 
 Screenshots are redacted by blacking out the accessibility bounds of sensitive nodes. The model never sees
 raw PII or credentials. Secrets are referenced by name and resolved from env/.env, standing in for a vault.
