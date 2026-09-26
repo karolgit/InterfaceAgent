@@ -248,3 +248,10 @@ def test_committed_evidence_contains_no_sample_pii_or_secrets():
     hits = [str(p) for p in (ROOT / "evidence").rglob("*") if p.suffix in {".json", ".jsonl", ".md"}
             and bad.search(p.read_text(encoding="utf-8", errors="ignore"))]
     assert not hits, f"sensitive values found in: {hits[:5]}"
+
+
+def test_card_pattern_masks_cards_but_not_run_ids():
+    r = Redactor()
+    assert r.text("card 4111 1111 1111 1111 ok") == "card [CARD_OR_ACCOUNT] ok"
+    assert r.text("acct 123456789012345") == "acct [CARD_OR_ACCOUNT]"
+    assert r.text("discover-20260926-155104-3ef0") == "discover-20260926-155104-3ef0"

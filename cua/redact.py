@@ -24,7 +24,8 @@ from .surface.base import Node, Observation
 PATTERNS: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"\b\d{3}-\d{2}-\d{4}\b"), "[SSN]"),
     (re.compile(r"\b(0[1-9]|1[0-2])/(0[1-9]|[12]\d|3[01])/(19|20)\d{2}\b"), "[DATE]"),
-    (re.compile(r"\b(?:\d[ -]?){13,19}\b"), "[CARD_OR_ACCOUNT]"),
+    # 13-19 digits, not glued to word characters or hyphens (so run IDs and timestamps survive)
+    (re.compile(r"(?<![\w-])(?:\d[ -]?){12,18}\d(?![\w-])"), "[CARD_OR_ACCOUNT]"),
     (re.compile(r"\$\s?\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\$\s?\d+(?:\.\d{2})?"), "[AMOUNT]"),
 ]
 

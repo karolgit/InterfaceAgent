@@ -1,0 +1,34 @@
+{
+  "run_id": "13-open-account-no-approval-grant-20260926-160452-57e1",
+  "capability": "corelink.account.open_share_sub_account@1.0.0",
+  "status": "failed",
+  "outputs": {},
+  "outcome": null,
+  "failure": {
+    "code": "HUMAN_TIMEOUT",
+    "step_id": "s8",
+    "step_intent": "Post the sub-account opening transaction to obtain the confirmation number.",
+    "expected": "approval decision",
+    "observed": "no operator responded in time",
+    "evidence": {
+      "screenshot": "02-failure-HUMAN_TIMEOUT.png",
+      "tree": "tree-failure-HUMAN_TIMEOUT.json"
+    }
+  },
+  "recoveries": [],
+  "handoffs": [
+    {
+      "intervention": "int-160453-3412",
+      "kind": "approval",
+      "reason": "Irreversible step needs approval: Post the sub-account opening transaction to obtain the confirmation number.",
+      "decision": "abort",
+      "operator": null,
+      "notes": "",
+      "human_actions": 0,
+      "expired": true
+    }
+  ],
+  "locator_fallbacks": [],
+  "duration_ms": 7750,
+  "evidence_dir": "evidence\\replays\\13-open-account-no-approval-grant-20260926-160452-57e1"
+}
