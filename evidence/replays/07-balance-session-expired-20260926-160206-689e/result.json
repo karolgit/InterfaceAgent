@@ -1,0 +1,24 @@
+{
+  "run_id": "07-balance-session-expired-[CARD_OR_ACCOUNT]689e",
+  "capability": "corelink.member.get_share_savings_balance@1.0.0",
+  "status": "success",
+  "outputs": {
+    "savings_balance": "sha256:df7f4401d04c"
+  },
+  "outcome": null,
+  "failure": null,
+  "recoveries": [
+    {
+      "rule": "session_expired",
+      "code": "SESSION_EXPIRED",
+      "action": "resign_on_and_restart",
+      "attempt": 1,
+      "step": "s1",
+      "ui_text": "SESSION EXPIRED - PLEASE SIGN ON AGAIN"
+    }
+  ],
+  "handoffs": [],
+  "locator_fallbacks": [],
+  "duration_ms": 3078,
+  "evidence_dir": "evidence\\replays\\07-balance-session-expired-[CARD_OR_ACCOUNT]689e"
+}

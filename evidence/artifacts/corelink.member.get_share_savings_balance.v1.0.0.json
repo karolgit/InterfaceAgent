@@ -59,7 +59,7 @@
   "steps": [
     {
       "id": "s1",
-      "intent": "Open the Member Inquiry screen from the Member menu.",
+      "intent": "Open the Member Inquiry screen to look up the member.",
       "action": "click",
       "target": {
         "description": "menu item 'Member Inquiry' in window 'CoreLink 7.4.1 - Heritage Federal Credit Union'",
@@ -93,7 +93,7 @@
     },
     {
       "id": "s2",
-      "intent": "Enter the member number.",
+      "intent": "Enter the member number to search.",
       "action": "set_text",
       "target": {
         "description": "text 'Member #:' in 'Member Inquiry'",
@@ -144,7 +144,7 @@
     },
     {
       "id": "s3",
-      "intent": "Run the inquiry.",
+      "intent": "Run the inquiry to load the member's accounts.",
       "action": "click",
       "target": {
         "description": "push button 'Inquire' in 'Member Inquiry'",
@@ -185,7 +185,7 @@
     },
     {
       "id": "s4",
-      "intent": "Read the Share Savings balance from the accounts table.",
+      "intent": "Capture the Share Savings balance from the matching row.",
       "action": "extract",
       "target": {
         "description": "table 'table' in 'Member Inquiry'",
@@ -240,11 +240,11 @@
   "outcome_rules": [],
   "inherit_outcome_rules": true,
   "provenance": {
-    "discovered_by": "scripted-test",
-    "discovery_run": "discover-20260924-015435-e0bb",
+    "discovered_by": "llm:claude-opus-5",
+    "discovery_run": "discover-20260926-155104-3ef0",
     "goal": "Look up the member given by member_number and read the current balance of their Share Savings account.",
     "tenant": "heritage",
-    "created_at": "2026-09-24T05:54:40+00:00",
+    "created_at": "2026-09-26T19:51:29+00:00",
     "notes": []
   }
 }

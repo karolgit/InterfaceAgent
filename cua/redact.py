@@ -66,6 +66,18 @@ class Redactor:
         return o
 
     # -- observation-level
+    def learn(self, obs: Observation) -> None:
+        """Remember the concrete PII values on screen (e.g. the value next to 'Name:') as run-scoped literals,
+        so they are masked wherever they reappear later: diffs, review screens, dialog text, log lines."""
+        sensitive = self.sensitive_nodes(obs)
+        for n in obs.nodes():
+            if n.ref not in sensitive:
+                continue
+            for t in (n.name, n.value):
+                t = (t or "").strip()
+                if len(t) >= 3 and "[" not in t and self.text(t) == t:  # skip text patterns already mask
+                    self.literals[t] = "[PII]"
+
     def sensitive_nodes(self, obs: Observation) -> set[str]:
         """Refs of nodes whose content is PII: pattern hits, registered literals, or values next to PII labels."""
         refs: set[str] = set()

@@ -1,0 +1,11 @@
+{
+  "intervention": "int-160224-d1e2",
+  "kind": "approval",
+  "reason": "Irreversible step needs approval: Post the sub-account opening transaction to obtain the confirmation number.",
+  "decision": "abort",
+  "operator": null,
+  "notes": "",
+  "human_actions": 0,
+  "expired": true,
+  "events": []
+}

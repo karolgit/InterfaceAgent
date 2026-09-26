@@ -17,7 +17,7 @@ class Resolution:
 
 def rx_escape(s: str) -> str:
     """re.escape, minus escaping of spaces and hyphens, so artifacts stay readable to reviewers."""
-    return re.escape(s).replace(r"\ ", " ").replace(r"\-", "-")
+    return re.escape(s).replace(r"\ ", " ").replace(r"\-", "-").replace(r"\#", "#")
 
 
 def _rx(pattern: str | None, text: str | None) -> bool:

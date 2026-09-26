@@ -221,3 +221,30 @@ def test_gemini_planner_round_trip(tmp_path, monkeypatch):
     assert last_user.parts[0].function_response.response == {"result": "Done."}
     assert planner.usage["input_tokens"] == 200 and calls2[0].name == "click"
     assert "model_thinking_summary" in (tmp_path / "t" / "log.jsonl").read_text()
+
+
+def test_success_checks_split_joined_proof_and_skip_pii():
+    from cua.agent.compile import success_checks
+    lines = {"TRANSACTION POSTED", "CONFIRMATION #: CL-104221-S32", "SSN 900-12-3456"}
+    cps = success_checks("TRANSACTION POSTED    CONFIRMATION #: CL-104221-S32", lines, Redactor())
+    assert [c.pattern for c in cps] == ["TRANSACTION POSTED", r"CONFIRMATION #: CL-\d+-S\d+"]
+    assert success_checks("SSN 900-12-3456", lines, Redactor()) == []
+
+
+def test_redactor_learns_labeled_pii_and_masks_it_elsewhere():
+    r = Redactor(pii_labels=["Name", "SSN"])
+    o = obs_fixture()
+    o.node("w0.1.3.0").name = "Name:"
+    o.node("w0.1.3.1").name = "SAMPLE, JANE Q"
+    r.learn(o)
+    assert r.text("MEMBER LOADED; SAMPLE, JANE Q") == "MEMBER LOADED; [PII]"
+
+
+def test_committed_evidence_contains_no_sample_pii_or_secrets():
+    """Every text file under evidence/ must be free of the mock app's PII, balances, and credentials."""
+    import re as _re
+    bad = _re.compile(r"SAMPLE, JANE|TESTPERSON|DEMO, ALEX|900-\d{2}-\d{4}|\b(12345|23456|34567)\b|"
+                      r"4,210|4210\.55|3,210|15,320|demo123|03/14/1978|sk-ant-")
+    hits = [str(p) for p in (ROOT / "evidence").rglob("*") if p.suffix in {".json", ".jsonl", ".md"}
+            and bad.search(p.read_text(encoding="utf-8", errors="ignore"))]
+    assert not hits, f"sensitive values found in: {hits[:5]}"

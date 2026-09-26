@@ -1,0 +1,15 @@
+{
+  "run_id": "01-balance-happy-path-[CARD_OR_ACCOUNT]447b",
+  "capability": "corelink.member.get_share_savings_balance@1.0.0",
+  "status": "success",
+  "outputs": {
+    "savings_balance": "sha256:df7f4401d04c"
+  },
+  "outcome": null,
+  "failure": null,
+  "recoveries": [],
+  "handoffs": [],
+  "locator_fallbacks": [],
+  "duration_ms": 1468,
+  "evidence_dir": "evidence\\replays\\01-balance-happy-path-[CARD_OR_ACCOUNT]447b"
+}

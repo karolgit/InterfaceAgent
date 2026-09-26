@@ -1,0 +1,21 @@
+{
+  "intervention": "int-160124-ef0b",
+  "kind": "approval",
+  "reason": "Discovery wants to perform an irreversible action: click 'Post Transaction'",
+  "decision": "approve",
+  "operator": "sim-supervisor",
+  "notes": "SIMULATED operator reviewed the Review screen and chose to approve.",
+  "human_actions": 0,
+  "expired": false,
+  "events": [
+    {
+      "from": "paused",
+      "to": "human",
+      "kind": "control_change",
+      "holder": "sim-supervisor",
+      "seq": 7,
+      "ts": 1790452885322,
+      "mode": "human"
+    }
+  ]
+}

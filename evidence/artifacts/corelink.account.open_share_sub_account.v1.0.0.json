@@ -93,7 +93,7 @@
   "steps": [
     {
       "id": "s1",
-      "intent": "Open the Open Sub-Account transaction from the Accounts menu.",
+      "intent": "Open the Open Sub-Account workflow.",
       "action": "click",
       "target": {
         "description": "menu item 'Open Sub-Account' in window 'CoreLink 7.4.1 - Heritage Federal Credit Union'",
@@ -127,7 +127,7 @@
     },
     {
       "id": "s2",
-      "intent": "Enter the member number.",
+      "intent": "Enter the member number to load the member record.",
       "action": "set_text",
       "target": {
         "description": "text 'Member Number' in 'Open Sub-Account  [TRAN 0417]'",
@@ -179,7 +179,7 @@
     },
     {
       "id": "s3",
-      "intent": "Load the member so the funding accounts populate.",
+      "intent": "Load the member record to populate name and share list.",
       "action": "click",
       "target": {
         "description": "push button 'Load' in 'Open Sub-Account  [TRAN 0417]'",
@@ -227,7 +227,7 @@
     },
     {
       "id": "s4",
-      "intent": "Choose the product to open.",
+      "intent": "Set the requested sub-account type.",
       "action": "select",
       "target": {
         "description": "combo box 'Account Type' in 'Open Sub-Account  [TRAN 0417]'",
@@ -279,7 +279,7 @@
     },
     {
       "id": "s5",
-      "intent": "Enter the opening deposit.",
+      "intent": "Enter the opening deposit amount.",
       "action": "set_text",
       "target": {
         "description": "text 'Initial Deposit' in 'Open Sub-Account  [TRAN 0417]'",
@@ -331,7 +331,7 @@
     },
     {
       "id": "s6",
-      "intent": "Choose the funding share.",
+      "intent": "Choose the funding share by suffix.",
       "action": "select",
       "target": {
         "description": "combo box 'Fund From' in 'Open Sub-Account  [TRAN 0417]'",
@@ -383,7 +383,7 @@
     },
     {
       "id": "s7",
-      "intent": "Validate and go to the review screen.",
+      "intent": "Advance to the review/confirmation step before posting.",
       "action": "click",
       "target": {
         "description": "push button 'Review >>' in 'Open Sub-Account  [TRAN 0417]'",
@@ -431,7 +431,7 @@
     },
     {
       "id": "s8",
-      "intent": "Post the transaction (irreversible, needs approval).",
+      "intent": "Post the sub-account opening transaction to obtain the confirmation number.",
       "action": "click",
       "target": {
         "description": "push button 'Post Transaction' in 'Open Sub-Account  [TRAN 0417]'",
@@ -479,7 +479,7 @@
     },
     {
       "id": "s9",
-      "intent": "Confirm the posting.",
+      "intent": "Confirm posting as instructed by the goal.",
       "action": "click",
       "target": {
         "description": "push button 'Yes' in window 'Confirm Posting'",
@@ -519,7 +519,7 @@
     },
     {
       "id": "s10",
-      "intent": "Read the confirmation number.",
+      "intent": "Capture the declared confirmation number output.",
       "action": "extract",
       "target": {
         "description": "label 'CONFIRMATION #: CL-104221-S32' in 'Open Sub-Account  [TRAN 0417]'",
@@ -563,18 +563,23 @@
   "success": [
     {
       "kind": "text_present",
-      "pattern": "TRANSACTION POSTED",
-      "description": "screen shows 'TRANSACTION POSTED'"
+      "pattern": "TRANSACTION POSTED - CONF CL-\\d+-S\\d+",
+      "description": "screen shows 'TRANSACTION POSTED - CONF CL-104221-S32'"
+    },
+    {
+      "kind": "text_present",
+      "pattern": "CONFIRMATION #: CL-\\d+-S\\d+",
+      "description": "screen shows 'CONFIRMATION #: CL-104221-S32'"
     }
   ],
   "outcome_rules": [],
   "inherit_outcome_rules": true,
   "provenance": {
-    "discovered_by": "scripted-test",
-    "discovery_run": "discover-20260924-015658-0149",
+    "discovered_by": "llm:claude-opus-5",
+    "discovery_run": "discover-20260926-160045-ab13",
     "goal": "Open a new sub-account of type account_type for the member given by member_number, with opening deposit initial_deposit funded from the member's share whose suffix is fund_from. Post it and read the confirmation number.",
     "tenant": "heritage",
-    "created_at": "2026-09-24T05:57:11+00:00",
+    "created_at": "2026-09-26T20:01:38+00:00",
     "notes": []
   }
 }

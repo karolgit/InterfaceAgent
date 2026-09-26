@@ -29,4 +29,5 @@ Copy-Item capabilities\*.json evidence\artifacts\ -Force
 if (Test-Path evidence\replays) { Remove-Item evidence\replays -Recurse -Force }
 Write-Host "== Replay scenario matrix"
 & $py scripts\scenarios.py --out evidence\replays
+if ($LASTEXITCODE -ne 0) { throw "scenario matrix had failures; see evidence\replays\summary.md" }
 Write-Host "Done. See evidence\replays\summary.md"

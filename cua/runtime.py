@@ -44,6 +44,10 @@ def app_session(tenant: str = "heritage", attach: bool = False, port: int = 8740
     finally:
         if not keep_open:
             proc.kill()
+            try:
+                proc.wait(timeout=10)  # release the bridge port before the next launch
+            except Exception:
+                pass
 
 
 def make_redactor(profile: AppProfile) -> Redactor:

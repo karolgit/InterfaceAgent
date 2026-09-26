@@ -35,7 +35,7 @@ figcaption { font-size: 8.4pt; color: #4b5566; margin-top: 2pt; }
   <div class="sub">An LLM discovers how to do a task in a legacy banking app once. The run becomes a typed, versioned
   capability that replays deterministically, classifies runtime errors, stays inside safety policy, and hands the
   live session to a human when it must.</div>
-  <div class="meta">Karol Stuart · September 25, 2026<br>Repository: https://github.com/karolgit/InterfaceAgent</div>
+  <div class="meta">Karol Stuart · September 26, 2026<br>Repository: https://github.com/karolgit/InterfaceAgent</div>
   <img src="../architecture.png">
 </section>
 
@@ -54,7 +54,7 @@ be injected at runtime. All data is fake. Four pieces carry the design:</p>
 handling, human handoff on the live session, and evidence for each. Every core requirement in the brief is covered, as
 the matrix below shows. The stretch goals built are the agent-facing capability interface and
 cross-tenant reuse with per-tenant overrides. Unattended replay is also gated on draft or approved status.</p>
-<div class="note"><b>Discovery evidence status:</b> no LLM discovery run is recorded in <code>evidence/discovery/</code> yet. Run <code>scripts\demo.ps1</code> with an API key, then rebuild this report.</div>
+<table><tr><th>Discovery run</th><th>Planner</th><th>Success</th><th>Actions</th><th>Tokens in/out</th></tr><tr><td>discover-[CARD_OR_ACCOUNT]3ef0</td><td>llm:claude-opus-5</td><td>yes</td><td>5</td><td>59332/949</td></tr><tr><td>discover-[CARD_OR_ACCOUNT]ab13</td><td>llm:claude-opus-5</td><td>yes</td><td>10</td><td>163751/1827</td></tr></table>
 <h2>Requirements coverage</h2><table>
 <thead>
 <tr>
@@ -800,7 +800,7 @@ Scenarios 14 and 15 use a clearly labeled simulated operator in place of a perso
   ]
 }</code></pre><h3>One flow step (what replay executes)</h3><pre><code>{
   "id": "s2",
-  "intent": "Enter the member number.",
+  "intent": "Enter the member number to search.",
   "action": "set_text",
   "target": {
     "description": "text 'Member #:' in 'Member Inquiry'",

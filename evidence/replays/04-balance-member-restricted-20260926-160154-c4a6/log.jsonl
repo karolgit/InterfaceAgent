@@ -1,0 +1,32 @@
+{"ts": "2026-09-26T20:01:54.519+00:00", "t_ms": 0, "event": "replay_started", "capability": "corelink.member.get_share_savings_balance@1.0.0", "tenant": "heritage", "params": {"member_number": "[MEMBER_NUMBER]"}, "status": "draft"}
+{"ts": "2026-09-26T20:01:54.574+00:00", "t_ms": 47, "event": "sign_on_started"}
+{"ts": "2026-09-26T20:01:54.574+00:00", "t_ms": 47, "event": "step_started", "step": "so1", "intent": "Enter operator ID", "action": "set_text"}
+{"ts": "2026-09-26T20:01:54.596+00:00", "t_ms": 78, "event": "target_resolved", "step": "so1", "strategy": 0, "kind": "label", "ref": "w1.0.1.0.1"}
+{"ts": "2026-09-26T20:01:54.596+00:00", "t_ms": 78, "event": "policy", "step": "so1", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-26T20:01:54.606+00:00", "t_ms": 78, "event": "acted", "step": "so1", "action": "set_text", "target": "Operator ID field", "value_source": "secret"}
+{"ts": "2026-09-26T20:01:54.992+00:00", "t_ms": 469, "event": "step_started", "step": "so2", "intent": "Enter operator password", "action": "set_text"}
+{"ts": "2026-09-26T20:01:55.002+00:00", "t_ms": 485, "event": "target_resolved", "step": "so2", "strategy": 0, "kind": "label", "ref": "w1.0.1.0.3"}
+{"ts": "2026-09-26T20:01:55.002+00:00", "t_ms": 485, "event": "policy", "step": "so2", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-26T20:01:55.004+00:00", "t_ms": 485, "event": "acted", "step": "so2", "action": "set_text", "target": "Password field", "value_source": "secret"}
+{"ts": "2026-09-26T20:01:55.393+00:00", "t_ms": 875, "event": "step_started", "step": "so3", "intent": "Submit sign-on", "action": "click"}
+{"ts": "2026-09-26T20:01:55.400+00:00", "t_ms": 875, "event": "target_resolved", "step": "so3", "strategy": 0, "kind": "a11y", "ref": "w1.0.1.0.5"}
+{"ts": "2026-09-26T20:01:55.400+00:00", "t_ms": 875, "event": "policy", "step": "so3", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-26T20:01:55.403+00:00", "t_ms": 875, "event": "acted", "step": "so3", "action": "click", "target": "Sign On button", "value_source": null}
+{"ts": "2026-09-26T20:01:55.501+00:00", "t_ms": 985, "event": "checkpoint_met", "step": "so3", "checks": ["status bar confirms sign-on"]}
+{"ts": "2026-09-26T20:01:55.501+00:00", "t_ms": 985, "event": "sign_on_completed"}
+{"ts": "2026-09-26T20:01:55.510+00:00", "t_ms": 985, "event": "step_started", "step": "s1", "intent": "Open the Member Inquiry screen to look up the member.", "action": "click"}
+{"ts": "2026-09-26T20:01:55.517+00:00", "t_ms": 1000, "event": "target_resolved", "step": "s1", "strategy": 0, "kind": "a11y", "ref": "w0.0.1.1.1.0"}
+{"ts": "2026-09-26T20:01:55.517+00:00", "t_ms": 1000, "event": "policy", "step": "s1", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-26T20:01:55.521+00:00", "t_ms": 1000, "event": "acted", "step": "s1", "action": "click", "target": "menu item 'Member Inquiry' in window 'CoreLink 7.4.1 - Heritage Federal Credit Union'", "value_source": null}
+{"ts": "2026-09-26T20:01:55.653+00:00", "t_ms": 1125, "event": "checkpoint_met", "step": "s1", "checks": ["work window 'Member Inquiry' opened"]}
+{"ts": "2026-09-26T20:01:55.661+00:00", "t_ms": 1141, "event": "step_started", "step": "s2", "intent": "Enter the member number to search.", "action": "set_text"}
+{"ts": "2026-09-26T20:01:55.691+00:00", "t_ms": 1172, "event": "target_resolved", "step": "s2", "strategy": 0, "kind": "a11y", "ref": "w0.0.1.0.1.0.0.1.0.0.1"}
+{"ts": "2026-09-26T20:01:55.691+00:00", "t_ms": 1172, "event": "policy", "step": "s2", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-26T20:01:55.696+00:00", "t_ms": 1172, "event": "acted", "step": "s2", "action": "set_text", "target": "text 'Member #:' in 'Member Inquiry'", "value_source": "param"}
+{"ts": "2026-09-26T20:01:55.703+00:00", "t_ms": 1188, "event": "checkpoint_met", "step": "s2", "checks": ["field holds the entered value"]}
+{"ts": "2026-09-26T20:01:55.704+00:00", "t_ms": 1188, "event": "step_started", "step": "s3", "intent": "Run the inquiry to load the member's accounts.", "action": "click"}
+{"ts": "2026-09-26T20:01:55.714+00:00", "t_ms": 1188, "event": "target_resolved", "step": "s3", "strategy": 0, "kind": "a11y", "ref": "w0.0.1.0.1.0.0.1.0.0.2"}
+{"ts": "2026-09-26T20:01:55.714+00:00", "t_ms": 1188, "event": "policy", "step": "s3", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-26T20:01:55.716+00:00", "t_ms": 1188, "event": "acted", "step": "s3", "action": "click", "target": "push button 'Inquire' in 'Member Inquiry'", "value_source": null}
+{"ts": "2026-09-26T20:01:55.823+00:00", "t_ms": 1297, "event": "rule_matched", "rule": "member_restricted", "kind": "business_outcome", "code": "MEMBER_RESTRICTED", "ui_text": "MEMBER RESTRICTED - SUPERVISOR REVIEW REQUIRED", "step": "s3"}
+{"ts": "2026-09-26T20:01:55.982+00:00", "t_ms": 1453, "event": "replay_finished", "status": "business_outcome", "outcome": {"code": "MEMBER_RESTRICTED", "message": "Member is restricted; supervisor review required before servicing.", "ui_text": "MEMBER RESTRICTED - SUPERVISOR REVIEW REQUIRED", "step_id": "s3", "screenshot": "01-outcome-MEMBER_RESTRICTED.png"}, "failure": null, "duration_ms": 1453}

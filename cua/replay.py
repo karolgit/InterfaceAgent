@@ -101,6 +101,9 @@ class ReplayEngine:
         t0 = time.monotonic()
         self.result.capability = f"{cap.id}@{cap.version}"
         self.rules = self.profile.rules_for(self.tenant, cap.outcome_rules, cap.inherit_outcome_rules)
+        for spec in cap.inputs:  # register sensitive inputs BEFORE anything is logged
+            if spec.sensitive and params.get(spec.name) not in (None, ""):
+                self.red.register(str(params[spec.name]), spec.name)
         self.ev.log("replay_started", capability=self.result.capability, tenant=self.tenant,
                     params=params, status=cap.status)
         try:
@@ -401,6 +404,7 @@ class ReplayEngine:
         return None
 
     def _check_rules(self, obs: Observation, step: Step | None) -> str | None:
+        self.red.learn(obs)
         m = self._match_rule(obs)
         if not m:
             return None
@@ -518,6 +522,7 @@ class ReplayEngine:
         self.result.outputs = outputs
 
     def _describe(self, obs: Observation) -> str:
+        self.red.learn(obs)
         top = obs.top_window
         parts = [f"windows={[w.title for w in obs.windows]}", f"open={obs.containers()}"]
         if top and top.modal:

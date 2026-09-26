@@ -29,6 +29,27 @@ def generalize(line: str) -> str:
     return re.sub(r"\d+", lambda _: r"\d+", rx_escape(core))
 
 
+def success_checks(proof_text: str | None, lines: set[str], redactor: Redactor) -> list[Checkpoint]:
+    """Turn the model's quoted proof into checkpoints. The model may join several on-screen labels into one
+    string, so split it on runs of whitespace/newlines and match each fragment to a visible line. Numbers are
+    generalized, and lines that contain PII are never baked in."""
+    out: list[Checkpoint] = []
+    seen: set[str] = set()
+    for frag in re.split(r"\s{2,}|\n", TS.sub("", (proof_text or "").strip())):
+        frag = frag.strip()
+        if len(frag) < 4:
+            continue
+        for l in sorted(lines):
+            if frag in l and redactor.text(l) == l:
+                pat = generalize(l)
+                if pat not in seen:
+                    seen.add(pat)
+                    out.append(Checkpoint(kind="text_present", pattern=pat,
+                                          description=f"screen shows '{TS.sub('', l)}'"))
+                break
+    return out
+
+
 def describe(node: Node) -> str:
     what = node.label or node.name or node.role
     where = f" in '{node.container}'" if node.container else (f" in window '{node.window}'" if node.window else "")
@@ -105,12 +126,7 @@ def compile_capability(task: Task, result: DiscoveryResult, profile: AppProfile,
                           expect=derive_checkpoints(t.obs_before, t.obs_after, t, target, redactor)))
 
     success: list[Checkpoint] = []
-    if result.proof_text:
-        for l in visible_lines(result.final_obs):
-            if result.proof_text.strip() and TS.sub("", result.proof_text.strip()) in l and redactor.text(l) == l:
-                success.append(Checkpoint(kind="text_present", pattern=generalize(l),
-                                          description=f"screen shows '{TS.sub('', l)}'"))
-                break
+    success = success_checks(result.proof_text, visible_lines(result.final_obs), redactor)
     risks = {s.risk for s in steps}
     overall = "irreversible" if "irreversible" in risks else "state_changing" if "risky" in risks else "read_only"
     outcome_desc = {r.code: r.message for r in profile.outcome_rules}

@@ -351,6 +351,7 @@ class DiscoveryAgent:
                     summary = "stopped: timeout"
                     break
                 obs = self.s.settle()
+                self.red.learn(obs)
                 if isinstance(planner, ScriptedPlanner):
                     planner.bind(obs)
                 obs_text = render_observation(obs, self.red)
@@ -440,6 +441,7 @@ class DiscoveryAgent:
                 return self._record(turn, call, node, obs, decision.to_dict(), True,
                                     f"Captured output '{a['output']}' (value hidden by design).", extracted=extracted)
             after = self.s.settle()
+            self.red.learn(after)
             changed = self._diff(obs, after)
             return self._record(turn, call, node, obs, decision.to_dict(), True, f"Done. {changed}", after=after,
                                 value_source=vs)

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import socket
 import subprocess
 import time
 from pathlib import Path
@@ -88,6 +89,25 @@ def java_bin() -> str:
     return "java"
 
 
+def port_free(port: int) -> bool:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        try:
+            sock.bind(("127.0.0.1", port))
+            return True
+        except OSError:
+            return False
+
+
+def wait_port_free(port: int, timeout_s: float = 15.0) -> None:
+    """A just-killed JVM can hold its listening socket for a moment; never start a second app on top of it."""
+    deadline = time.monotonic() + timeout_s
+    while not port_free(port):
+        if time.monotonic() > deadline:
+            raise SurfaceError(f"port {port} is still in use (another CoreLink/bridge running?). "
+                               "Close CoreLink windows or kill java.exe, then retry.")
+        time.sleep(0.25)
+
+
 def launch_corelink(tenant: str = "heritage", port: int = 8740, faults_file: Path | None = None,
                     idle_timeout_s: int = 900, log_file: Path | None = None) -> tuple[subprocess.Popen, SwingSurface]:
     """Start the CoreLink mock with the bridge attached and wait until the bridge answers."""
@@ -99,6 +119,8 @@ def launch_corelink(tenant: str = "heritage", port: int = 8740, faults_file: Pat
     cmd = [java_bin(), f"-javaagent:{jar}=port={port}", f"-Dcorelink.faults={faults}",
            f"-Dcorelink.idleTimeoutSec={idle_timeout_s}", "-cp", str(classes), "com.corelink.Main",
            f"--tenant={tenant}"]
+    wait_port_free(port)
+    log_start = Path(log_file).stat().st_size if log_file and Path(log_file).exists() else 0
     out = open(log_file, "ab") if log_file else subprocess.DEVNULL
     proc = subprocess.Popen(cmd, stdout=out, stderr=out, cwd=str(ROOT))
     surface = SwingSurface(port)
@@ -106,6 +128,9 @@ def launch_corelink(tenant: str = "heritage", port: int = 8740, faults_file: Pat
     while time.monotonic() < deadline:
         if proc.poll() is not None:
             raise SurfaceError("CoreLink exited during startup")
+        if log_file and "BindException" in Path(log_file).read_bytes()[log_start:].decode(errors="ignore"):
+            proc.kill()
+            raise SurfaceError(f"bridge could not bind port {port}: another instance is running")
         if surface.healthy():
             try:
                 if surface.observe().windows:
