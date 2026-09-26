@@ -168,7 +168,7 @@ be injected at runtime. All data is fake. Four pieces carry the design:
 
 - **A surface driver.** A Java agent reads the unmodified app's accessibility tree, acts through accessibility
   actions, and owns the human-handoff control lock.
-- **A discovery agent.** Claude Opus 5 acts on element references and never sees raw PII.
+- **A discovery agent.** A pluggable LLM planner (Claude or Gemini) acts on element references and never sees raw PII.
 - **A capability artifact.** It has a contract part for calling agents and a flow part for replay.
 - **A replay engine.** It sorts every run into a business outcome, a recovered condition, or a hard failure.
 

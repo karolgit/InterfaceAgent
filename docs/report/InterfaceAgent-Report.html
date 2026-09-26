@@ -35,7 +35,7 @@ figcaption { font-size: 8.4pt; color: #4b5566; margin-top: 2pt; }
   <div class="sub">An LLM discovers how to do a task in a legacy banking app once. The run becomes a typed, versioned
   capability that replays deterministically, classifies runtime errors, stays inside safety policy, and hands the
   live session to a human when it must.</div>
-  <div class="meta">Karol Stuart · September 24, 2026<br>Repository: https://github.com/karolgit/InterfaceAgent</div>
+  <div class="meta">Karol Stuart · September 25, 2026<br>Repository: https://github.com/karolgit/InterfaceAgent</div>
   <img src="../architecture.png">
 </section>
 
@@ -46,7 +46,7 @@ be injected at runtime. All data is fake. Four pieces carry the design:</p>
 <ul>
 <li><strong>A surface driver.</strong> A Java agent reads the unmodified app's accessibility tree, acts through accessibility
   actions, and owns the human-handoff control lock.</li>
-<li><strong>A discovery agent.</strong> Claude Opus 5 acts on element references and never sees raw PII.</li>
+<li><strong>A discovery agent.</strong> A pluggable LLM planner (Claude or Gemini) acts on element references and never sees raw PII.</li>
 <li><strong>A capability artifact.</strong> It has a contract part for calling agents and a flow part for replay.</li>
 <li><strong>A replay engine.</strong> It sorts every run into a business outcome, a recovered condition, or a hard failure.</li>
 </ul>
@@ -343,9 +343,11 @@ demand. Faults are injected through a properties file that the app re-reads on e
 - <strong>The model points, the harness records.</strong> The model acts only on element refs from the current
   outline. The compiler turns each targeted element into ranked locators computed from the live tree. The
   model never writes selectors, which keeps its hallucinations out of the artifact.
-- <strong>Model:</strong> Claude Opus 5 through the official SDK, with adaptive thinking and summarized reasoning logged
-  as evidence. It uses a manual tool loop with an append-only history and one action per turn.
-  Discovery is rare and correctness matters more than cost there. Replay never calls a model.
+- <strong>Model is pluggable.</strong> The planner interface has two real implementations. The default is Claude Opus 5,
+  through the official SDK, with adaptive thinking. The other is Gemini, through google-genai. Both get the
+  same redacted inputs and tool schema, both use a manual loop with one action per turn, and both log their
+  reasoning summaries as evidence. Discovery is rare, so I favour the strongest model over cost there.
+  Replay never calls a model. The planner used for each run is recorded in the artifact's provenance.
 - <strong>One process, file-based intervention queue.</strong> A desktop session is single-threaded by nature. The
   gateway serializes invocations with a lock. Queues and workers are deliberately not built; see Cuts.</p>
 <h2>2. Artifact schema</h2>
