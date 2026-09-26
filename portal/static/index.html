@@ -4,87 +4,227 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Member Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#eef1f5;--card:#fff;--ink:#17202e;--muted:#5b6474;--line:#d7dce4;--brand:#1f3a68;--brand-ink:#fff;
---me:#1f3a68;--me-ink:#fff;--bot:#f3f5f8;--warn:#9a5b00;--ok:#0b6b2e}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#11151b;--card:#1a1f27;--ink:#e7e9ee;--muted:#9aa2b1;
---line:#2b323d;--brand:#8fb0ea;--brand-ink:#0d1320;--me:#2f5596;--me-ink:#fff;--bot:#232a34}}
+:root{
+  --blue-900:#020b3a; --blue-800:#061a6e; --blue-700:#0a2bb8; --blue-600:#1740e6; --blue-500:#2e5bff;
+  --yellow:#ffc933; --yellow-ink:#1b1400;
+  --ink:#101828; --muted:#5b6474; --line:#e3e7ef; --card:#ffffff; --soft:#f3f6fc;
+  --me:#1740e6; --bot:#f1f4fa; --warn:#b26a00;
+}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
-header{background:var(--brand);color:var(--brand-ink);padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-header h1{font-size:17px;margin:0;font-weight:650}
-.tag{font-size:12px;padding:2px 8px;border-radius:99px;background:rgba(255,255,255,.18)}
-.wrap{max-width:760px;margin:0 auto;padding:16px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
-.banner{background:#fff4e0;color:#6b4200;border:1px solid #f0d49a;border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:13px}
-@media (prefers-color-scheme: dark){.banner{background:#3a2c10;color:#f3d9a4;border-color:#5a4520}}
-.members{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:12px}
-button{font:inherit;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:9px 14px;cursor:pointer}
-button.primary{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
-button:disabled{opacity:.5;cursor:default}
-#log{height:min(58vh,520px);overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:4px}
-.msg{max-width:82%;padding:10px 13px;border-radius:14px;white-space:pre-wrap}
-.me{align-self:flex-end;background:var(--me);color:var(--me-ink);border-bottom-right-radius:4px}
-.bot{align-self:flex-start;background:var(--bot);border-bottom-left-radius:4px}
+html,body{margin:0}
+body{font:15px/1.5 Manrope,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:#f6f8fc}
+
+/* ---------- hero ---------- */
+.hero{position:relative;overflow:hidden;color:#fff;padding:0 16px 150px;
+  background:
+    radial-gradient(1200px 500px at 15% 90%, rgba(46,91,255,.55), transparent 60%),
+    radial-gradient(900px 600px at 85% 20%, rgba(23,64,230,.45), transparent 60%),
+    linear-gradient(160deg, var(--blue-700) 0%, var(--blue-800) 55%, var(--blue-900) 100%);}
+.hero::before,.hero::after{content:"";position:absolute;border-radius:50%;pointer-events:none;
+  border:38px solid rgba(64,110,255,.28);filter:blur(2px)}
+.hero::before{width:900px;height:900px;left:-420px;top:120px}
+.hero::after{width:1100px;height:1100px;right:-560px;top:-260px;border-color:rgba(64,110,255,.18)}
+
+nav.top{position:relative;z-index:2;max-width:1160px;margin:0 auto;background:#fff;color:var(--ink);
+  border-radius:0 0 14px 14px;padding:12px 18px;display:flex;align-items:center;gap:22px;flex-wrap:wrap;
+  box-shadow:0 10px 30px rgba(2,11,58,.25)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;color:var(--blue-700);text-decoration:none}
+.brand .mark{width:30px;height:30px;border-radius:50%;background:conic-gradient(var(--blue-600) 0 75%, var(--yellow) 0);
+  box-shadow:inset 0 0 0 7px #fff, 0 0 0 2px var(--blue-600)}
+.brand small{display:block;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.2px}
+nav.top .links{display:flex;gap:20px;margin-left:auto;flex-wrap:wrap}
+nav.top .links a{color:#344054;text-decoration:none;font-weight:600;font-size:14px}
+nav.top .links a:hover{color:var(--blue-600)}
+.pill{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;font-weight:700;
+  padding:11px 20px;border:1px solid transparent;cursor:pointer;font:inherit;font-weight:700;text-decoration:none}
+.pill.primary{background:var(--blue-600);color:#fff}
+.pill.primary:hover{background:var(--blue-700)}
+.pill.white{background:#fff;color:var(--blue-700)}
+.pill.ghost{background:transparent;color:#fff;border-color:rgba(255,255,255,.45)}
+.pill.ghost:hover{background:rgba(255,255,255,.08)}
+
+.hero-inner{position:relative;z-index:1;max-width:1160px;margin:0 auto;text-align:center;padding-top:72px}
+.eyebrow{letter-spacing:1.5px;text-transform:uppercase;font-weight:700;font-size:13px;color:#cfdaff}
+.hero h1{font-size:clamp(34px,6vw,64px);line-height:1.08;margin:14px 0 16px;font-weight:800;letter-spacing:-.5px}
+.hero h1 em{font-style:normal;color:var(--yellow)}
+.hero p.lead{max-width:680px;margin:0 auto;color:#e5ebff;font-size:17px}
+.cta{display:flex;gap:14px;justify-content:center;margin-top:28px;flex-wrap:wrap}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:1160px;margin:54px auto 0;
+  border-top:1px solid rgba(255,255,255,.18);padding-top:28px}
+.stats b{display:block;font-size:26px;font-weight:800}
+.stats span{font-size:13px;color:#cfdaff}
+@media (max-width:760px){.stats{grid-template-columns:repeat(2,1fr)} nav.top .links{display:none}}
+
+/* ---------- main card ---------- */
+main{position:relative;z-index:3;max-width:880px;margin:-110px auto 48px;padding:0 16px}
+.card{background:var(--card);border-radius:18px;border:1px solid #dfe5f3;box-shadow:0 24px 60px rgba(2,11,58,.18);padding:22px}
+.notice{display:flex;gap:10px;align-items:center;background:#fff7dc;border:1px solid #ffe08a;color:#6b4d00;
+  border-radius:12px;padding:8px 12px;font-size:13px;margin-bottom:14px}
+.notice .dot{background:var(--yellow);color:var(--yellow-ink);border-radius:999px;padding:2px 9px;font-weight:800;font-size:12px}
+.tabs{display:inline-flex;background:var(--soft);border-radius:999px;padding:4px;gap:4px}
+.tabs button{border:0;background:transparent;border-radius:999px;padding:8px 16px;font:inherit;font-weight:700;color:var(--muted);cursor:pointer}
+.tabs button.on{background:#fff;color:var(--blue-700);box-shadow:0 2px 8px rgba(2,11,58,.12)}
+h2{font-size:20px;margin:14px 0 4px}
+.hint{color:var(--muted);font-size:13px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font:inherit;font-size:14px;
+  font-weight:600;cursor:pointer;color:#344054}
+.chip:hover{border-color:var(--blue-500);color:var(--blue-700)}
+.row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+input[type=text]{flex:1;min-width:0;font:inherit;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--ink)}
+input[type=text]:focus{outline:2px solid var(--blue-500);outline-offset:1px}
+.err{color:#b42318;font-size:13px;min-height:18px;margin-top:6px}
+
+.chat-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.tag{font-size:12px;font-weight:700;border-radius:999px;padding:4px 10px;background:var(--soft);color:var(--blue-700)}
+.tag.staff{background:#fff1c2;color:#6b4d00}
+.chat-head .spacer{flex:1}
+.linkbtn{background:none;border:0;color:var(--muted);font:inherit;font-size:13px;cursor:pointer;text-decoration:underline}
+#log{height:min(52vh,460px);overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:6px 2px}
+.msg{max-width:82%;padding:11px 14px;border-radius:16px;white-space:pre-wrap}
+.me{align-self:flex-end;background:var(--me);color:#fff;border-bottom-right-radius:5px}
+.bot{align-self:flex-start;background:var(--bot);border-bottom-left-radius:5px}
 .sys{align-self:center;color:var(--muted);font-size:13px}
-.confirm{align-self:flex-start;border:1px solid var(--warn);border-radius:12px;padding:12px;background:var(--card);max-width:90%}
-.confirm .row{display:flex;gap:8px;margin-top:10px}
-form{display:flex;gap:8px;margin-top:12px}
-input[type=text]{flex:1;min-width:0;font:inherit;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
-#mic.on{background:#b00020;color:#fff;border-color:#b00020}
-.hint{color:var(--muted);font-size:13px;margin-top:8px}
-.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-.chips button{padding:5px 10px;font-size:13px}
+.confirm{align-self:flex-start;border:1px solid #f2c14e;border-radius:14px;padding:14px;background:#fffdf4;max-width:90%}
+.confirm .row{margin-top:10px}
+form.composer{display:flex;gap:8px;margin-top:12px}
+#mic{border-radius:999px;border:1px solid var(--line);background:#fff;font:inherit;font-weight:700;padding:0 16px;cursor:pointer}
+#mic.on{background:#d92d20;color:#fff;border-color:#d92d20}
+button:disabled{opacity:.5;cursor:default}
+footer{text-align:center;color:var(--muted);font-size:13px;padding:0 16px 36px}
 </style>
 </head>
 <body>
-<header><h1>Heritage Federal CU &middot; Member Assistant</h1><span class="tag" id="mode">...</span>
-<span class="tag" id="who" hidden></span></header>
-<div class="wrap">
-  <div class="banner" id="draft" hidden>Demo mode: serving DRAFT capabilities. Production serves only human-approved ones.</div>
-
-  <section class="card" id="signin">
-    <b>Sign in</b>
-    <div class="hint">Mock sign-in. Pick a demo member. All data is fake.</div>
-    <div class="members" id="members"></div>
-  </section>
-
-  <section class="card" id="chat" hidden>
-    <div id="log" aria-live="polite"></div>
-    <div class="chips">
-      <button data-say="What's my savings balance?">Savings balance</button>
-      <button data-say="What's my checking balance?">Checking balance</button>
-      <button data-say="Open a share certificate with $1,000 from my savings.">Open a $1,000 certificate</button>
-      <button data-say="Open a Christmas club with $50 from savings.">Christmas club $50</button>
+<section class="hero">
+  <nav class="top">
+    <a class="brand" href="#"><span class="mark" aria-hidden="true"></span>
+      <span>Heritage Federal CU<small>powered by InterfaceAgent</small></span></a>
+    <div class="links">
+      <a href="#assistant">Assistant</a>
+      <a href="http://127.0.0.1:8765" target="_blank" rel="noopener">Operator console</a>
+      <a href="https://github.com/karolgit/InterfaceAgent" target="_blank" rel="noopener">GitHub</a>
     </div>
-    <form id="f"><input type="text" id="t" placeholder="Type or press the mic and speak" autocomplete="off">
-      <button type="button" id="mic" title="Speak">Mic</button>
-      <button class="primary" id="send">Send</button></form>
-    <div class="hint"><label><input type="checkbox" id="speak" checked> Read replies aloud</label>
-      &middot; Each request runs a recorded, verified automation on the credit union's legacy core system.</div>
-  </section>
-</div>
+    <a class="pill primary" href="#assistant">Try it</a>
+  </nav>
+  <div class="hero-inner">
+    <div class="eyebrow">Member services · Heritage Federal Credit Union</div>
+    <h1>Legacy systems.<br><em>Instant answers.</em></h1>
+    <p class="lead">Ask by chat or voice. InterfaceAgent runs verified automations on the credit union's
+      existing core system, the same way every time, in seconds, day or night.</p>
+    <div class="cta">
+      <a class="pill white" href="#assistant">Ask the assistant</a>
+      <a class="pill ghost" href="http://127.0.0.1:8765" target="_blank" rel="noopener">Open operator console</a>
+    </div>
+    <div class="stats">
+      <div><b>~1.5 s</b><span>per automated request</span></div>
+      <div><b>$0</b><span>AI cost per replay</span></div>
+      <div><b>17 / 17</b><span>verified replay scenarios</span></div>
+      <div><b>24/7</b><span>member self-service</span></div>
+    </div>
+  </div>
+</section>
+
+<main id="assistant">
+  <div class="card">
+    <div class="notice" id="draft" hidden><span class="dot">Demo</span>
+      <span>Serving draft capabilities. Production serves only human-approved ones. All data is fictional.</span></div>
+
+    <!-- sign in -->
+    <section id="signin">
+      <div class="tabs" role="tablist">
+        <button class="on" id="tab-member" role="tab">Member</button>
+        <button id="tab-staff" role="tab">Staff</button>
+      </div>
+
+      <div id="pane-member">
+        <h2>Sign in as a member</h2>
+        <div class="hint">Mock sign-in for the demo. The assistant only ever acts on the signed-in member's accounts.</div>
+        <div class="chips" id="members"></div>
+        <div class="row">
+          <input type="text" id="mid" inputmode="numeric" maxlength="5" placeholder="Or enter a 5-digit member ID">
+          <button class="pill primary" id="mid-go">Continue</button>
+        </div>
+        <div class="err" id="mid-err"></div>
+      </div>
+
+      <div id="pane-staff" hidden>
+        <h2>Sign in as staff</h2>
+        <div class="hint">For contact-center employees. Staff can serve any member: just include the member number in
+          your question, like "checking balance for 12345".</div>
+        <div class="chips" id="staff"></div>
+      </div>
+    </section>
+
+    <!-- chat -->
+    <section id="chat" hidden>
+      <div class="chat-head">
+        <span class="tag" id="who"></span>
+        <span class="tag" id="mode">...</span>
+        <span class="spacer"></span>
+        <button class="linkbtn" id="signout">Sign out</button>
+      </div>
+      <div id="log" aria-live="polite"></div>
+      <div class="chips" id="suggest"></div>
+      <form class="composer" id="f">
+        <input type="text" id="t" placeholder="Type, or press Mic and speak" autocomplete="off">
+        <button type="button" id="mic" title="Speak">Mic</button>
+        <button class="pill primary" id="send">Send</button>
+      </form>
+      <div class="hint" style="margin-top:8px"><label><input type="checkbox" id="speak" checked> Read replies aloud</label>
+        · Each request runs a recorded, verified automation on the legacy core system.</div>
+    </section>
+  </div>
+</main>
+<footer>Fictional credit union and data · InterfaceAgent demo</footer>
+
 <script>
-let session=null;
+let session=null, role='member', modeText='';
 const $=id=>document.getElementById(id);
+const MEMBER_SUGGEST=["What's my savings balance?","What's my checking balance?","Open a Christmas club with $50 from savings."];
+const STAFF_SUGGEST=["Checking balance for 12345","Savings balance for 23456","Money market balance for 12345","Savings balance for 99999"];
+
 function add(cls,text){const d=document.createElement('div');d.className='msg '+cls;d.textContent=text;$('log').appendChild(d);$('log').scrollTop=1e9;return d}
 function say(text){if(!$('speak').checked||!('speechSynthesis' in window))return;speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(text);u.rate=1.03;speechSynthesis.speak(u)}
 async function post(url,body){const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-  if(!r.ok)throw new Error(await r.text());return r.json()}
+  if(!r.ok){let m=await r.text();try{m=JSON.parse(m).detail||m}catch(e){}throw new Error(m)}return r.json()}
+function chip(label,fn){const b=document.createElement('button');b.className='chip';b.type='button';b.textContent=label;b.onclick=fn;return b}
+
+function showTab(which){
+  $('tab-member').classList.toggle('on',which==='member');$('tab-staff').classList.toggle('on',which==='staff');
+  $('pane-member').hidden=which!=='member';$('pane-staff').hidden=which!=='staff'}
+$('tab-member').onclick=()=>showTab('member');$('tab-staff').onclick=()=>showTab('staff');
 
 (async()=>{const i=await (await fetch('/api/info')).json();
-  $('mode').textContent=i.mode==='llm'?('AI: '+i.model):'Offline mode (no API key)';
+  modeText=i.mode==='llm'?('AI · '+i.model):'Offline mode · no AI cost';
   $('draft').hidden=!i.draft_mode;
-  for(const [num,name] of Object.entries(i.members)){const b=document.createElement('button');
-    b.textContent=name;b.onclick=()=>signin(num);$('members').appendChild(b)}
-  // Demo deep link: /?member=12345&ask=What%27s%20my%20balance
-  const q=new URLSearchParams(location.search);
-  if(q.get('member')){await signin(q.get('member'));if(q.get('ask'))send(q.get('ask'))}})();
+  for(const [num,name] of Object.entries(i.members)) $('members').appendChild(chip(name,()=>signin({role:'member',member_number:num})));
+  for(const [id,name] of Object.entries(i.staff||{})) $('staff').appendChild(chip(name,()=>signin({role:'staff',staff_id:id})));
+  const q=new URLSearchParams(location.search);   // demo deep links: ?member=12345&ask=...  or  ?staff=sarah&ask=...
+  if(q.get('member'))await signin({role:'member',member_number:q.get('member')});
+  else if(q.get('staff'))await signin({role:'staff',staff_id:q.get('staff')});
+  if(session&&q.get('ask'))send(q.get('ask'))})();
 
-async function signin(num){const r=await post('/api/login',{member_number:num});session=r.session;
-  $('signin').hidden=true;$('chat').hidden=false;$('who').hidden=false;$('who').textContent='Signed in: '+r.name;
-  const hi=`Hi ${r.name.split(' ')[0]}. I can check your balance or open a new account. How can I help?`;add('bot',hi);say(hi)}
+$('mid-go').onclick=()=>signin({role:'member',member_number:$('mid').value.trim()});
+$('mid').addEventListener('keydown',e=>{if(e.key==='Enter')$('mid-go').click()});
+
+async function signin(body){$('mid-err').textContent='';
+  try{const r=await post('/api/login',body);session=r.session;role=r.role;
+    $('signin').hidden=true;$('chat').hidden=false;$('log').innerHTML='';
+    $('who').textContent=(role==='staff'?'Staff: ':'Member: ')+r.name;$('who').className='tag'+(role==='staff'?' staff':'');
+    $('mode').textContent=modeText;
+    $('suggest').innerHTML='';for(const s of (role==='staff'?STAFF_SUGGEST:MEMBER_SUGGEST))$('suggest').appendChild(chip(s,()=>send(s)));
+    const hi=role==='staff'
+      ?`Hi ${r.name.split(' ')[0]}. Which member can I help with? Include the member number, for example "checking balance for 12345".`
+      :`Hi ${r.name.split(' ')[0]}. I can check your balances or open a new account. How can I help?`;
+    add('bot',hi);say(hi);$('t').focus({preventScroll:true});
+    if(!new URLSearchParams(location.search).has('ask'))$('assistant').scrollIntoView({behavior:'smooth',block:'start'})}
+  catch(e){$('mid-err').textContent=e.message}}
+
+$('signout').onclick=()=>{session=null;$('chat').hidden=true;$('signin').hidden=false;speechSynthesis.cancel()};
 
 async function send(text){if(!text.trim())return;add('me',text);$('t').value='';$('send').disabled=true;
   const w=add('sys','Working on the core system...');
@@ -96,7 +236,7 @@ function confirmCard(p){const d=document.createElement('div');d.className='confi
   const details=Object.entries(p.details||{}).map(([k,v])=>`${k.replace(/_/g,' ')}: ${v}`).join('\n');
   d.innerHTML=`<b>Please confirm</b><div style="white-space:pre-wrap;margin-top:6px"></div>
   <div class="hint">This posts a real transaction and cannot be undone.</div>
-  <div class="row"><button class="primary">Confirm</button><button>Cancel</button></div>`;
+  <div class="row"><button class="pill primary">Confirm</button><button class="chip">Cancel</button></div>`;
   d.querySelector('div').textContent=(p.capability||'')+'\n'+details;
   const [ok,no]=d.querySelectorAll('button');
   const go=async accept=>{ok.disabled=no.disabled=true;const w=add('sys',accept?'Posting on the core system...':'Cancelling...');
@@ -105,7 +245,6 @@ function confirmCard(p){const d=document.createElement('div');d.className='confi
   ok.onclick=()=>go(true);no.onclick=()=>go(false);$('log').appendChild(d);$('log').scrollTop=1e9}
 
 $('f').onsubmit=e=>{e.preventDefault();send($('t').value)};
-document.querySelectorAll('[data-say]').forEach(b=>b.onclick=()=>send(b.dataset.say));
 
 // Voice input: browser speech recognition (Chrome/Edge). Falls back to typing.
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;

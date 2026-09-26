@@ -73,6 +73,8 @@ SHOTS = [
     ("11-operator-console.png", "Operator console: the queue, context, redacted snapshot, and live session."),
     ("12-member-assistant.png", "Member assistant answering from a deterministic replay."),
     ("13-member-confirmation.png", "The member must confirm an irreversible action. The model cannot."),
+    ("14-staff-assistant.png", "Staff mode: the employee names the member; follow-ups reuse it."),
+    ("15-portal-landing.png", "Member Assistant landing page with member and staff sign-in."),
 ]
 
 CSS = """

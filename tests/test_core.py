@@ -285,3 +285,15 @@ def test_optional_input_default_is_applied(tmp_path):
     params = {"member_number": "12345"}
     eng._validate(cap, params, allow_draft=True)
     assert params["share_type"] == "Share Savings"
+
+
+def test_portal_binds_member_but_lets_staff_choose():
+    import portal.app as pa
+    member = {"role": "member", "member_number": "12345"}
+    staff = {"role": "staff", "staff_id": "sarah", "last_member": None}
+    assert pa._bound(member) == {"member_number": "12345"}       # member can never choose another account
+    assert pa._bound(staff) == {}                                 # staff pick the member per request
+    assert pa._staff_member(staff, "what's the balance?") is None  # no number yet -> assistant must ask
+    assert pa._staff_member(staff, "checking balance for 23456") == "23456"
+    assert pa._staff_member(staff, "and savings?") == "23456"      # follow-ups reuse the last member
+    assert pa._requester(staff) == "staff:sarah" and pa._requester(member) == "member:12345"

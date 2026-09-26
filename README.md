@@ -192,10 +192,20 @@ attached to the run's evidence. The CLI works too: `python -m cua operator list|
 .venv\Scripts\python.exe -m portal.app --allow-draft --offline   # free: no LLM calls
 ```
 
-Sign in as a demo member. Ask "What's my savings balance?" or "Open a share certificate with $1,000 from
-my savings." With an API key set, the LLM assistant chooses capabilities as tools. Without a key, a small
-offline intent router drives the same gateway. The member number comes from the signed-in session and is
-never a tool parameter. Irreversible actions wait for the member to press **Confirm**.
+The page has two sign-in modes. Both use a mock login.
+
+| Mode | Who | How the member is chosen | Try asking |
+|---|---|---|---|
+| **Member** | A member, picked from the list or by typing a 5-digit member ID | Bound to the login. The model never sees it as a parameter, so it can't act on anyone else's account. | "What's my checking balance?", "Open a Christmas club with $50 from savings." |
+| **Staff** | Contact-center staff, such as "Sarah" | Named in each request. If it's missing, the assistant asks, and it remembers the last member for follow-ups. | "Checking balance for 12345", "and the savings balance?", "Savings balance for 99999" |
+
+With an API key set, the LLM assistant chooses capabilities as tools. With `--offline`, or with no key, a
+small keyword router drives the same gateway. Irreversible actions wait for the person to press
+**Confirm**. Requests are logged as `member:<id>` or `staff:<id>`.
+
+Useful demo links (the page signs in and asks the question for you):
+`http://127.0.0.1:8800/?member=12345&ask=What's my checking balance?` and
+`http://127.0.0.1:8800/?staff=sarah&ask=Checking balance for 12345`.
 
 ## Running without live services
 
@@ -245,6 +255,7 @@ tokens and $25 per million output tokens:
 | ![Confirm](docs/screenshots/06-confirm-posting-dialog.png) **Irreversible.** Policy requires an approval grant or a human. | ![Posted](docs/screenshots/07-transaction-posted.png) **Output.** The confirmation number is extracted with a capture pattern. |
 | ![Override](docs/screenshots/08-supervisor-override.png) **Escalation.** The supervisor override goes to a human. | ![Tenant](docs/screenshots/09-second-tenant-lakeshore.png) **Second tenant.** The same capability replays through label and name overrides. |
 | ![Redacted](docs/screenshots/10-redacted-evidence.png) **Evidence** is redacted from accessibility bounds. | ![Confirm in chat](docs/screenshots/13-member-confirmation.png) **The member confirms** an irreversible action. |
+| ![Staff mode](docs/screenshots/14-staff-assistant.png) **Staff mode.** Sarah names the member in her request. | ![Portal landing](docs/screenshots/15-portal-landing.png) **Member Assistant** landing page, with member or staff sign-in. |
 
 ## Repository layout
 
