@@ -9,3 +9,4 @@ __pycache__/
 *.pyc
 .pytest_cache/
 bridge/cua-bridge.jar
+docs/VIDEO_*.md
