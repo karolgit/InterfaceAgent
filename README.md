@@ -91,7 +91,8 @@ offline mode need none.
 | `CUA_PLANNER` | Forces `claude` or `gemini` when both keys are set |
 | `CORELINK_OPERATOR_ID` / `_PASSWORD` | The fake demo operator the bot signs on as. Defaults are `teller01` / `demo123`. |
 | `CUA_PORT` | Bridge port, default 8740. Change it to run tests while you have the app open by hand. |
-| `PORTAL_MODEL` | Model for the member assistant's AI mode. It defaults to `CUA_MODEL`. `claude-sonnet-5` is cheaper. |
+| `PORTAL_MODEL` | Model for the member assistant's AI mode. It defaults to `claude-sonnet-5`, which is cheaper than the discovery model. |
+| `PORTAL_OFFLINE` | Set to `true`, or pass `--offline`, to run the member assistant with no LLM calls, even when a key is set |
 | `CUA_DEMO_DELAY_MS` | Slows replays down for screen recording only |
 
 The CoreLink credentials are fake demo values built into the mock app. Only secret names appear in
@@ -187,7 +188,8 @@ attached to the run's evidence. The CLI works too: `python -m cua operator list|
 **7. Try the member assistant.** It works as chat, or as voice in Chrome or Edge.
 
 ```powershell
-.venv\Scripts\python.exe -m portal.app --allow-draft     # http://127.0.0.1:8800
+.venv\Scripts\python.exe -m portal.app --allow-draft             # AI mode (claude-sonnet-5), http://127.0.0.1:8800
+.venv\Scripts\python.exe -m portal.app --allow-draft --offline   # free: no LLM calls
 ```
 
 Sign in as a demo member. Ask "What's my savings balance?" or "Open a share certificate with $1,000 from
@@ -213,8 +215,8 @@ LLM spend happens only where a model is called. Everything on the production pat
 |---|---|---|
 | Discovery (`cua discover`, or `demo.ps1` without flags) | Yes, once per capability | About $0.30 to $0.90 per run with `claude-opus-5` |
 | Replay, the scenario matrix, unit tests, operator console, handoff | None | $0 |
-| Member assistant with an API key set | The chat model only. The replay behind it is free. | About $0.02 to $0.05 per question |
-| Member assistant with no key (offline mode) | None | $0 |
+| Member assistant, AI mode (a key is set; default model `claude-sonnet-5`) | The chat model only. The replay behind it is free. | About 1 to 2 cents per question |
+| Member assistant, offline mode (`--offline`, or no key) | None | $0 |
 
 These are the measured discovery runs in [evidence/discovery/](evidence/discovery/), at $5 per million input
 tokens and $25 per million output tokens:
@@ -228,7 +230,7 @@ tokens and $25 per million output tokens:
   conversation plus a redacted screenshot.
 - **Paying less.**
   - Set `CUA_MODEL=claude-sonnet-5` for discovery, or use the Gemini planner, which has a free tier.
-  - Set `PORTAL_MODEL=claude-sonnet-5` for the member assistant.
+  - Test the member assistant UI for free with `python -m portal.app --allow-draft --offline`.
   - Run `.\scripts\demo.ps1 -SkipDiscovery` to regenerate replay evidence without re-running discovery.
 - **Why this is the business case.** A capability is discovered once. Every later request, whether from an
   operator, a member, or an AI agent, is a deterministic replay with zero model cost and about 1.5 seconds

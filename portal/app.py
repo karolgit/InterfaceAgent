@@ -31,7 +31,10 @@ sys.path.insert(0, str(ROOT))
 
 from cua.gateway import CapabilityGateway, tool_name  # noqa: E402
 
-MODEL = os.environ.get("PORTAL_MODEL", os.environ.get("CUA_MODEL", "claude-opus-5"))
+# The chat assistant only routes requests to capabilities, so a cheaper model is enough here.
+# Discovery (CUA_MODEL) stays on the strongest model.
+MODEL = os.environ.get("PORTAL_MODEL", "claude-sonnet-5")
+OFFLINE = os.environ.get("PORTAL_OFFLINE", "").lower() in ("1", "true", "yes")
 DEMO_MEMBERS = {"12345": "Jane Sample", "23456": "Robert Testperson", "34567": "Alex Demo", "99999": "Unknown Member"}
 
 SYSTEM = """You are the virtual assistant of Heritage Federal Credit Union, helping a signed-in member with \
@@ -51,6 +54,9 @@ SESSIONS: dict[str, dict[str, Any]] = {}
 
 
 def llm_available() -> bool:
+    """AI mode needs a key and must not be switched off. Offline mode costs nothing."""
+    if OFFLINE:
+        return False
     return bool(os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN"))
 
 
@@ -231,9 +237,13 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--port", type=int, default=8800)
     ap.add_argument("--tenant", default="heritage")
+    ap.add_argument("--offline", action="store_true",
+                    help="no LLM calls (free): a keyword router picks capabilities, even if an API key is set")
     ap.add_argument("--allow-draft", action="store_true",
                     help="serve DRAFT capabilities (supervised demo only; production requires approved)")
     a = ap.parse_args()
+    global OFFLINE
+    OFFLINE = OFFLINE or a.offline
     gateway = CapabilityGateway(tenant=a.tenant, allow_draft=a.allow_draft)
     print(f"Member Assistant on http://127.0.0.1:{a.port}  mode={'llm' if llm_available() else 'offline'}")
     try:
