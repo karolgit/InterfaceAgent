@@ -1,0 +1,23 @@
+{
+  "run_id": "08-balance-host-error-20260926-170510-f672",
+  "capability": "corelink.member.get_share_savings_balance@1.0.0",
+  "status": "failed",
+  "outputs": {},
+  "outcome": null,
+  "failure": {
+    "code": "HOST_ERROR",
+    "step_id": "s3",
+    "step_intent": "Run the inquiry to load the member's accounts.",
+    "expected": "step to complete",
+    "observed": "Host communication failure reported by the application. UI said: HOST COMMUNICATION FAILURE (ERR 0x2F1) CONTACT HELP DESK EXT 4400",
+    "evidence": {
+      "screenshot": "01-failure-HOST_ERROR.png",
+      "tree": "tree-failure-HOST_ERROR.json"
+    }
+  },
+  "recoveries": [],
+  "handoffs": [],
+  "locator_fallbacks": [],
+  "duration_ms": 1514,
+  "evidence_dir": "evidence\\replays\\08-balance-host-error-20260926-170510-f672"
+}

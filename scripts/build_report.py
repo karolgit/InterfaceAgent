@@ -40,6 +40,7 @@ COVERAGE = """
 | **3.7** Multi-tenant reuse and drift | A product-level app profile with tenant overrides. The Heritage-recorded capability replays on Lakeshore (v7.6.2, renamed controls, extra dialog). | `configs/apps/corelink.yaml`, scenario 09 |
 | **Stretch** Agent-facing capability interface | A gateway exposes approved capabilities as typed tools. A member assistant (chat and voice) invokes them, with identity binding and member confirmation. | `cua/gateway.py`, `portal/` |
 | **Stretch** Confidence and approval | Unattended replay requires `approved`. `cua approve` records the reviewer. | `cua/replay.py`, `cua/__main__.py` |
+| **Stretch** Canonicalization: one capability, many inputs | The discovered row filter becomes a typed `share_type` input, so one recording reads any share. A missing share returns the business outcome `SHARE_NOT_FOUND`. | `scripts/derive_share_balance.py`, scenarios 16 and 17 |
 | **Stretch** Cross-tenant reuse with per-variant overrides | Tenant label and name aliases, plus extra outcome rules. | `configs/apps/corelink.yaml` |
 """
 

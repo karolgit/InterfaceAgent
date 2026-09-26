@@ -1,0 +1,19 @@
+{
+  "run_id": "02-balance-member-not-found-20260926-170450-bb7a",
+  "capability": "corelink.member.get_share_savings_balance@1.0.0",
+  "status": "business_outcome",
+  "outputs": {},
+  "outcome": {
+    "code": "MEMBER_NOT_FOUND",
+    "message": "No member exists with that number.",
+    "ui_text": "MBR NOT ON FILE",
+    "step_id": "s3",
+    "screenshot": "01-outcome-MEMBER_NOT_FOUND.png"
+  },
+  "failure": null,
+  "recoveries": [],
+  "handoffs": [],
+  "locator_fallbacks": [],
+  "duration_ms": 1452,
+  "evidence_dir": "evidence\\replays\\02-balance-member-not-found-20260926-170450-bb7a"
+}

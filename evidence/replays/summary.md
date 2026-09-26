@@ -15,3 +15,5 @@
 | 13-open-account-no-approval-grant | heritage | - | failed | HUMAN_TIMEOUT | - | yes |
 | 14-open-account-operator-approves | heritage | - | success | success | - | yes |
 | 15-open-account-supervisor-handoff | heritage | - | success | success | - | yes |
+| 16-share-balance-checking | heritage | - | success | success | - | yes |
+| 17-share-balance-share-not-found | heritage | - | business_outcome | SHARE_NOT_FOUND | - | yes |

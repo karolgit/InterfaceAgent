@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 from contextlib import contextmanager
 from pathlib import Path
@@ -28,8 +29,9 @@ def write_faults(faults: dict[str, str] | None) -> None:
 
 
 @contextmanager
-def app_session(tenant: str = "heritage", attach: bool = False, port: int = 8740, keep_open: bool = False,
+def app_session(tenant: str = "heritage", attach: bool = False, port: int | None = None, keep_open: bool = False,
                 idle_timeout_s: int = 900) -> Iterator[SwingSurface]:
+    port = port or int(os.environ.get("CUA_PORT", "8740"))  # CUA_PORT lets tests run beside a manual app
     if attach:
         s = SwingSurface(port)
         if not s.healthy():

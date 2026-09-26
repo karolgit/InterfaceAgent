@@ -51,7 +51,7 @@ def main() -> int:
     ap.add_argument("--supervisor", action="store_true", help="handle supervisor-override escalations")
     ap.add_argument("--once", action="store_true")
     ap.add_argument("--timeout", type=float, default=120)
-    ap.add_argument("--port", type=int, default=8740)
+    ap.add_argument("--port", type=int, default=int(__import__("os").environ.get("CUA_PORT", "8740")))
     args = ap.parse_args()
     store = InterventionStore()
     seen: set[str] = {r["id"] for r in store.list()}

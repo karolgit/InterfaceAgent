@@ -1,0 +1,3 @@
+{"ts": "2026-09-26T21:04:52.869+00:00", "t_ms": 0, "event": "replay_started", "capability": "corelink.member.get_share_savings_balance@1.0.0", "tenant": "heritage", "params": {"member_number": "[MEMBER_NUMBER]"}, "status": "draft"}
+{"ts": "2026-09-26T21:04:52.869+00:00", "t_ms": 0, "event": "rejected", "code": "INVALID_INPUT", "message": "member_number: does not match ^\\d{5}$"}
+{"ts": "2026-09-26T21:04:52.878+00:00", "t_ms": 15, "event": "replay_finished", "status": "rejected", "outcome": null, "failure": {"code": "INVALID_INPUT", "step_id": null, "step_intent": null, "expected": null, "observed": "member_number: does not match ^\\d{5}$", "evidence": {}}, "duration_ms": 15}

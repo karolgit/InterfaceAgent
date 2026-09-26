@@ -37,6 +37,7 @@ class ParamSpec(BaseModel):
     pattern: str | None = None
     enum: list[str] | None = None
     required: bool = True
+    default: str | None = None  # applied when an optional input is omitted
     sensitive: bool = False  # never logged verbatim; registered with the redactor
 
 
@@ -128,8 +129,10 @@ Value = Annotated[Union[LiteralValue, ParamValue, SecretValue], Field(discrimina
 
 
 class RowMatch(BaseModel):
+    """Pick the table row whose `column` contains a fixed text OR the value of an input parameter."""
     column: str
-    contains: str
+    contains: str | None = None
+    contains_param: str | None = None
 
 
 class Extraction(BaseModel):
@@ -139,6 +142,7 @@ class Extraction(BaseModel):
     column: str | None = None
     parse: Literal["text", "currency", "integer"] = "text"
     pattern: str | None = None  # regex with one capture group applied to the raw text first
+    no_match_outcome: str | None = None  # business outcome code when no row matches (e.g. SHARE_NOT_FOUND)
 
 
 # ----------------------------------------------------------------------------- checkpoints

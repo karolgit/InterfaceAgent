@@ -476,7 +476,9 @@ class DiscoveryAgent:
             if len(rows) != 1:
                 raise ValueError(f"{len(rows)} rows match {rc} contains '{rv}'")
             raw = rows[0][cols.index(col)]
-            spec.update(read="table_cell", row_match={"column": rc, "contains": rv}, column=col)
+            bound = next((k for k, v in self.task.example_inputs.items() if str(v) == rv), None)
+            row = {"column": rc, "contains_param": bound} if bound else {"column": rc, "contains": rv}
+            spec.update(read="table_cell", row_match=row, column=col)
         else:
             raw = node.value if node.value else node.name
             spec["read"] = "value" if node.value else "name"

@@ -255,3 +255,33 @@ def test_card_pattern_masks_cards_but_not_run_ids():
     assert r.text("card 4111 1111 1111 1111 ok") == "card [CARD_OR_ACCOUNT] ok"
     assert r.text("acct 123456789012345") == "acct [CARD_OR_ACCOUNT]"
     assert r.text("discover-20260926-155104-3ef0") == "discover-20260926-155104-3ef0"
+
+
+def _engine_for_extract(tmp_path):
+    from cua.evidence import Evidence
+    from cua.replay import ReplayEngine
+    return ReplayEngine(None, AppProfile.load("corelink"), Policy.load(ROOT / "configs/policies/corelink.yaml"),
+                        Evidence("x", Redactor(), base=tmp_path), Redactor(), None)
+
+
+def test_extract_row_chosen_by_parameter_and_no_match_is_business_outcome(tmp_path):
+    from cua.artifact import Extraction, RowMatch, Step
+    from cua.replay import _Stop
+    eng = _engine_for_extract(tmp_path)
+    table = obs_fixture().node("w0.1.4.0")
+    step = Step(id="s4", intent="read", action="extract", extract=Extraction(
+        output="balance", read="table_cell", column="Balance", parse="currency",
+        row_match=RowMatch(column="Description", contains_param="share_type"), no_match_outcome="SHARE_NOT_FOUND"))
+    assert eng._extract(step, table, {"share_type": "Share Draft Checking"}) == "1893.20"
+    assert eng._extract(step, table, {"share_type": "Share Savings"}) == "4210.55"
+    with pytest.raises(_Stop) as e:
+        eng._extract(step, table, {"share_type": "Money Market"})
+    assert e.value.result.status == "business_outcome" and e.value.result.outcome["code"] == "SHARE_NOT_FOUND"
+
+
+def test_optional_input_default_is_applied(tmp_path):
+    eng = _engine_for_extract(tmp_path)
+    cap = load_capability("corelink.member.get_share_balance")
+    params = {"member_number": "12345"}
+    eng._validate(cap, params, allow_draft=True)
+    assert params["share_type"] == "Share Savings"

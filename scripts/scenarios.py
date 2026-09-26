@@ -21,6 +21,7 @@ from cua.runtime import app_session, load_capability, run_replay, write_faults  
 
 BAL = "corelink.member.get_share_savings_balance"
 OPEN = "corelink.account.open_share_sub_account"
+SHARE = "corelink.member.get_share_balance"
 OPEN_OK = {"member_number": "12345", "account_type": "Share Certificate", "initial_deposit": "1000.00",
            "fund_from": "S01"}
 
@@ -47,6 +48,10 @@ SCENARIOS = {
     "15-open-account-supervisor-handoff": (OPEN, {"member_number": "23456", "account_type": "Money Market",
                                                   "initial_deposit": "12000.00", "fund_from": "S10"}, {}, "heritage",
                                            {"approve_irreversible": True, "sim": ["--supervisor"]}, "success"),
+    "16-share-balance-checking": (SHARE, {"member_number": "12345", "share_type": "Share Draft Checking"}, {},
+                                  "heritage", {}, "success"),
+    "17-share-balance-share-not-found": (SHARE, {"member_number": "12345", "share_type": "Money Market"}, {},
+                                         "heritage", {}, "SHARE_NOT_FOUND"),
 }
 
 

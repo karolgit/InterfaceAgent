@@ -1,0 +1,21 @@
+{
+  "intervention": "int-170533-4161",
+  "kind": "approval",
+  "reason": "Irreversible step needs approval: Post the sub-account opening transaction to obtain the confirmation number.",
+  "decision": "approve",
+  "operator": "sim-supervisor",
+  "notes": "SIMULATED operator reviewed the Review screen and chose to approve.",
+  "human_actions": 0,
+  "expired": false,
+  "events": [
+    {
+      "kind": "control_change",
+      "holder": "sim-supervisor",
+      "from": "paused",
+      "to": "human",
+      "seq": 5,
+      "ts": 1790456734059,
+      "mode": "human"
+    }
+  ]
+}

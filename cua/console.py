@@ -16,7 +16,7 @@ from .handoff import InterventionStore
 
 app = FastAPI(title="CUA Operator Console")
 store = InterventionStore()
-BRIDGE = "http://127.0.0.1:8740"
+BRIDGE = f"http://127.0.0.1:{__import__('os').environ.get('CUA_PORT', '8740')}"
 
 
 class Claim(BaseModel):

@@ -35,4 +35,8 @@ if ($LASTEXITCODE -ne 0) { throw "mockcore build failed" }
 & "${bin}javac" -nowarn -d bridge\out (Get-ChildItem bridge\src\com\cua\bridge\*.java).FullName
 if ($LASTEXITCODE -ne 0) { throw "bridge build failed" }
 & "${bin}jar" cfm bridge\cua-bridge.jar bridge\manifest.txt -C bridge\out .
+if (-not (Test-Path ".env")) {
+    Copy-Item ".env.example" ".env"
+    Write-Host "Created .env from .env.example. Add an API key there only if you want to run discovery."
+}
 Write-Host "Build OK. Try: .venv\Scripts\python.exe -m pytest -q tests"

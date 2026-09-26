@@ -11,7 +11,7 @@
     "fallbacks": 0,
     "handoffs": [],
     "seconds": 2.5,
-    "run_dir": "01-balance-happy-path-20260926-160418-0219"
+    "run_dir": "01-balance-happy-path-20260926-170447-c908"
   },
   {
     "scenario": "02-balance-member-not-found",
@@ -24,8 +24,8 @@
     "recoveries": [],
     "fallbacks": 0,
     "handoffs": [],
-    "seconds": 2.3,
-    "run_dir": "02-balance-member-not-found-20260926-160420-e9a3"
+    "seconds": 2.5,
+    "run_dir": "02-balance-member-not-found-20260926-170450-bb7a"
   },
   {
     "scenario": "03-balance-invalid-input",
@@ -38,8 +38,8 @@
     "recoveries": [],
     "fallbacks": 0,
     "handoffs": [],
-    "seconds": 0.9,
-    "run_dir": "03-balance-invalid-input-20260926-160422-0be0"
+    "seconds": 1.0,
+    "run_dir": "03-balance-invalid-input-20260926-170452-3bf3"
   },
   {
     "scenario": "04-balance-member-restricted",
@@ -52,8 +52,8 @@
     "recoveries": [],
     "fallbacks": 0,
     "handoffs": [],
-    "seconds": 2.3,
-    "run_dir": "04-balance-member-restricted-20260926-160423-e995"
+    "seconds": 2.5,
+    "run_dir": "04-balance-member-restricted-20260926-170453-7a23"
   },
   {
     "scenario": "05-balance-unexpected-popup",
@@ -70,8 +70,8 @@
     ],
     "fallbacks": 0,
     "handoffs": [],
-    "seconds": 3.1,
-    "run_dir": "05-balance-unexpected-popup-20260926-160425-1abf"
+    "seconds": 3.3,
+    "run_dir": "05-balance-unexpected-popup-20260926-170456-6a50"
   },
   {
     "scenario": "06-balance-slow-host",
@@ -88,8 +88,8 @@
     ],
     "fallbacks": 0,
     "handoffs": [],
-    "seconds": 6.9,
-    "run_dir": "06-balance-slow-host-20260926-160429-23c0"
+    "seconds": 7.1,
+    "run_dir": "06-balance-slow-host-20260926-170459-246e"
   },
   {
     "scenario": "07-balance-session-expired",
@@ -106,8 +106,8 @@
     ],
     "fallbacks": 0,
     "handoffs": [],
-    "seconds": 4.0,
-    "run_dir": "07-balance-session-expired-20260926-160436-e173"
+    "seconds": 4.2,
+    "run_dir": "07-balance-session-expired-20260926-170506-5f78"
   },
   {
     "scenario": "08-balance-host-error",
@@ -122,8 +122,8 @@
     "recoveries": [],
     "fallbacks": 0,
     "handoffs": [],
-    "seconds": 2.4,
-    "run_dir": "08-balance-host-error-20260926-160439-5e38"
+    "seconds": 2.5,
+    "run_dir": "08-balance-host-error-20260926-170510-f672"
   },
   {
     "scenario": "09-balance-second-tenant",
@@ -136,8 +136,8 @@
     "recoveries": [],
     "fallbacks": 1,
     "handoffs": [],
-    "seconds": 2.3,
-    "run_dir": "09-balance-second-tenant-20260926-160442-9f51"
+    "seconds": 2.5,
+    "run_dir": "09-balance-second-tenant-20260926-170513-2681"
   },
   {
     "scenario": "10-open-account-approved",
@@ -150,8 +150,8 @@
     "recoveries": [],
     "fallbacks": 0,
     "handoffs": [],
-    "seconds": 2.8,
-    "run_dir": "10-open-account-approved-20260926-160444-30ff"
+    "seconds": 2.9,
+    "run_dir": "10-open-account-approved-20260926-170515-fe1f"
   },
   {
     "scenario": "11-open-account-below-minimum",
@@ -165,7 +165,7 @@
     "fallbacks": 0,
     "handoffs": [],
     "seconds": 2.5,
-    "run_dir": "11-open-account-below-minimum-20260926-160447-50b6"
+    "run_dir": "11-open-account-below-minimum-20260926-170518-c22e"
   },
   {
     "scenario": "12-open-account-permission-denied",
@@ -179,7 +179,7 @@
     "fallbacks": 0,
     "handoffs": [],
     "seconds": 2.1,
-    "run_dir": "12-open-account-permission-denied-20260926-160449-08cc"
+    "run_dir": "12-open-account-permission-denied-20260926-170521-55c6"
   },
   {
     "scenario": "13-open-account-no-approval-grant",
@@ -195,7 +195,7 @@
       "abort"
     ],
     "seconds": 8.6,
-    "run_dir": "13-open-account-no-approval-grant-20260926-160452-57e1"
+    "run_dir": "13-open-account-no-approval-grant-20260926-170523-2fe8"
   },
   {
     "scenario": "14-open-account-operator-approves",
@@ -211,7 +211,7 @@
       "approve"
     ],
     "seconds": 4.6,
-    "run_dir": "14-open-account-operator-approves-20260926-160500-c5e8"
+    "run_dir": "14-open-account-operator-approves-20260926-170531-558c"
   },
   {
     "scenario": "15-open-account-supervisor-handoff",
@@ -226,7 +226,35 @@
     "handoffs": [
       "resume"
     ],
-    "seconds": 6.2,
-    "run_dir": "15-open-account-supervisor-handoff-20260926-160505-d399"
+    "seconds": 6.3,
+    "run_dir": "15-open-account-supervisor-handoff-20260926-170536-88b0"
+  },
+  {
+    "scenario": "16-share-balance-checking",
+    "tenant": "heritage",
+    "faults": {},
+    "status": "success",
+    "code": "success",
+    "expected": "success",
+    "pass": true,
+    "recoveries": [],
+    "fallbacks": 0,
+    "handoffs": [],
+    "seconds": 2.3,
+    "run_dir": "16-share-balance-checking-20260926-170542-bc1b"
+  },
+  {
+    "scenario": "17-share-balance-share-not-found",
+    "tenant": "heritage",
+    "faults": {},
+    "status": "business_outcome",
+    "code": "SHARE_NOT_FOUND",
+    "expected": "SHARE_NOT_FOUND",
+    "pass": true,
+    "recoveries": [],
+    "fallbacks": 0,
+    "handoffs": [],
+    "seconds": 2.2,
+    "run_dir": "17-share-balance-share-not-found-20260926-170545-8346"
   }
 ]

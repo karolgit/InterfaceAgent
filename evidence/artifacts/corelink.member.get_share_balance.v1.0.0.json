@@ -1,0 +1,274 @@
+{
+  "schema_version": "cua.capability/v1",
+  "id": "corelink.member.get_share_balance",
+  "version": "1.0.0",
+  "status": "draft",
+  "title": "Get member share balance by share type",
+  "description": "Look up a member by member number in CoreLink Member Inquiry and return the current balance of one of the member's shares, chosen by share_type (for example Share Savings or Share Draft Checking). Read-only.",
+  "app": {
+    "product": "CoreLink",
+    "versions": "7.4.1",
+    "surface": "java-swing",
+    "profile": "corelink"
+  },
+  "inputs": [
+    {
+      "name": "member_number",
+      "type": "string",
+      "description": "5-digit CoreLink member number",
+      "pattern": "^\\d{5}$",
+      "required": true,
+      "sensitive": true
+    },
+    {
+      "name": "share_type",
+      "type": "enum",
+      "description": "Which share to read, matched against the Description column",
+      "enum": [
+        "Share Savings",
+        "Share Draft Checking",
+        "Money Market",
+        "Share Certificate",
+        "Christmas Club",
+        "Holiday Club",
+        "Youth Savings"
+      ],
+      "required": false,
+      "default": "Share Savings",
+      "sensitive": false
+    }
+  ],
+  "outputs": [
+    {
+      "name": "balance",
+      "type": "currency",
+      "description": "Current balance of the requested share in USD, as a decimal string",
+      "sensitive": true
+    }
+  ],
+  "business_outcomes": [
+    {
+      "code": "MEMBER_NOT_FOUND",
+      "description": "No member exists with that number."
+    },
+    {
+      "code": "MEMBER_RESTRICTED",
+      "description": "Member is restricted; supervisor review required before servicing."
+    },
+    {
+      "code": "MEMBER_CLOSED",
+      "description": "Membership is closed."
+    },
+    {
+      "code": "PERMISSION_DENIED",
+      "description": "The signed-on operator is not authorized for this transaction."
+    },
+    {
+      "code": "VALIDATION_ERROR",
+      "description": "The application rejected an input value."
+    },
+    {
+      "code": "SHARE_NOT_FOUND",
+      "description": "The member has no share of the requested type."
+    }
+  ],
+  "risk": "read_only",
+  "preconditions": [
+    "signed_on",
+    "no_modal_dialog"
+  ],
+  "steps": [
+    {
+      "id": "s1",
+      "intent": "Open the Member Inquiry screen to look up the member.",
+      "action": "click",
+      "target": {
+        "description": "menu item 'Member Inquiry' in window 'CoreLink 7.4.1 - Heritage Federal Credit Union'",
+        "scope": {
+          "window": "main"
+        },
+        "strategies": [
+          {
+            "kind": "a11y",
+            "role": "menu item",
+            "name": "Member Inquiry",
+            "unique_at_record": true
+          },
+          {
+            "kind": "path",
+            "role": "menu item",
+            "path": "0.1.1.1.0",
+            "unique_at_record": true
+          }
+        ]
+      },
+      "risk": "safe",
+      "expect": [
+        {
+          "kind": "container_present",
+          "pattern": "^Member Inquiry$",
+          "description": "work window 'Member Inquiry' opened"
+        }
+      ],
+      "timeout_ms": 8000
+    },
+    {
+      "id": "s2",
+      "intent": "Enter the member number to search.",
+      "action": "set_text",
+      "target": {
+        "description": "text 'Member #:' in 'Member Inquiry'",
+        "scope": {
+          "window": "main",
+          "container": "^Member Inquiry$"
+        },
+        "strategies": [
+          {
+            "kind": "a11y",
+            "role": "text",
+            "name": "Member #:",
+            "unique_at_record": true
+          },
+          {
+            "kind": "label",
+            "role": "text",
+            "label": "Member #:",
+            "unique_at_record": true
+          },
+          {
+            "kind": "path",
+            "role": "text",
+            "path": "0.1.0.0.1",
+            "unique_at_record": true
+          },
+          {
+            "kind": "coords",
+            "rel_x": 0.1871,
+            "rel_y": 0.1071,
+            "unique_at_record": true
+          }
+        ]
+      },
+      "value": {
+        "source": "param",
+        "param": "member_number"
+      },
+      "risk": "safe",
+      "expect": [
+        {
+          "kind": "element_value",
+          "pattern": ".+",
+          "description": "field holds the entered value"
+        }
+      ],
+      "timeout_ms": 8000
+    },
+    {
+      "id": "s3",
+      "intent": "Run the inquiry to load the member's accounts.",
+      "action": "click",
+      "target": {
+        "description": "push button 'Inquire' in 'Member Inquiry'",
+        "scope": {
+          "window": "main",
+          "container": "^Member Inquiry$"
+        },
+        "strategies": [
+          {
+            "kind": "a11y",
+            "role": "push button",
+            "name": "Inquire",
+            "unique_at_record": true
+          },
+          {
+            "kind": "path",
+            "role": "push button",
+            "path": "0.1.0.0.2",
+            "unique_at_record": true
+          },
+          {
+            "kind": "coords",
+            "rel_x": 0.3218,
+            "rel_y": 0.1071,
+            "unique_at_record": true
+          }
+        ]
+      },
+      "risk": "safe",
+      "expect": [
+        {
+          "kind": "text_present",
+          "pattern": "INQUIRY COMPLETE - \\d+ SHARE\\(S\\)",
+          "description": "status line shows 'INQUIRY COMPLETE - 2 SHARE(S)'"
+        }
+      ],
+      "timeout_ms": 8000
+    },
+    {
+      "id": "s4",
+      "intent": "Capture the balance from the row whose Description matches share_type.",
+      "action": "extract",
+      "target": {
+        "description": "table 'table' in 'Member Inquiry'",
+        "scope": {
+          "window": "main",
+          "container": "^Member Inquiry$"
+        },
+        "strategies": [
+          {
+            "kind": "group",
+            "role": "table",
+            "group": "Share Accounts",
+            "index": 0,
+            "unique_at_record": true
+          },
+          {
+            "kind": "path",
+            "role": "table",
+            "path": "0.1.0.1.1.0.0",
+            "unique_at_record": true
+          },
+          {
+            "kind": "coords",
+            "rel_x": 0.5,
+            "rel_y": 0.5667,
+            "unique_at_record": true
+          }
+        ]
+      },
+      "extract": {
+        "output": "balance",
+        "read": "table_cell",
+        "row_match": {
+          "column": "Description",
+          "contains_param": "share_type"
+        },
+        "column": "Balance",
+        "parse": "currency",
+        "no_match_outcome": "SHARE_NOT_FOUND"
+      },
+      "risk": "safe",
+      "expect": [],
+      "timeout_ms": 8000
+    }
+  ],
+  "success": [
+    {
+      "kind": "text_present",
+      "pattern": "INQUIRY COMPLETE - \\d+ SHARE\\(S\\)",
+      "description": "screen shows 'INQUIRY COMPLETE - 2 SHARE(S)'"
+    }
+  ],
+  "outcome_rules": [],
+  "inherit_outcome_rules": true,
+  "provenance": {
+    "discovered_by": "llm:claude-opus-5",
+    "discovery_run": "discover-20260926-155104-3ef0",
+    "goal": "Look up the member given by member_number and read the current balance of their Share Savings account.",
+    "tenant": "heritage",
+    "created_at": "2026-09-26T19:51:29+00:00",
+    "notes": [
+      "Derived from corelink.member.get_share_savings_balance@1.0.0 (discovery run discover-20260926-155104-3ef0): the extraction row filter was parameterized as share_type; all other steps, locators, and checkpoints are unchanged."
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "run_id": "12-open-account-permission-denied-20260926-170521-55c6",
+  "capability": "corelink.account.open_share_sub_account@1.0.0",
+  "status": "business_outcome",
+  "outputs": {},
+  "outcome": {
+    "code": "PERMISSION_DENIED",
+    "message": "The signed-on operator is not authorized for this transaction.",
+    "ui_text": "OPERATOR VIEWER01 NOT AUTHORIZED FOR TRAN CODE 0417 (OPEN SUB-ACCOUNT)",
+    "step_id": "s1",
+    "screenshot": "01-outcome-PERMISSION_DENIED.png"
+  },
+  "failure": null,
+  "recoveries": [],
+  "handoffs": [],
+  "locator_fallbacks": [],
+  "duration_ms": 1266,
+  "evidence_dir": "evidence\\replays\\12-open-account-permission-denied-20260926-170521-55c6"
+}

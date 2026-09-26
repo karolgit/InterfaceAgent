@@ -140,6 +140,11 @@ cross-tenant reuse with per-tenant overrides. Unattended replay is also gated on
 <td><code>cua/replay.py</code>, <code>cua/__main__.py</code></td>
 </tr>
 <tr>
+<td><strong>Stretch</strong> Canonicalization: one capability, many inputs</td>
+<td>The discovered row filter becomes a typed <code>share_type</code> input, so one recording reads any share. A missing share returns the business outcome <code>SHARE_NOT_FOUND</code>.</td>
+<td><code>scripts/derive_share_balance.py</code>, scenarios 16 and 17</td>
+</tr>
+<tr>
 <td><strong>Stretch</strong> Cross-tenant reuse with per-variant overrides</td>
 <td>Tenant label and name aliases, plus extra outcome rules.</td>
 <td><code>configs/apps/corelink.yaml</code></td>
@@ -444,14 +449,16 @@ this order: capability rules, then tenant extras, then product rules.</p>
 </tbody>
 </table>
 <p>Sensitive outputs are returned to the caller but fingerprinted in the persisted <code>result.json</code>.</p>
-<p><strong>Evidence.</strong> <code>evidence/replays/summary.md</code> shows 15 scenarios, all passing:
+<p><strong>Evidence.</strong> <code>evidence/replays/summary.md</code> shows 17 scenarios, all passing:
 - the happy path and a second tenant;
 - not-found, restricted, and invalid input;
 - a popup, a slow host, and session expiry, all recovered;
 - a host error, which fails hard;
 - an irreversible post with a caller grant, with operator approval, and with no approval, which times out;
 - a validation error and a permission denial;
-- the supervisor handoff.</p>
+- the supervisor handoff;
+- the parameterized share-balance capability reading Share Draft Checking, and returning
+  <code>SHARE_NOT_FOUND</code> for a share the member doesn't have.</p>
 <p><strong>Drift (secondary).</strong> Locator fallbacks are logged per step. A tenant can override label and name
 aliases without re-recording. Structural drift that breaks every strategy fails with <code>TARGET_NOT_FOUND</code>
 and a full evidence bundle.</p>
@@ -764,6 +771,24 @@ python -m portal.app --allow-draft                           # 7. member assista
 <td>-</td>
 <td>success</td>
 <td>success</td>
+<td>-</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>16-share-balance-checking</td>
+<td>heritage</td>
+<td>-</td>
+<td>success</td>
+<td>success</td>
+<td>-</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>17-share-balance-share-not-found</td>
+<td>heritage</td>
+<td>-</td>
+<td>business_outcome</td>
+<td>SHARE_NOT_FOUND</td>
 <td>-</td>
 <td>yes</td>
 </tr>

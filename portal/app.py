@@ -185,7 +185,11 @@ def _money(s: str) -> str | None:
 def _chat_offline(sess: dict[str, Any], text: str) -> dict[str, Any]:
     t = text.lower()
     if "balance" in t or "how much" in t:
-        r = gateway.invoke(tool_name("corelink.member.get_share_savings_balance"), {}, _bound(sess), "member")
+        share = ("Share Draft Checking" if "checking" in t or "draft" in t else
+                 "Money Market" if "money market" in t else "Share Savings")
+        r = gateway.invoke(tool_name("corelink.member.get_share_balance"), {"share_type": share}, _bound(sess),
+                           "member")
+        r["share_type"] = share
         return {"reply": _phrase(r, "balance"), "result": r}
     if "open" in t or "certificate" in t or "money market" in t or "club" in t:
         kind = ("Money Market" if "money market" in t else "Christmas Club" if "club" in t else "Share Certificate")
@@ -207,8 +211,8 @@ def _phrase(r: dict[str, Any], intent: str) -> str:
     if st == "cancelled":
         return "No problem, I didn't make any changes."
     if st == "success" and intent == "balance":
-        v = r["outputs"].get("savings_balance")
-        return f"Your Share Savings balance is ${float(v):,.2f}."
+        v = r["outputs"].get("balance", r["outputs"].get("savings_balance"))
+        return f"Your {r.get('share_type', 'Share Savings')} balance is ${float(v):,.2f}."
     if st == "success":
         return f"Done. Your new account is open. Confirmation number {r['outputs'].get('confirmation_number')}."
     if st == "business_outcome":
@@ -217,6 +221,7 @@ def _phrase(r: dict[str, Any], intent: str) -> str:
                 "MEMBER_NOT_FOUND": "I couldn't find your membership record. Please contact us.",
                 "VALIDATION_ERROR": f"The system didn't accept that: {r['outcome'].get('ui_text', '')}.",
                 "PERMISSION_DENIED": "That service isn't available right now.",
+                "SHARE_NOT_FOUND": "I don't see an account of that type on your membership.",
                 }.get(code, f"I couldn't complete that ({code}).")
     return "Sorry, something went wrong on our side. A staff member will follow up."
 

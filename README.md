@@ -72,16 +72,26 @@ Python 3.11 virtual environment. If no JDK is on PATH, it downloads a portable T
 
 ### Configuration
 
-Create a `.env` file in the repo root. It is gitignored.
+Configuration lives in a `.env` file in the repo root, which is gitignored. The repo ships
+[`.env.example`](.env.example), a template with placeholder values and every key commented out. No real
+key is committed. `build.ps1` copies it to `.env` if you don't have one yet. To do it by hand:
 
-```ini
-# Discovery needs ONE LLM key. Replay, tests, and the operator console need none.
-ANTHROPIC_API_KEY=sk-ant-...        # planner "claude" (default model claude-opus-5; override with CUA_MODEL)
-# GEMINI_API_KEY=...                # planner "gemini" (default gemini-flash-latest; override with GEMINI_MODEL)
-# CUA_PLANNER=gemini                # force a planner when both keys are present
-# CORELINK_OPERATOR_ID=teller01     # fake demo operator; these are the defaults
-# CORELINK_OPERATOR_PASSWORD=demo123
+```powershell
+Copy-Item .env.example .env
+notepad .env        # uncomment ONE key line and paste your own key
 ```
+
+Only discovery needs an LLM key. Replay, the tests, the operator console, and the member assistant's
+offline mode need none.
+
+| Setting | Purpose |
+|---|---|
+| `ANTHROPIC_API_KEY` | Planner `claude`, default model `claude-opus-5`, override with `CUA_MODEL`. The key comes from the Claude Console. claude.ai plan credits don't fund API keys. |
+| `GEMINI_API_KEY` | Planner `gemini`, default `gemini-flash-latest`, override with `GEMINI_MODEL`. A free key is available at aistudio.google.com. |
+| `CUA_PLANNER` | Forces `claude` or `gemini` when both keys are set |
+| `CORELINK_OPERATOR_ID` / `_PASSWORD` | The fake demo operator the bot signs on as. Defaults are `teller01` / `demo123`. |
+| `CUA_PORT` | Bridge port, default 8740. Change it to run tests while you have the app open by hand. |
+| `CUA_DEMO_DELAY_MS` | Slows replays down for screen recording only |
 
 The CoreLink credentials are fake demo values built into the mock app. Only secret names appear in
 artifacts and logs. The table below lists the fake logins.
@@ -124,6 +134,18 @@ screenshots, and the model's reasoning summaries go to `runs\discover-*`.
 
 ```json
 { "status": "success", "outputs": { "savings_balance": "4210.55" }, "duration_ms": 1469, ... }
+```
+
+**Any share, one capability.** `corelink.member.get_share_balance` is derived from the discovered artifact by
+`scripts\derive_share_balance.py`. It turns the table-row filter into a typed `share_type` input, and every
+recorded step, locator, and checkpoint is reused. A share the member doesn't have returns the business
+outcome `SHARE_NOT_FOUND`, not a failure.
+
+```powershell
+.venv\Scripts\python.exe -m cua replay corelink.member.get_share_balance -p member_number=12345 -p "share_type=Share Draft Checking" --allow-draft
+# -> { "status": "success", "outputs": { "balance": "1893.20" } }
+.venv\Scripts\python.exe -m cua replay corelink.member.get_share_balance -p member_number=12345 -p "share_type=Money Market" --allow-draft
+# -> { "status": "business_outcome", "outcome": { "code": "SHARE_NOT_FOUND", ... } }
 ```
 
 **4. Replay into error and exceptional states.**

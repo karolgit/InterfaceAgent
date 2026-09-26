@@ -118,14 +118,16 @@ this order: capability rules, then tenant extras, then product rules.
 
 Sensitive outputs are returned to the caller but fingerprinted in the persisted `result.json`.
 
-**Evidence.** `evidence/replays/summary.md` shows 15 scenarios, all passing:
+**Evidence.** `evidence/replays/summary.md` shows 17 scenarios, all passing:
 - the happy path and a second tenant;
 - not-found, restricted, and invalid input;
 - a popup, a slow host, and session expiry, all recovered;
 - a host error, which fails hard;
 - an irreversible post with a caller grant, with operator approval, and with no approval, which times out;
 - a validation error and a permission denial;
-- the supervisor handoff.
+- the supervisor handoff;
+- the parameterized share-balance capability reading Share Draft Checking, and returning
+  `SHARE_NOT_FOUND` for a share the member doesn't have.
 
 **Drift (secondary).** Locator fallbacks are logged per step. A tenant can override label and name
 aliases without re-recording. Structural drift that breaks every strategy fails with `TARGET_NOT_FOUND`

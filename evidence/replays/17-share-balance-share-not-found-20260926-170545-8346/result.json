@@ -1,0 +1,17 @@
+{
+  "run_id": "17-share-balance-share-not-found-20260926-170545-8346",
+  "capability": "corelink.member.get_share_balance@1.0.0",
+  "status": "business_outcome",
+  "outputs": {},
+  "outcome": {
+    "code": "SHARE_NOT_FOUND",
+    "message": "No row where Description contains the requested value.",
+    "step_id": "s4"
+  },
+  "failure": null,
+  "recoveries": [],
+  "handoffs": [],
+  "locator_fallbacks": [],
+  "duration_ms": 1297,
+  "evidence_dir": "evidence\\replays\\17-share-balance-share-not-found-20260926-170545-8346"
+}

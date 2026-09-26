@@ -163,6 +163,8 @@ class ReplayEngine:
                                                     "requires 'approved' (use --allow-draft for supervised testing)")
         errors = []
         for spec in cap.inputs:
+            if params.get(spec.name) in (None, "") and spec.default is not None:
+                params[spec.name] = spec.default
             v = params.get(spec.name)
             if v is None or v == "":
                 if spec.required:
@@ -247,7 +249,7 @@ class ReplayEngine:
         self.baseline = obs
         if op == "extract":
             assert step.extract and node
-            val = self._extract(step, node)
+            val = self._extract(step, node, params)
             outputs[step.extract.output] = val
             if cap:
                 spec = next((o for o in cap.outputs if o.name == step.extract.output), None)
@@ -349,7 +351,7 @@ class ReplayEngine:
             return re.search(c.pattern, res.node.text() or "") is not None
         return False
 
-    def _extract(self, step: Step, node) -> Any:
+    def _extract(self, step: Step, node, params: dict[str, Any] | None = None) -> Any:
         ex = step.extract
         if ex.read == "table_cell":
             if not node.rows or not node.columns:
@@ -360,10 +362,17 @@ class ReplayEngine:
             except ValueError:
                 self._fail("EXTRACTION_FAILED", step, f"columns {ex.column}/{ex.row_match.column}",
                            f"columns {node.columns}")
-            rows = [r for r in node.rows if ex.row_match.contains.lower() in r[mi].lower()]
+            rm = ex.row_match
+            want = str((params or {}).get(rm.contains_param, "")) if rm.contains_param else (rm.contains or "")
+            rows = [r for r in node.rows if want and want.lower() in r[mi].lower()]
+            if not rows and ex.no_match_outcome:
+                r = self.result.model_copy(update={"status": "business_outcome", "outcome": {
+                    "code": ex.no_match_outcome, "message": f"No row where {rm.column} contains the requested value.",
+                    "step_id": step.id}})
+                raise _Stop(r)
             if len(rows) != 1:
-                self._fail("EXTRACTION_FAILED", step, f"exactly one row where {ex.row_match.column} contains "
-                                                      f"'{ex.row_match.contains}'", f"{len(rows)} rows matched")
+                self._fail("EXTRACTION_FAILED", step, f"exactly one row where {rm.column} contains "
+                                                      f"'{want}'", f"{len(rows)} rows matched")
             raw = rows[0][ci]
         elif ex.read == "name":
             raw = node.name
