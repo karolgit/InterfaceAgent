@@ -75,8 +75,10 @@ Python 3.11 virtual environment. If no JDK is on PATH, it downloads a portable T
 Create a `.env` file in the repo root. It is gitignored.
 
 ```ini
-ANTHROPIC_API_KEY=sk-ant-...        # needed only for discovery and the AI mode of the member assistant
-# CUA_MODEL=claude-opus-5           # optional model override for discovery
+# Discovery needs ONE LLM key. Replay, tests, and the operator console need none.
+ANTHROPIC_API_KEY=sk-ant-...        # planner "claude" (default model claude-opus-5; override with CUA_MODEL)
+# GEMINI_API_KEY=...                # planner "gemini" (default gemini-flash-latest; override with GEMINI_MODEL)
+# CUA_PLANNER=gemini                # force a planner when both keys are present
 # CORELINK_OPERATOR_ID=teller01     # fake demo operator; these are the defaults
 # CORELINK_OPERATOR_PASSWORD=demo123
 ```
@@ -98,7 +100,8 @@ Add `--keep-open` to leave the app window up.
 **1. Discover a capability with the LLM.**
 
 ```powershell
-.venv\Scripts\python.exe -m cua discover --task tasks\get_savings_balance.yaml
+.venv\Scripts\python.exe -m cua discover --task tasks\get_savings_balance.yaml               # planner picked from your key
+.venv\Scripts\python.exe -m cua discover --task tasks\get_savings_balance.yaml --planner gemini
 ```
 
 The agent signs on through the vendor profile, finds Member Inquiry, looks up the example member, and

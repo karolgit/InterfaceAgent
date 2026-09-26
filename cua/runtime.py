@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any, Iterator
 
 from .agent.compile import compile_capability, load_capability, save_capability
-from .agent.discover import ClaudePlanner, DiscoveryAgent, ScriptedPlanner, Task
+from .agent.discover import ClaudePlanner, DiscoveryAgent, GeminiPlanner, ScriptedPlanner, Task
 from .artifact import Capability, RunResult
 from .evidence import Evidence, new_run_id
 from .handoff import HandoffController
@@ -62,6 +62,8 @@ def run_discovery(task_path: str, surface: SwingSurface, tenant: str, planner_ki
     ReplayEngine(surface, profile, policy, ev, red, handoff, tenant=tenant).prepare_session()
     if planner_kind == "claude":
         planner: Any = ClaudePlanner(ev, model=model) if model else ClaudePlanner(ev)
+    elif planner_kind == "gemini":
+        planner = GeminiPlanner(ev, model=model) if model else GeminiPlanner(ev)
     else:
         planner = ScriptedPlanner(json.loads(Path(script_path).read_text()))
     agent = DiscoveryAgent(surface, profile, policy, task, ev, red, handoff)

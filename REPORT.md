@@ -33,9 +33,11 @@ demand. Faults are injected through a properties file that the app re-reads on e
 - **The model points, the harness records.** The model acts only on element refs from the current
   outline. The compiler turns each targeted element into ranked locators computed from the live tree. The
   model never writes selectors, which keeps its hallucinations out of the artifact.
-- **Model:** Claude Opus 5 through the official SDK, with adaptive thinking and summarized reasoning logged
-  as evidence. It uses a manual tool loop with an append-only history and one action per turn.
-  Discovery is rare and correctness matters more than cost there. Replay never calls a model.
+- **Model is pluggable.** The planner interface has two real implementations. The default is Claude Opus 5,
+  through the official SDK, with adaptive thinking. The other is Gemini, through google-genai. Both get the
+  same redacted inputs and tool schema, both use a manual loop with one action per turn, and both log their
+  reasoning summaries as evidence. Discovery is rare, so I favour the strongest model over cost there.
+  Replay never calls a model. The planner used for each run is recorded in the artifact's provenance.
 - **One process, file-based intervention queue.** A desktop session is single-threaded by nature. The
   gateway serializes invocations with a lock. Queues and workers are deliberately not built; see Cuts.
 

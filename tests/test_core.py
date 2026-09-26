@@ -186,3 +186,38 @@ def test_saved_artifacts_validate_and_contain_no_sensitive_literals():
         for bad in ("12345", "23456", "900-", "4210", "demo123", "teller01"):
             assert bad not in raw, f"{bad} leaked into {path.name}"
         assert json.loads(raw)["schema_version"] == "cua.capability/v1"
+
+
+# ---------------------------------------------------------------- Gemini planner (offline, faked API)
+def test_gemini_planner_round_trip(tmp_path, monkeypatch):
+    from google.genai import types
+    from cua.agent.discover import GeminiPlanner, Task, ToolCall
+    from cua.evidence import Evidence
+
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+    ev = Evidence("t", Redactor(), base=tmp_path)
+    planner = GeminiPlanner(ev, model="gemini-test")
+    sent = []
+
+    def fake_generate(model, contents, config):
+        sent.append(list(contents))
+        return types.GenerateContentResponse(
+            candidates=[types.Candidate(content=types.Content(role="model", parts=[
+                types.Part(text="Open the inquiry screen first.", thought=True),
+                types.Part(function_call=types.FunctionCall(id="c1", name="click",
+                                                            args={"ref": "w0.1", "why": "open inquiry"}))]))],
+            usage_metadata=types.GenerateContentResponseUsageMetadata(prompt_token_count=100,
+                                                                      candidates_token_count=10))
+
+    monkeypatch.setattr(planner.client.models, "generate_content", fake_generate)
+    task = Task(capability_id="x", title="t", description="d", app_profile="corelink", goal="g",
+                inputs=[], outputs=[], business_outcomes=[], example_inputs={})
+    planner.start(task)
+    calls = planner.decide("outline", b"\x89PNG", [])
+    assert calls == [ToolCall("c1", "click", {"ref": "w0.1", "why": "open inquiry"})]
+    calls2 = planner.decide("outline 2", b"\x89PNG", [(calls[0], "Done.", False)])
+    last_user = sent[-1][-1]
+    assert last_user.role == "user" and last_user.parts[0].function_response.name == "click"
+    assert last_user.parts[0].function_response.response == {"result": "Done."}
+    assert planner.usage["input_tokens"] == 200 and calls2[0].name == "click"
+    assert "model_thinking_summary" in (tmp_path / "t" / "log.jsonl").read_text()

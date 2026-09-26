@@ -215,6 +215,76 @@ class ClaudePlanner:
         return calls
 
 
+GEMINI_DEFAULT_MODEL = os.environ.get("GEMINI_MODEL", "gemini-flash-latest")
+
+
+class GeminiPlanner:
+    """Google Gemini via the google-genai SDK. Same tools, same redacted inputs, manual function-call loop."""
+
+    def __init__(self, evidence: Evidence, model: str = GEMINI_DEFAULT_MODEL):
+        from google import genai
+        from google.genai import types
+
+        self.types = types
+        self.client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY"))
+        self.model = model
+        self.name = f"llm:{model}"
+        self.ev = evidence
+        self.history: list[Any] = []
+        self.usage = {"input_tokens": 0, "output_tokens": 0}
+        self._pending_goal: str | None = None
+        self._nudge = False
+        decls = []
+        for t in TOOLS:
+            schema = json.loads(json.dumps(t["input_schema"]))
+            schema.pop("additionalProperties", None)
+            decls.append(types.FunctionDeclaration(name=t["name"], description=t["description"],
+                                                   parameters_json_schema=schema))
+        self.config = types.GenerateContentConfig(
+            system_instruction=SYSTEM_PROMPT,
+            tools=[types.Tool(function_declarations=decls)],
+            automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
+            thinking_config=types.ThinkingConfig(include_thoughts=True))
+
+    def start(self, task: Task) -> None:
+        self._pending_goal = task.goal_text()
+
+    def decide(self, obs_text: str, png: bytes, results: list[tuple[ToolCall, str, bool]]) -> list[ToolCall]:
+        T = self.types
+        parts = [T.Part.from_function_response(name=call.name,
+                                               response={"error" if is_error else "result": text})
+                 for call, text, is_error in results]
+        if self._nudge:
+            parts.append(T.Part.from_text(text="Please continue by calling exactly one tool."))
+            self._nudge = False
+        if self._pending_goal:
+            parts.append(T.Part.from_text(text=self._pending_goal))
+            self._pending_goal = None
+        parts.append(T.Part.from_text(text="CURRENT SCREEN (accessibility outline):\n" + obs_text))
+        parts.append(T.Part.from_bytes(data=png, mime_type="image/png"))
+        self.history.append(T.Content(role="user", parts=parts))
+        resp = self.client.models.generate_content(model=self.model, contents=self.history, config=self.config)
+        um = resp.usage_metadata
+        if um:
+            self.usage["input_tokens"] += um.prompt_token_count or 0
+            self.usage["output_tokens"] += (um.candidates_token_count or 0) + (um.thoughts_token_count or 0)
+        cand = resp.candidates[0] if resp.candidates else None
+        if cand is None or cand.content is None:
+            raise RuntimeError(f"Gemini returned no content (finish_reason="
+                               f"{getattr(cand, 'finish_reason', None)}, feedback={resp.prompt_feedback})")
+        self.history.append(cand.content)
+        for p in cand.content.parts or []:
+            if p.text and p.thought:
+                self.ev.log("model_thinking_summary", text=p.text[:2000])
+            elif p.text:
+                self.ev.log("model_text", text=p.text[:2000])
+        calls = [ToolCall(fc.id or f"g-{len(self.history)}-{i}", fc.name, dict(fc.args or {}))
+                 for i, fc in enumerate(resp.function_calls or [])]
+        if not calls:
+            self._nudge = True
+        return calls
+
+
 class ScriptedPlanner:
     """OFFLINE TEST DOUBLE. Resolves each scripted action's target by a predicate over the outline."""
 

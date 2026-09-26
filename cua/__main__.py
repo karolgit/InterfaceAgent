@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -29,6 +30,7 @@ def _kv(items: list[str] | None) -> dict[str, str]:
 
 
 def main(argv: list[str] | None = None) -> int:
+    from . import secrets as _dotenv  # noqa: F401  (loads .env into the environment)
     ap = argparse.ArgumentParser(prog="cua")
     sub = ap.add_subparsers(dest="cmd", required=True)
 
@@ -39,7 +41,9 @@ def main(argv: list[str] | None = None) -> int:
     d = sub.add_parser("discover")
     d.add_argument("--task", required=True)
     d.add_argument("--tenant", default="heritage")
-    d.add_argument("--planner", default="claude", choices=["claude", "scripted"])
+    d.add_argument("--planner", default=os.environ.get("CUA_PLANNER", "auto"),
+                   choices=["auto", "claude", "gemini", "scripted"],
+                   help="auto = claude if ANTHROPIC_API_KEY is set, else gemini if GEMINI_API_KEY is set")
     d.add_argument("--script", help="scripted planner file (offline tests only)")
     d.add_argument("--model")
     d.add_argument("--attach", action="store_true")
@@ -91,13 +95,18 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.cmd == "discover":
-        import os
-        from . import secrets as _load_dotenv  # noqa: F401  (loads .env)
-        if args.planner == "claude" and not (os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN")):
-            print("No API key found. Add a line like this to .env in the repo root (and save the file):\n"
-                  "    ANTHROPIC_API_KEY=sk-ant-...\n"
-                  "or set it for this terminal:  $env:ANTHROPIC_API_KEY = \"sk-ant-...\"", file=sys.stderr)
+        has_claude = bool(os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN"))
+        has_gemini = bool(os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY"))
+        if args.planner == "auto":
+            args.planner = "claude" if has_claude else "gemini" if has_gemini else "none"
+        if args.planner == "none" or (args.planner == "claude" and not has_claude) \
+                or (args.planner == "gemini" and not has_gemini):
+            print("No API key for the chosen planner. Add one of these lines to .env in the repo root and save it:\n"
+                  "    ANTHROPIC_API_KEY=sk-ant-...   (planner: claude)\n"
+                  "    GEMINI_API_KEY=...             (planner: gemini, free key at aistudio.google.com)",
+                  file=sys.stderr)
             return 2
+        print(f"discovery planner: {args.planner}", file=sys.stderr)
         from .runtime import app_session, run_discovery, write_faults
         write_faults({})
         with app_session(args.tenant, attach=args.attach, keep_open=args.keep_open) as s:
@@ -109,7 +118,6 @@ def main(argv: list[str] | None = None) -> int:
         return 0 if res.success else 1
 
     if args.cmd == "replay":
-        import os
         from .runtime import app_session, load_capability, run_replay, write_faults
         cap = load_capability(args.capability)
         if args.operator:

@@ -1,0 +1,17 @@
+{"ts": "2026-09-26T02:18:14.949+00:00", "t_ms": 93, "event": "sign_on_started"}
+{"ts": "2026-09-26T02:18:14.950+00:00", "t_ms": 93, "event": "step_started", "step": "so1", "intent": "Enter operator ID", "action": "set_text"}
+{"ts": "2026-09-26T02:18:14.964+00:00", "t_ms": 110, "event": "target_resolved", "step": "so1", "strategy": 0, "kind": "label", "ref": "w1.0.1.0.1"}
+{"ts": "2026-09-26T02:18:14.965+00:00", "t_ms": 110, "event": "policy", "step": "so1", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-26T02:18:14.977+00:00", "t_ms": 125, "event": "acted", "step": "so1", "action": "set_text", "target": "Operator ID field", "value_source": "secret"}
+{"ts": "2026-09-26T02:18:15.368+00:00", "t_ms": 515, "event": "step_started", "step": "so2", "intent": "Enter operator password", "action": "set_text"}
+{"ts": "2026-09-26T02:18:15.380+00:00", "t_ms": 531, "event": "target_resolved", "step": "so2", "strategy": 0, "kind": "label", "ref": "w1.0.1.0.3"}
+{"ts": "2026-09-26T02:18:15.380+00:00", "t_ms": 531, "event": "policy", "step": "so2", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-26T02:18:15.387+00:00", "t_ms": 531, "event": "acted", "step": "so2", "action": "set_text", "target": "Password field", "value_source": "secret"}
+{"ts": "2026-09-26T02:18:15.776+00:00", "t_ms": 921, "event": "step_started", "step": "so3", "intent": "Submit sign-on", "action": "click"}
+{"ts": "2026-09-26T02:18:15.786+00:00", "t_ms": 937, "event": "target_resolved", "step": "so3", "strategy": 0, "kind": "a11y", "ref": "w1.0.1.0.5"}
+{"ts": "2026-09-26T02:18:15.787+00:00", "t_ms": 937, "event": "policy", "step": "so3", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-26T02:18:15.790+00:00", "t_ms": 937, "event": "acted", "step": "so3", "action": "click", "target": "Sign On button", "value_source": null}
+{"ts": "2026-09-26T02:18:15.916+00:00", "t_ms": 1062, "event": "checkpoint_met", "step": "so3", "checks": ["status bar confirms sign-on"]}
+{"ts": "2026-09-26T02:18:15.917+00:00", "t_ms": 1062, "event": "sign_on_completed"}
+{"ts": "2026-09-26T02:18:20.095+00:00", "t_ms": 5250, "event": "discovery_started", "goal": "Look up the member given by member_number and read the current balance of their Share Savings account.", "capability": "corelink.member.get_share_savings_balance", "planner": "llm:claude-opus-5", "max_steps": 15}
+{"ts": "2026-09-26T02:18:20.725+00:00", "t_ms": 5875, "event": "observation", "turn": 1, "windows": ["CoreLink 7.4.1 - Heritage Federal Credit Union"], "containers": []}
