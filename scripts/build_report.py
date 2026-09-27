@@ -337,8 +337,8 @@ def main() -> None:
   live session to a human when it must.</div>
   <a class="video" href="{VIDEO}">
     <img src="../video-thumbnail.jpg" alt="Demo video thumbnail">
-    <span><b>&#9654; Watch the 2-minute demo video</b><br>{VIDEO}<br>
-    <small>The business story: a teller's day in the legacy app, then the same work done instantly through the
+    <span><b>&#9654; Watch the demo video (about 8 minutes)</b><br>{VIDEO}<br>
+    <small>The business problem, a teller's day in the legacy app, and the same work done instantly through the
     assistant.</small></span></a>
   <div class="meta">Karol Stuart · {date.today().strftime('%B %d, %Y')}<br>
     Repository: <a href="{REPO}">{REPO}</a></div>

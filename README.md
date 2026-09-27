@@ -2,7 +2,7 @@
 
 Computer-use automation for legacy banking software that has no API.
 
-**[▶ Watch the 2-minute demo video](https://youtu.be/NMyKIrVkQq4)** · [Design report (PDF)](docs/InterfaceAgent-Report.pdf) · [REPORT.md](REPORT.md)
+**[▶ Watch the demo video (about 8 minutes)](https://youtu.be/NMyKIrVkQq4)** · [Design report (PDF)](docs/InterfaceAgent-Report.pdf) · [REPORT.md](REPORT.md)
 
 [![Demo video: Interface Agent](docs/video-thumbnail.jpg)](https://youtu.be/NMyKIrVkQq4)
 

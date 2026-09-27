@@ -325,7 +325,10 @@ class ReplayEngine:
                     self.ev.log("locator_fallback", **fb)
                 return res.node, obs
             last_notes = res.notes
-            self._check_rules(obs, step)  # a dialog/error may explain why the target is missing
+            if self._check_rules(obs, step) == "human":  # a dialog/error may explain why the target is missing
+                deadline = time.monotonic() + step.timeout_ms / 1000  # restart the clock after a handoff
+                obs = self.s.observe()
+                continue
             if time.monotonic() > deadline:
                 expected = f"{step.target.description} via " + ", ".join(
                     f"{s.kind}" for s in step.target.strategies)
@@ -344,6 +347,11 @@ class ReplayEngine:
         while True:
             obs = self.s.observe()
             handled = self._check_rules(obs, step)
+            if handled == "human":
+                # A person just had the session, for however long it took. Restart this step's clock and look
+                # at the screen again instead of judging the stale pre-handoff snapshot.
+                deadline = time.monotonic() + step.timeout_ms / 1000
+                continue
             if handled == "wait" and extended < 5:
                 deadline = max(deadline, time.monotonic() + 2.0)
                 extended += 1
