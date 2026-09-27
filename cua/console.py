@@ -96,6 +96,9 @@ code{font-size:12px}.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 <header><h1>Operator Console</h1><span id="ctl" class="pill" style="background:#777">...</span>
 <span class="muted">Claim a request, then work directly in the CoreLink window. Your actions are recorded.</span>
 <label>Operator <input id="who" value="karol" size="10"></label></header>
+<div id="offline" class="card" style="margin:12px 20px;border-color:#d9a35a;background:#fff8ec" hidden>
+This console is not connected to a CoreLink session. If you started the Member Assistant, use its built-in
+console instead: <a href="http://127.0.0.1:8800/console/">http://127.0.0.1:8800/console/</a></div>
 <main><section><h2>Intervention requests</h2><div id="list"></div></section>
 <section><h2>Live session</h2><div class="card"><img id="live" alt="live session view"></div></section></main>
 <script>
@@ -111,6 +114,7 @@ function esc(s){return String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;
 async function refresh(){
   const s=await j('api/session');const c=document.getElementById('ctl');
   c.textContent='session: '+(s.mode||'offline')+(s.holder?' ('+s.holder+')':'');c.style.background=colors[s.mode]||'#555';
+  document.getElementById('offline').hidden=(s.mode&&s.mode!=='offline');
   const items=await j('api/interventions');const el=document.getElementById('list');
   el.innerHTML=items.slice(0,12).map(r=>{
     const live=r.status==='open'||r.status==='claimed';

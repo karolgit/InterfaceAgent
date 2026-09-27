@@ -50,7 +50,7 @@ class InterventionStore:
         return self.base / f"{iid}.json"
 
     def create(self, rec: dict[str, Any]) -> str:
-        iid = f"int-{datetime.now().strftime('%H%M%S')}-{uuid.uuid4().hex[:4]}"
+        iid = f"int-{datetime.now().strftime('%Y%m%d-%H%M%S')}-{uuid.uuid4().hex[:4]}"
         rec = {"id": iid, "status": "open", "created_at": _now(), **rec}
         self._p(iid).write_text(json.dumps(rec, indent=2), encoding="utf-8")
         return iid
@@ -73,13 +73,16 @@ class InterventionStore:
 
     def list(self, status: str | None = None) -> list[dict[str, Any]]:
         out = []
-        for p in sorted(self.base.glob("int-*.json"), reverse=True):
+        for p in self.base.glob("int-*.json"):
             try:
                 rec = json.loads(p.read_text(encoding="utf-8"))
             except json.JSONDecodeError:
                 continue
             if status is None or rec.get("status") == status:
                 out.append(rec)
+        # Newest first, then anything still waiting for a person (open/claimed) floats to the top.
+        out.sort(key=lambda r: r.get("created_at", ""), reverse=True)
+        out.sort(key=lambda r: 0 if r.get("status") in ("open", "claimed") else 1)
         return out
 
     # operator-side verbs (used by console and CLI)

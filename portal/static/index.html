@@ -226,12 +226,28 @@ async function signin(body){$('mid-err').textContent='';
 
 $('signout').onclick=()=>{session=null;$('chat').hidden=true;$('signin').hidden=false;speechSynthesis.cancel()};
 
+// While the core system is being driven, check whether a person is needed (supervisor override,
+// approval) and say so in the chat with a link to the operator console.
+function watchHuman(since){const shown=new Set();let stop=false;
+  const tick=async()=>{if(stop)return;
+    try{const items=await (await fetch('console/api/interventions')).json();
+      for(const r of items){if(!['open','claimed'].includes(r.status)||(r.created_at||'')<since||shown.has(r.id))continue;
+        shown.add(r.id);const d=document.createElement('div');d.className='confirm';
+        d.innerHTML=`<b>A person is needed</b><div style="margin-top:6px"></div>
+          <div class="hint">Open the operator console, click Take control, finish the step in CoreLink, then click resume.</div>
+          <div class="row"><a class="pill primary" href="/console/" target="_blank" rel="noopener">Open operator console</a></div>`;
+        d.querySelector('div').textContent=r.reason;$('log').appendChild(d);$('log').scrollTop=1e9;say('A supervisor is needed. Please open the operator console.')}}
+    catch(e){}
+    setTimeout(tick,2000)};
+  setTimeout(tick,1500);return()=>{stop=true}}
+function nowIso(){return new Date(Date.now()-5000).toISOString().replace(/\.\d+Z$/,'+00:00')}
+
 async function send(text){if(!text.trim())return;add('me',text);$('t').value='';$('send').disabled=true;
-  const w=add('sys','Working on the core system...');
+  const w=add('sys','Working on the core system...');const unwatch=watchHuman(nowIso());
   try{const r=await post('/api/chat',{session,text});w.remove();add('bot',r.reply);say(r.reply);
     if(r.choices)choiceCard(r.choices);
     if(r.pending)confirmCard(r.pending)}
-  catch(e){w.remove();add('sys','Error: '+e.message)}finally{$('send').disabled=false}}
+  catch(e){w.remove();add('sys','Error: '+e.message)}finally{$('send').disabled=false;unwatch()}}
 
 // Valid choices read from the live core system, shown as one-tap buttons.
 function choiceCard(c){const d=document.createElement('div');d.className='confirm';d.style.borderColor='#c9d6ff';
@@ -251,8 +267,9 @@ function confirmCard(p){const d=document.createElement('div');d.className='confi
   d.querySelector('div').textContent=(p.capability||'')+'\n'+details;
   const [ok,no]=d.querySelectorAll('button');
   const go=async accept=>{ok.disabled=no.disabled=true;const w=add('sys',accept?'Posting on the core system...':'Cancelling...');
+    const unwatch=watchHuman(nowIso());
     try{const r=await post('/api/confirm',{session,pending_id:p.pending_id,accept});w.remove();add('bot',r.reply);say(r.reply)}
-    catch(e){w.remove();add('sys','Error: '+e.message)}};
+    catch(e){w.remove();add('sys','Error: '+e.message)}finally{unwatch()}};
   ok.onclick=()=>go(true);no.onclick=()=>go(false);$('log').appendChild(d);$('log').scrollTop=1e9}
 
 $('f').onsubmit=e=>{e.preventDefault();send($('t').value)};
