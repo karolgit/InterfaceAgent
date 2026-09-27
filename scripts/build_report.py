@@ -363,8 +363,22 @@ Scenarios 14 and 15 use a clearly labeled simulated operator in place of a perso
     if not browser:
         print(f"HTML written to {html_path}; no Edge/Chrome found for PDF")
         return
+    import tempfile
+    import time
+
+    before = pdf.stat().st_mtime if pdf.exists() else 0
+    # A separate profile keeps headless Edge/Chrome from attaching to a browser window you have open
+    # (which silently skips the print).
+    profile = tempfile.mkdtemp(prefix="report-browser-")
     subprocess.run([browser, "--headless=new", "--disable-gpu", "--no-pdf-header-footer",
-                    f"--print-to-pdf={pdf}", html_path.as_uri()], check=True, capture_output=True, timeout=120)
+                    f"--user-data-dir={profile}", f"--print-to-pdf={pdf}", html_path.as_uri()],
+                   capture_output=True, timeout=180)
+    for _ in range(60):
+        if pdf.exists() and pdf.stat().st_mtime > before:
+            break
+        time.sleep(0.5)
+    if not pdf.exists() or pdf.stat().st_mtime <= before:
+        raise SystemExit(f"PDF was NOT updated: {pdf} (close the file if it is open in a viewer, then retry)")
     print(f"wrote {pdf} ({pdf.stat().st_size // 1024} KB)")
 
 
