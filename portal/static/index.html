@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Member Assistant</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%231740e6'/%3E%3Cpath d='M16 16 L16 4 A12 12 0 0 1 28 16 Z' fill='%23ffc933'/%3E%3Ccircle cx='16' cy='16' r='5' fill='white'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -104,8 +105,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:0 16px 36px}
       <span>Heritage Federal CU<small>powered by InterfaceAgent</small></span></a>
     <div class="links">
       <a href="#assistant">Assistant</a>
-      <a href="http://127.0.0.1:8765" target="_blank" rel="noopener">Operator console</a>
-      <a href="https://github.com/karolgit/InterfaceAgent" target="_blank" rel="noopener">GitHub</a>
+      <a href="/console/" target="_blank" rel="noopener">Operator console</a>
     </div>
     <a class="pill primary" href="#assistant">Try it</a>
   </nav>
@@ -116,12 +116,12 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:0 16px 36px}
       existing core system, the same way every time, in seconds, day or night.</p>
     <div class="cta">
       <a class="pill white" href="#assistant">Ask the assistant</a>
-      <a class="pill ghost" href="http://127.0.0.1:8765" target="_blank" rel="noopener">Open operator console</a>
+      <a class="pill ghost" href="/console/" target="_blank" rel="noopener">Open operator console</a>
     </div>
     <div class="stats">
       <div><b>~1.5 s</b><span>per automated request</span></div>
       <div><b>$0</b><span>AI cost per replay</span></div>
-      <div><b>18 / 18</b><span>verified replay scenarios</span></div>
+      <div><b>19 / 19</b><span>verified replay scenarios</span></div>
       <div><b>24/7</b><span>member self-service</span></div>
     </div>
   </div>
@@ -183,8 +183,8 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:0 16px 36px}
 <script>
 let session=null, role='member', modeText='';
 const $=id=>document.getElementById(id);
-const MEMBER_SUGGEST=["What's my savings balance?","What's my checking balance?","Open a Christmas club with $50 from savings."];
-const STAFF_SUGGEST=["Checking balance for 12345","Savings balance for 23456","Money market balance for 12345","Savings balance for 99999"];
+const MEMBER_SUGGEST=["What's my checking balance?","What accounts can I open?","Open a Christmas club with $50 from savings."];
+const STAFF_SUGGEST=["Checking balance for 12345","What accounts can 23456 open?","Savings balance for 99999"];
 
 function add(cls,text){const d=document.createElement('div');d.className='msg '+cls;d.textContent=text;$('log').appendChild(d);$('log').scrollTop=1e9;return d}
 function say(text){if(!$('speak').checked||!('speechSynthesis' in window))return;speechSynthesis.cancel();
@@ -229,8 +229,19 @@ $('signout').onclick=()=>{session=null;$('chat').hidden=true;$('signin').hidden=
 async function send(text){if(!text.trim())return;add('me',text);$('t').value='';$('send').disabled=true;
   const w=add('sys','Working on the core system...');
   try{const r=await post('/api/chat',{session,text});w.remove();add('bot',r.reply);say(r.reply);
+    if(r.choices)choiceCard(r.choices);
     if(r.pending)confirmCard(r.pending)}
   catch(e){w.remove();add('sys','Error: '+e.message)}finally{$('send').disabled=false}}
+
+// Valid choices read from the live core system, shown as one-tap buttons.
+function choiceCard(c){const d=document.createElement('div');d.className='confirm';d.style.borderColor='#c9d6ff';
+  d.style.background='#f6f8ff';
+  const rows=[['Account types offered',c.account_types,v=>`Open a ${v}`],['Fund from',c.fund_from,v=>`Fund it from ${v}`]];
+  for(const [label,items,say] of rows){if(!items||!items.length)continue;
+    const h=document.createElement('div');h.className='hint';h.style.margin='6px 0 4px';h.textContent=label;d.appendChild(h);
+    const row=document.createElement('div');row.className='chips';row.style.marginTop='0';
+    for(const it of items)row.appendChild(chip(it,()=>send(say(it))));d.appendChild(row)}
+  $('log').appendChild(d);$('log').scrollTop=1e9}
 
 function confirmCard(p){const d=document.createElement('div');d.className='confirm';
   const details=Object.entries(p.details||{}).map(([k,v])=>`${k.replace(/_/g,' ')}: ${v}`).join('\n');

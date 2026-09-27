@@ -22,6 +22,7 @@ from cua.runtime import app_session, load_capability, run_replay, write_faults  
 BAL = "corelink.member.get_share_savings_balance"
 OPEN = "corelink.account.open_share_sub_account"
 SHARE = "corelink.member.get_share_balance"
+OPTIONS = "corelink.account.get_open_options"
 OPEN_OK = {"member_number": "12345", "account_type": "Share Certificate", "initial_deposit": "1000.00",
            "fund_from": "S01"}
 
@@ -54,6 +55,7 @@ SCENARIOS = {
                                          "heritage", {}, "SHARE_NOT_FOUND"),
     "18-open-account-product-not-offered": (OPEN, {**OPEN_OK, "account_type": "Youth Savings"}, {}, "heritage",
                                             {"approve_irreversible": True}, "INVALID_OPTION"),
+    "19-open-options-list": (OPTIONS, {"member_number": "12345"}, {}, "heritage", {}, "success"),
 }
 
 

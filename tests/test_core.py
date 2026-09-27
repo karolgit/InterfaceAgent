@@ -297,3 +297,15 @@ def test_portal_binds_member_but_lets_staff_choose():
     assert pa._staff_member(staff, "checking balance for 23456") == "23456"
     assert pa._staff_member(staff, "and savings?") == "23456"      # follow-ups reuse the last member
     assert pa._requester(staff) == "staff:sarah" and pa._requester(member) == "member:12345"
+
+
+def test_text_checkpoint_accepts_repeated_text_only_when_screen_changed(tmp_path):
+    from cua.artifact import Checkpoint
+    eng = _engine_for_extract(tmp_path)
+    before = obs_fixture()
+    cp = Checkpoint(kind="text_present", pattern="INQUIRY COMPLETE")
+    eng.baseline = before
+    assert not eng._checkpoint(obs_fixture(), cp)          # identical screen: stale text must not count
+    after = obs_fixture()
+    after.node("w0.1.3.1").name = "900-00-0000"             # something on screen changed after the action
+    assert eng._checkpoint(after, cp)

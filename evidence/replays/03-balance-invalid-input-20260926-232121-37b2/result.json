@@ -1,0 +1,20 @@
+{
+  "run_id": "03-balance-invalid-input-20260926-232121-37b2",
+  "capability": "corelink.member.get_share_savings_balance@1.0.0",
+  "status": "rejected",
+  "outputs": {},
+  "outcome": null,
+  "failure": {
+    "code": "INVALID_INPUT",
+    "step_id": null,
+    "step_intent": null,
+    "expected": null,
+    "observed": "member_number: does not match ^\\d{5}$",
+    "evidence": {}
+  },
+  "recoveries": [],
+  "handoffs": [],
+  "locator_fallbacks": [],
+  "duration_ms": 0,
+  "evidence_dir": "evidence\\replays\\03-balance-invalid-input-20260926-232121-37b2"
+}

@@ -282,6 +282,134 @@ cross-tenant reuse with per-tenant overrides. Unattended replay is also gated on
 </svg>
 </section>
 
+<section class="pb"><h2>How a capability is recorded</h2><p>Recording does not capture mouse movements or video. It records <strong>which control</strong> was used, <strong>where each value
+came from</strong>, and <strong>what changed on screen</strong>. These examples come from the real Claude discovery run for "get
+savings balance".</p>
+<p><strong>Each turn of the discovery loop</strong></p>
+<ol>
+<li><strong>Look.</strong> The surface driver reads the app's accessibility tree (roles, names, labels, states, bounds) and turns
+   it into an outline with short references. The model gets that outline plus a redacted screenshot:</li>
+</ol>
+<pre><code>[w0.0.1.1.1.0] menu item &quot;Member Inquiry&quot;   (in closed menu; clickable)
+[w0.0.1.0.1.0.1.0.0.1] text  label=&quot;Member #:&quot;
+[w0.0.1.0.1.0.1.0.0.2] push button &quot;Inquire&quot;
+</code></pre>
+<ol>
+<li><strong>Decide.</strong> The model picks exactly one action and states why, for example
+   <code>click(ref="w0.0.1.1.1.0", why="Open the Member Inquiry screen")</code>. Inputs are referenced by name
+   (<code>type_text(ref=..., param="member_number")</code>). The model never sees or types the value.</li>
+<li><strong>Check.</strong> Policy verifies the action against the allowlist and assigns its risk class. Irreversible actions
+   pause for a human.</li>
+<li><strong>Act.</strong> The driver performs the action through accessibility, not the physical mouse:</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>How it is performed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Click a button or menu item</td>
+<td>The control's accessibility action, the same effect as a click</td>
+</tr>
+<tr>
+<td>Type into a field</td>
+<td>Sets the field's text through the accessible text interface. That focuses the field first, so "focus" is never a separate step.</td>
+</tr>
+<tr>
+<td>Press a key (F2, Enter, Esc)</td>
+<td>Key events sent to the app window</td>
+</tr>
+<tr>
+<td>Choose from a drop-down</td>
+<td>Selects the matching option. If the option doesn't exist, the result is <code>INVALID_OPTION</code>.</td>
+</tr>
+</tbody>
+</table>
+<ol>
+<li><strong>Record.</strong> For each action the trace keeps the target's role, name, label, panel, index path, and bounds. It
+   also keeps the value source (literal, input parameter, or named secret), the screen before and after, the
+   policy verdict, and the model's reason.</li>
+</ol>
+<p><strong>Compiling the trace into the capability</strong></p>
+<p>When the model calls <code>finish</code>, the compiler converts the trace into the artifact, independent of the model
+transcript:</p>
+<ul>
+<li><strong>Targets become ranked locators</strong>, each checked for uniqueness on the recorded screen. The order is
+  accessible name, then nearby label, then named panel, then index path, then relative coordinates as a last resort.</li>
+<li><strong>Typed values become parameters or secret references</strong>, never literal PII.</li>
+<li><strong>Screen changes become checkpoints</strong>: a new work window, a new dialog, a new status line (numbers
+  generalized, as in <code>INQUIRY COMPLETE - \d+ SHARE\(S\)</code>), or a field holding a value.</li>
+<li><strong>Policy verdicts become per-step risk classes.</strong> The model's quoted proof becomes the final success check.</li>
+</ul>
+<pre><code>s2  set_text   value = input &quot;member_number&quot;
+    locate by: 1) name &quot;Member #:&quot;  2) label &quot;Member #:&quot;  3) index path  4) coordinates
+    checkpoint: field holds a value
+s3  click &quot;Inquire&quot;
+    checkpoint: status line matches &quot;INQUIRY COMPLETE - \d+ SHARE\(S\)&quot;
+</code></pre>
+<p>In replay there is no model. Each step re-finds its control with those strategies, acts, and waits for its checkpoint,
+so a moved window or a slightly renamed label does not break it. Human actions during a handoff are recorded
+separately by the driver's input recorder: real clicks and keystrokes, with password fields stored as <code>[SECRET]</code>.</p></section>
+
+<section class="pb"><h2>Supporting applications that are not Java</h2><p>Only one component is specific to Java Swing: the <strong>surface driver</strong> (the bridge). Everything above it is
+technology-neutral and does not change:
+- the discovery agent;
+- the artifact schema;
+- the replay engine;
+- policy and redaction;
+- the capability gateway;
+- the operator console.</p>
+<p>Supporting another kind of application means writing another driver behind the same interface. It must provide
+observe (nodes with role, name, value, label, and bounds), the basic actions (click, set text, select, key, close),
+screenshots, and the control lock with input recording.</p>
+<table>
+<thead>
+<tr>
+<th>Application type</th>
+<th>Driver</th>
+<th>How it perceives and acts</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Java desktop (CoreLink)</td>
+<td>Accessibility bridge (<strong>built</strong>)</td>
+<td>Java Accessibility API in-process; accessibility actions</td>
+</tr>
+<tr>
+<td>Modern or legacy web app</td>
+<td>Browser driver (Playwright or CDP)</td>
+<td>The browser's accessibility tree and page structure, including frames and framesets; browser input</td>
+</tr>
+<tr>
+<td>Windows desktop (.NET, Win32, Delphi, PowerBuilder)</td>
+<td>Windows UI Automation driver</td>
+<td>The Windows accessibility tree; invoke and value patterns, with synthesized input as a fallback</td>
+</tr>
+<tr>
+<td>Custom-drawn UIs, Citrix, or remote desktops</td>
+<td>Vision driver</td>
+<td>Screenshot, OCR, and a vision model produce nodes with role guesses and bounds; coordinate input</td>
+</tr>
+<tr>
+<td>Mainframe green screens (3270/5250)</td>
+<td>Terminal-emulator driver</td>
+<td>Screen buffer fields; keystrokes</td>
+</tr>
+</tbody>
+</table>
+<p><strong>What changes per application.</strong>
+- <strong>App profile.</strong> A new <code>configs/apps/&lt;product&gt;.yaml</code> declares the driver, the sign-on routine, the product's
+  error messages mapped to outcome codes, the PII labels, and tenant overrides.
+- <strong>Scope.</strong> <code>scope.window</code> may name a browser frame or page instead of a desktop window.</p>
+<p><strong>What does not change.</strong>
+- <strong>The artifact format and locator strategies.</strong> Label proximity and relative coordinates are geometric, so a
+  vision driver fills them from OCR bounds exactly as the Swing driver fills them from accessibility bounds.
+- <strong>Replay, the error taxonomy, human handoff, and redaction.</strong> They work unchanged on top of any driver.</p></section>
+
 <section class="pb"><h2>1. Architecture</h2>
 <p><strong>Target choice.</strong> The proxy is CoreLink, a Java Swing desktop client I built to look like a legacy
 core-banking teller app. It uses an MDI desktop, modal option dialogs, upper-case status-bar errors, and no
@@ -449,7 +577,7 @@ this order: capability rules, then tenant extras, then product rules.</p>
 </tbody>
 </table>
 <p>Sensitive outputs are returned to the caller but fingerprinted in the persisted <code>result.json</code>.</p>
-<p><strong>Evidence.</strong> <code>evidence/replays/summary.md</code> shows 18 scenarios, all passing:
+<p><strong>Evidence.</strong> <code>evidence/replays/summary.md</code> shows 19 scenarios, all passing:
 - the happy path and a second tenant;
 - not-found, restricted, and invalid input;
 - a popup, a slow host, and session expiry, all recovered;
@@ -460,7 +588,9 @@ this order: capability rules, then tenant extras, then product rules.</p>
 - the parameterized share-balance capability reading Share Draft Checking, and returning
   <code>SHARE_NOT_FOUND</code> for a share the member doesn't have;
 - a product this tenant doesn't offer, which returns <code>INVALID_OPTION</code> with the valid choices. It is found by
-  the replay's select action, not by a pre-listed rule, so a caller or AI agent can correct the request.</p>
+  the replay's select action, not by a pre-listed rule, so a caller or AI agent can correct the request;
+- a read-only capability that lists the account types this tenant offers and the member's funding shares.
+  The assistant calls it before opening an account, so it only offers valid choices.</p>
 <p><strong>Drift (secondary).</strong> Locator fallbacks are logged per step. A tenant can override label and name
 aliases without re-recording. Structural drift that breaks every strategy fails with <code>TARGET_NOT_FOUND</code>
 and a full evidence bundle.</p>
@@ -803,6 +933,15 @@ python -m portal.app --allow-draft                           # 7. member assista
 <td>-</td>
 <td>yes</td>
 </tr>
+<tr>
+<td>19-open-options-list</td>
+<td>heritage</td>
+<td>-</td>
+<td>success</td>
+<td>success</td>
+<td>-</td>
+<td>yes</td>
+</tr>
 </tbody>
 </table>
 <p>Each scenario runs in a fresh app instance. The evidence for each is in <code>evidence/replays/&lt;scenario&gt;/</code>.
@@ -890,5 +1029,5 @@ Scenarios 14 and 15 use a clearly labeled simulated operator in place of a perso
   "timeout_ms": 8000
 }</code></pre></section>
 
-<section class="pb"><h2>Appendix D. Screens</h2><div class="grid"><figure><img src="../screenshots/01-corelink-sign-on.png"><figcaption>Sign-on. Credentials are resolved from the secret store by name.</figcaption></figure><figure><img src="../screenshots/02-member-inquiry.png"><figcaption>Member Inquiry: the flow the first capability automates.</figcaption></figure><figure><img src="../screenshots/03-member-not-found.png"><figcaption>Business outcome: MBR NOT ON FILE becomes MEMBER_NOT_FOUND.</figcaption></figure><figure><img src="../screenshots/04-open-sub-account-form.png"><figcaption>The labels are not linked to their fields. Replay locates them by label geometry.</figcaption></figure><figure><img src="../screenshots/05-review-transaction.png"><figcaption>The review screen, before the irreversible post.</figcaption></figure><figure><img src="../screenshots/06-confirm-posting-dialog.png"><figcaption>An irreversible confirmation. Policy requires approval.</figcaption></figure><figure><img src="../screenshots/07-transaction-posted.png"><figcaption>The output: a confirmation number extracted with a capture pattern.</figcaption></figure><figure><img src="../screenshots/08-supervisor-override.png"><figcaption>Escalation: a supervisor override is handed to a human.</figcaption></figure><figure><img src="../screenshots/09-second-tenant-lakeshore.png"><figcaption>Second tenant (v7.6.2, renamed controls). The same capability replays through overrides.</figcaption></figure><figure><img src="../screenshots/10-redacted-evidence.png"><figcaption>Evidence screenshot, redacted using accessibility bounds.</figcaption></figure><figure><img src="../screenshots/11-operator-console.png"><figcaption>Operator console: the queue, context, redacted snapshot, and live session.</figcaption></figure><figure><img src="../screenshots/12-member-assistant.png"><figcaption>Member assistant answering from a deterministic replay.</figcaption></figure><figure><img src="../screenshots/13-member-confirmation.png"><figcaption>The member must confirm an irreversible action. The model cannot.</figcaption></figure><figure><img src="../screenshots/14-staff-assistant.png"><figcaption>Staff mode: the employee names the member; follow-ups reuse it.</figcaption></figure><figure><img src="../screenshots/15-portal-landing.png"><figcaption>Member Assistant landing page with member and staff sign-in.</figcaption></figure></div></section>
+<section class="pb"><h2>Appendix D. Screens</h2><div class="grid"><figure><img src="../screenshots/01-corelink-sign-on.png"><figcaption>Sign-on. Credentials are resolved from the secret store by name.</figcaption></figure><figure><img src="../screenshots/02-member-inquiry.png"><figcaption>Member Inquiry: the flow the first capability automates.</figcaption></figure><figure><img src="../screenshots/03-member-not-found.png"><figcaption>Business outcome: MBR NOT ON FILE becomes MEMBER_NOT_FOUND.</figcaption></figure><figure><img src="../screenshots/04-open-sub-account-form.png"><figcaption>The labels are not linked to their fields. Replay locates them by label geometry.</figcaption></figure><figure><img src="../screenshots/05-review-transaction.png"><figcaption>The review screen, before the irreversible post.</figcaption></figure><figure><img src="../screenshots/06-confirm-posting-dialog.png"><figcaption>An irreversible confirmation. Policy requires approval.</figcaption></figure><figure><img src="../screenshots/07-transaction-posted.png"><figcaption>The output: a confirmation number extracted with a capture pattern.</figcaption></figure><figure><img src="../screenshots/08-supervisor-override.png"><figcaption>Escalation: a supervisor override is handed to a human.</figcaption></figure><figure><img src="../screenshots/09-second-tenant-lakeshore.png"><figcaption>Second tenant (v7.6.2, renamed controls). The same capability replays through overrides.</figcaption></figure><figure><img src="../screenshots/10-redacted-evidence.png"><figcaption>Evidence screenshot, redacted using accessibility bounds.</figcaption></figure><figure><img src="../screenshots/11-operator-console.png"><figcaption>Operator console: the queue, context, redacted snapshot, and live session.</figcaption></figure><figure><img src="../screenshots/12-member-assistant.png"><figcaption>Member assistant answering from a deterministic replay.</figcaption></figure><figure><img src="../screenshots/13-member-confirmation.png"><figcaption>The member must confirm an irreversible action. The model cannot.</figcaption></figure><figure><img src="../screenshots/16-open-account-options.png"><figcaption>Valid account types and funding shares, read live from the core system, offered as buttons.</figcaption></figure><figure><img src="../screenshots/14-staff-assistant.png"><figcaption>Staff mode: the employee names the member; follow-ups reuse it.</figcaption></figure><figure><img src="../screenshots/15-portal-landing.png"><figcaption>Member Assistant landing page with member and staff sign-in.</figcaption></figure></div></section>
 </body></html>

@@ -1,0 +1,41 @@
+{"ts": "2026-09-27T03:22:18.955+00:00", "t_ms": 0, "event": "replay_started", "capability": "corelink.account.get_open_options@1.0.0", "tenant": "heritage", "params": {"member_number": "[MEMBER_NUMBER]"}, "status": "draft"}
+{"ts": "2026-09-27T03:22:19.014+00:00", "t_ms": 47, "event": "sign_on_started"}
+{"ts": "2026-09-27T03:22:19.014+00:00", "t_ms": 47, "event": "step_started", "step": "so1", "intent": "Enter operator ID", "action": "set_text"}
+{"ts": "2026-09-27T03:22:19.035+00:00", "t_ms": 78, "event": "target_resolved", "step": "so1", "strategy": 0, "kind": "label", "ref": "w1.0.1.0.1"}
+{"ts": "2026-09-27T03:22:19.036+00:00", "t_ms": 78, "event": "policy", "step": "so1", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-27T03:22:19.043+00:00", "t_ms": 78, "event": "acted", "step": "so1", "action": "set_text", "target": "Operator ID field", "value_source": "secret"}
+{"ts": "2026-09-27T03:22:19.431+00:00", "t_ms": 469, "event": "step_started", "step": "so2", "intent": "Enter operator password", "action": "set_text"}
+{"ts": "2026-09-27T03:22:19.440+00:00", "t_ms": 484, "event": "target_resolved", "step": "so2", "strategy": 0, "kind": "label", "ref": "w1.0.1.0.3"}
+{"ts": "2026-09-27T03:22:19.441+00:00", "t_ms": 484, "event": "policy", "step": "so2", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-27T03:22:19.445+00:00", "t_ms": 484, "event": "acted", "step": "so2", "action": "set_text", "target": "Password field", "value_source": "secret"}
+{"ts": "2026-09-27T03:22:19.828+00:00", "t_ms": 875, "event": "step_started", "step": "so3", "intent": "Submit sign-on", "action": "click"}
+{"ts": "2026-09-27T03:22:19.838+00:00", "t_ms": 875, "event": "target_resolved", "step": "so3", "strategy": 0, "kind": "a11y", "ref": "w1.0.1.0.5"}
+{"ts": "2026-09-27T03:22:19.840+00:00", "t_ms": 875, "event": "policy", "step": "so3", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-27T03:22:19.840+00:00", "t_ms": 875, "event": "acted", "step": "so3", "action": "click", "target": "Sign On button", "value_source": null}
+{"ts": "2026-09-27T03:22:19.933+00:00", "t_ms": 969, "event": "checkpoint_met", "step": "so3", "checks": ["status bar confirms sign-on"]}
+{"ts": "2026-09-27T03:22:19.933+00:00", "t_ms": 969, "event": "sign_on_completed"}
+{"ts": "2026-09-27T03:22:19.949+00:00", "t_ms": 984, "event": "step_started", "step": "s1", "intent": "Open the Open Sub-Account workflow.", "action": "click"}
+{"ts": "2026-09-27T03:22:19.955+00:00", "t_ms": 1000, "event": "target_resolved", "step": "s1", "strategy": 0, "kind": "a11y", "ref": "w0.0.1.1.2.0"}
+{"ts": "2026-09-27T03:22:19.956+00:00", "t_ms": 1000, "event": "policy", "step": "s1", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-27T03:22:19.959+00:00", "t_ms": 1000, "event": "acted", "step": "s1", "action": "click", "target": "menu item 'Open Sub-Account' in window 'CoreLink 7.4.1 - Heritage Federal Credit Union'", "value_source": null}
+{"ts": "2026-09-27T03:22:20.115+00:00", "t_ms": 1156, "event": "checkpoint_met", "step": "s1", "checks": ["work window 'Open Sub-Account  [TRAN 0417]' opened"]}
+{"ts": "2026-09-27T03:22:20.116+00:00", "t_ms": 1156, "event": "step_started", "step": "s2", "intent": "Enter the member number to load the member record.", "action": "set_text"}
+{"ts": "2026-09-27T03:22:20.137+00:00", "t_ms": 1172, "event": "target_resolved", "step": "s2", "strategy": 0, "kind": "label", "ref": "w0.0.1.0.1.0.0.1.0.0.0.1"}
+{"ts": "2026-09-27T03:22:20.144+00:00", "t_ms": 1187, "event": "policy", "step": "s2", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-27T03:22:20.148+00:00", "t_ms": 1187, "event": "acted", "step": "s2", "action": "set_text", "target": "text 'Member Number' in 'Open Sub-Account  [TRAN 0417]'", "value_source": "param"}
+{"ts": "2026-09-27T03:22:20.155+00:00", "t_ms": 1187, "event": "checkpoint_met", "step": "s2", "checks": ["field holds the entered value"]}
+{"ts": "2026-09-27T03:22:20.155+00:00", "t_ms": 1187, "event": "step_started", "step": "s3", "intent": "Load the member record to populate name and share list.", "action": "click"}
+{"ts": "2026-09-27T03:22:20.165+00:00", "t_ms": 1203, "event": "target_resolved", "step": "s3", "strategy": 0, "kind": "a11y", "ref": "w0.0.1.0.1.0.0.1.0.0.0.2"}
+{"ts": "2026-09-27T03:22:20.166+00:00", "t_ms": 1203, "event": "policy", "step": "s3", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-27T03:22:20.168+00:00", "t_ms": 1203, "event": "acted", "step": "s3", "action": "click", "target": "push button 'Load' in 'Open Sub-Account  [TRAN 0417]'", "value_source": null}
+{"ts": "2026-09-27T03:22:20.250+00:00", "t_ms": 1297, "event": "checkpoint_met", "step": "s3", "checks": ["status line shows 'MEMBER LOADED'"]}
+{"ts": "2026-09-27T03:22:20.252+00:00", "t_ms": 1297, "event": "step_started", "step": "s4", "intent": "Read the account types offered by this credit union.", "action": "extract"}
+{"ts": "2026-09-27T03:22:20.259+00:00", "t_ms": 1297, "event": "target_resolved", "step": "s4", "strategy": 0, "kind": "label", "ref": "w0.0.1.0.1.0.0.1.0.0.0.6"}
+{"ts": "2026-09-27T03:22:20.259+00:00", "t_ms": 1297, "event": "policy", "step": "s4", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-27T03:22:20.259+00:00", "t_ms": 1297, "event": "extracted", "step": "s4", "output": "account_types", "value": "['Share Certificate', 'Money Market', 'Christmas Club']"}
+{"ts": "2026-09-27T03:22:20.263+00:00", "t_ms": 1297, "event": "step_started", "step": "s5", "intent": "Read the member's shares that can fund the new account.", "action": "extract"}
+{"ts": "2026-09-27T03:22:20.270+00:00", "t_ms": 1312, "event": "target_resolved", "step": "s5", "strategy": 0, "kind": "label", "ref": "w0.0.1.0.1.0.0.1.0.0.0.10"}
+{"ts": "2026-09-27T03:22:20.270+00:00", "t_ms": 1312, "event": "policy", "step": "s5", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-27T03:22:20.270+00:00", "t_ms": 1312, "event": "extracted", "step": "s5", "output": "fund_from", "value": "['S01 Share Savings', 'S10 Share Draft Checking']"}
+{"ts": "2026-09-27T03:22:20.270+00:00", "t_ms": 1312, "event": "success_verified", "checks": []}
+{"ts": "2026-09-27T03:22:20.424+00:00", "t_ms": 1469, "event": "replay_finished", "status": "success", "outcome": null, "failure": null, "duration_ms": 1469}

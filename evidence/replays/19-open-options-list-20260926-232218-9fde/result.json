@@ -1,0 +1,23 @@
+{
+  "run_id": "19-open-options-list-20260926-232218-9fde",
+  "capability": "corelink.account.get_open_options@1.0.0",
+  "status": "success",
+  "outputs": {
+    "account_types": [
+      "Share Certificate",
+      "Money Market",
+      "Christmas Club"
+    ],
+    "fund_from": [
+      "S01 Share Savings",
+      "S10 Share Draft Checking"
+    ]
+  },
+  "outcome": null,
+  "failure": null,
+  "recoveries": [],
+  "handoffs": [],
+  "locator_fallbacks": [],
+  "duration_ms": 1469,
+  "evidence_dir": "evidence\\replays\\19-open-options-list-20260926-232218-9fde"
+}

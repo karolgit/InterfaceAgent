@@ -1,0 +1,35 @@
+{"ts": "2026-09-27T03:22:16.639+00:00", "t_ms": 0, "event": "replay_started", "capability": "corelink.account.open_share_sub_account@1.0.0", "tenant": "heritage", "params": {"member_number": "[MEMBER_NUMBER]", "account_type": "Youth Savings", "initial_deposit": "1000.00", "fund_from": "S01"}, "status": "draft"}
+{"ts": "2026-09-27T03:22:16.701+00:00", "t_ms": 62, "event": "sign_on_started"}
+{"ts": "2026-09-27T03:22:16.702+00:00", "t_ms": 62, "event": "step_started", "step": "so1", "intent": "Enter operator ID", "action": "set_text"}
+{"ts": "2026-09-27T03:22:16.724+00:00", "t_ms": 92, "event": "target_resolved", "step": "so1", "strategy": 0, "kind": "label", "ref": "w1.0.1.0.1"}
+{"ts": "2026-09-27T03:22:16.726+00:00", "t_ms": 92, "event": "policy", "step": "so1", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-27T03:22:16.734+00:00", "t_ms": 108, "event": "acted", "step": "so1", "action": "set_text", "target": "Operator ID field", "value_source": "secret"}
+{"ts": "2026-09-27T03:22:17.119+00:00", "t_ms": 483, "event": "step_started", "step": "so2", "intent": "Enter operator password", "action": "set_text"}
+{"ts": "2026-09-27T03:22:17.119+00:00", "t_ms": 483, "event": "target_resolved", "step": "so2", "strategy": 0, "kind": "label", "ref": "w1.0.1.0.3"}
+{"ts": "2026-09-27T03:22:17.129+00:00", "t_ms": 500, "event": "policy", "step": "so2", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-27T03:22:17.135+00:00", "t_ms": 500, "event": "acted", "step": "so2", "action": "set_text", "target": "Password field", "value_source": "secret"}
+{"ts": "2026-09-27T03:22:17.517+00:00", "t_ms": 889, "event": "step_started", "step": "so3", "intent": "Submit sign-on", "action": "click"}
+{"ts": "2026-09-27T03:22:17.520+00:00", "t_ms": 889, "event": "target_resolved", "step": "so3", "strategy": 0, "kind": "a11y", "ref": "w1.0.1.0.5"}
+{"ts": "2026-09-27T03:22:17.520+00:00", "t_ms": 889, "event": "policy", "step": "so3", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-27T03:22:17.529+00:00", "t_ms": 889, "event": "acted", "step": "so3", "action": "click", "target": "Sign On button", "value_source": null}
+{"ts": "2026-09-27T03:22:17.624+00:00", "t_ms": 983, "event": "checkpoint_met", "step": "so3", "checks": ["status bar confirms sign-on"]}
+{"ts": "2026-09-27T03:22:17.626+00:00", "t_ms": 1000, "event": "sign_on_completed"}
+{"ts": "2026-09-27T03:22:17.631+00:00", "t_ms": 1000, "event": "step_started", "step": "s1", "intent": "Open the Open Sub-Account workflow.", "action": "click"}
+{"ts": "2026-09-27T03:22:17.645+00:00", "t_ms": 1014, "event": "target_resolved", "step": "s1", "strategy": 0, "kind": "a11y", "ref": "w0.0.1.1.2.0"}
+{"ts": "2026-09-27T03:22:17.647+00:00", "t_ms": 1014, "event": "policy", "step": "s1", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-27T03:22:17.648+00:00", "t_ms": 1014, "event": "acted", "step": "s1", "action": "click", "target": "menu item 'Open Sub-Account' in window 'CoreLink 7.4.1 - Heritage Federal Credit Union'", "value_source": null}
+{"ts": "2026-09-27T03:22:17.797+00:00", "t_ms": 1171, "event": "checkpoint_met", "step": "s1", "checks": ["work window 'Open Sub-Account  [TRAN 0417]' opened"]}
+{"ts": "2026-09-27T03:22:17.798+00:00", "t_ms": 1171, "event": "step_started", "step": "s2", "intent": "Enter the member number to load the member record.", "action": "set_text"}
+{"ts": "2026-09-27T03:22:17.822+00:00", "t_ms": 1187, "event": "target_resolved", "step": "s2", "strategy": 0, "kind": "label", "ref": "w0.0.1.0.1.0.0.1.0.0.0.1"}
+{"ts": "2026-09-27T03:22:17.823+00:00", "t_ms": 1187, "event": "policy", "step": "s2", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-27T03:22:17.828+00:00", "t_ms": 1202, "event": "acted", "step": "s2", "action": "set_text", "target": "text 'Member Number' in 'Open Sub-Account  [TRAN 0417]'", "value_source": "param"}
+{"ts": "2026-09-27T03:22:17.831+00:00", "t_ms": 1202, "event": "checkpoint_met", "step": "s2", "checks": ["field holds the entered value"]}
+{"ts": "2026-09-27T03:22:17.834+00:00", "t_ms": 1202, "event": "step_started", "step": "s3", "intent": "Load the member record to populate name and share list.", "action": "click"}
+{"ts": "2026-09-27T03:22:17.838+00:00", "t_ms": 1202, "event": "target_resolved", "step": "s3", "strategy": 0, "kind": "a11y", "ref": "w0.0.1.0.1.0.0.1.0.0.0.2"}
+{"ts": "2026-09-27T03:22:17.838+00:00", "t_ms": 1202, "event": "policy", "step": "s3", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-27T03:22:17.838+00:00", "t_ms": 1202, "event": "acted", "step": "s3", "action": "click", "target": "push button 'Load' in 'Open Sub-Account  [TRAN 0417]'", "value_source": null}
+{"ts": "2026-09-27T03:22:17.926+00:00", "t_ms": 1296, "event": "checkpoint_met", "step": "s3", "checks": ["status line shows 'MEMBER LOADED'"]}
+{"ts": "2026-09-27T03:22:17.927+00:00", "t_ms": 1296, "event": "step_started", "step": "s4", "intent": "Set the requested sub-account type.", "action": "select"}
+{"ts": "2026-09-27T03:22:17.931+00:00", "t_ms": 1296, "event": "target_resolved", "step": "s4", "strategy": 0, "kind": "label", "ref": "w0.0.1.0.1.0.0.1.0.0.0.6"}
+{"ts": "2026-09-27T03:22:17.937+00:00", "t_ms": 1312, "event": "policy", "step": "s4", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-27T03:22:18.072+00:00", "t_ms": 1437, "event": "replay_finished", "status": "business_outcome", "outcome": {"code": "INVALID_OPTION", "message": "'Youth Savings' is not an available choice for combo box 'Account Type' in 'Open Sub-Account  [TRAN 0417]'.", "available": ["Share Certificate", "Money Market", "Christmas Club"], "step_id": "s4", "screenshot": "01-outcome-INVALID_OPTION.png"}, "failure": null, "duration_ms": 1437}

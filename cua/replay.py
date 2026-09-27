@@ -349,8 +349,15 @@ class ReplayEngine:
         if c.kind == "window_present":
             return any(re.search(c.pattern or "", w.title) for w in obs.windows)
         if c.kind == "text_present":
-            new = visible_lines(obs) - (visible_lines(self.baseline) if self.baseline else set())
-            return any(re.search(c.pattern or "", l) for l in new)
+            now = visible_lines(obs)
+            new = now - (visible_lines(self.baseline) if self.baseline else set())
+            if any(re.search(c.pattern or "", l) for l in new):
+                return True
+            # Same text can legitimately reappear (e.g. two runs in the same second produce an identical
+            # timestamped status line). Accept it only if the screen actually changed since the action,
+            # so a stale message from before the click can never satisfy the checkpoint on its own.
+            return (self.baseline is not None and obs.fingerprint() != self.baseline.fingerprint()
+                    and any(re.search(c.pattern or "", l) for l in now))
         if c.kind in ("element_value", "element_present"):
             target = c.target or (step.target if step else None)
             if target is None:
@@ -365,6 +372,8 @@ class ReplayEngine:
 
     def _extract(self, step: Step, node, params: dict[str, Any] | None = None) -> Any:
         ex = step.extract
+        if ex.read == "options":
+            return [o for o in (node.options or []) if o]
         if ex.read == "table_cell":
             if not node.rows or not node.columns:
                 self._fail("EXTRACTION_FAILED", step, "a table with rows", "table is empty")

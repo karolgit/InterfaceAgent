@@ -1,0 +1,304 @@
+{
+  "schema_version": "cua.capability/v1",
+  "id": "corelink.account.get_open_options",
+  "version": "1.0.0",
+  "status": "draft",
+  "title": "List account types that can be opened, and the member's funding shares",
+  "description": "Open the Open Sub-Account screen for a member and read, without posting anything, which account types this credit union offers and which of the member's shares can fund a new account. Call this before opening an account so only valid choices are offered. Read-only.",
+  "app": {
+    "product": "CoreLink",
+    "versions": "7.4.1",
+    "surface": "java-swing",
+    "profile": "corelink"
+  },
+  "inputs": [
+    {
+      "name": "member_number",
+      "type": "string",
+      "description": "5-digit member number",
+      "pattern": "^\\d{5}$",
+      "required": true,
+      "sensitive": true
+    }
+  ],
+  "outputs": [
+    {
+      "name": "account_types",
+      "type": "list",
+      "description": "Account types offered by this credit union",
+      "sensitive": false
+    },
+    {
+      "name": "fund_from",
+      "type": "list",
+      "description": "Member's shares that can fund it, e.g. 'S01 Share Savings'",
+      "sensitive": false
+    }
+  ],
+  "business_outcomes": [
+    {
+      "code": "MEMBER_NOT_FOUND",
+      "description": "No member exists with that number."
+    },
+    {
+      "code": "MEMBER_RESTRICTED",
+      "description": "Member is restricted; supervisor review required before servicing."
+    },
+    {
+      "code": "MEMBER_CLOSED",
+      "description": "Membership is closed."
+    },
+    {
+      "code": "PERMISSION_DENIED",
+      "description": "The signed-on operator is not authorized for this transaction."
+    }
+  ],
+  "risk": "read_only",
+  "preconditions": [
+    "signed_on",
+    "no_modal_dialog"
+  ],
+  "steps": [
+    {
+      "id": "s1",
+      "intent": "Open the Open Sub-Account workflow.",
+      "action": "click",
+      "target": {
+        "description": "menu item 'Open Sub-Account' in window 'CoreLink 7.4.1 - Heritage Federal Credit Union'",
+        "scope": {
+          "window": "main"
+        },
+        "strategies": [
+          {
+            "kind": "a11y",
+            "role": "menu item",
+            "name": "Open Sub-Account",
+            "unique_at_record": true
+          },
+          {
+            "kind": "path",
+            "role": "menu item",
+            "path": "0.1.1.2.0",
+            "unique_at_record": true
+          }
+        ]
+      },
+      "risk": "safe",
+      "expect": [
+        {
+          "kind": "container_present",
+          "pattern": "^Open Sub-Account  \\[TRAN 0417\\]$",
+          "description": "work window 'Open Sub-Account  [TRAN 0417]' opened"
+        }
+      ],
+      "timeout_ms": 8000
+    },
+    {
+      "id": "s2",
+      "intent": "Enter the member number to load the member record.",
+      "action": "set_text",
+      "target": {
+        "description": "text 'Member Number' in 'Open Sub-Account  [TRAN 0417]'",
+        "scope": {
+          "window": "main",
+          "container": "^Open Sub-Account  \\[TRAN 0417\\]$"
+        },
+        "strategies": [
+          {
+            "kind": "label",
+            "role": "text",
+            "label": "Member Number",
+            "unique_at_record": true
+          },
+          {
+            "kind": "group",
+            "role": "text",
+            "group": "New Share Sub-Account",
+            "index": 0,
+            "unique_at_record": true
+          },
+          {
+            "kind": "path",
+            "role": "text",
+            "path": "0.1.0.0.0.1",
+            "unique_at_record": true
+          },
+          {
+            "kind": "coords",
+            "rel_x": 0.4929,
+            "rel_y": 0.3088,
+            "unique_at_record": true
+          }
+        ]
+      },
+      "value": {
+        "source": "param",
+        "param": "member_number"
+      },
+      "risk": "safe",
+      "expect": [
+        {
+          "kind": "element_value",
+          "pattern": ".+",
+          "description": "field holds the entered value"
+        }
+      ],
+      "timeout_ms": 8000
+    },
+    {
+      "id": "s3",
+      "intent": "Load the member record to populate name and share list.",
+      "action": "click",
+      "target": {
+        "description": "push button 'Load' in 'Open Sub-Account  [TRAN 0417]'",
+        "scope": {
+          "window": "main",
+          "container": "^Open Sub-Account  \\[TRAN 0417\\]$"
+        },
+        "strategies": [
+          {
+            "kind": "a11y",
+            "role": "push button",
+            "name": "Load",
+            "unique_at_record": true
+          },
+          {
+            "kind": "group",
+            "role": "push button",
+            "group": "New Share Sub-Account",
+            "index": 0,
+            "unique_at_record": true
+          },
+          {
+            "kind": "path",
+            "role": "push button",
+            "path": "0.1.0.0.0.2",
+            "unique_at_record": true
+          },
+          {
+            "kind": "coords",
+            "rel_x": 0.7232,
+            "rel_y": 0.3088,
+            "unique_at_record": true
+          }
+        ]
+      },
+      "risk": "safe",
+      "expect": [
+        {
+          "kind": "text_present",
+          "pattern": "MEMBER LOADED",
+          "description": "status line shows 'MEMBER LOADED'"
+        }
+      ],
+      "timeout_ms": 8000
+    },
+    {
+      "id": "s4",
+      "intent": "Read the account types offered by this credit union.",
+      "action": "extract",
+      "target": {
+        "description": "combo box 'Account Type' in 'Open Sub-Account  [TRAN 0417]'",
+        "scope": {
+          "window": "main",
+          "container": "^Open Sub-Account  \\[TRAN 0417\\]$"
+        },
+        "strategies": [
+          {
+            "kind": "label",
+            "role": "combo box",
+            "label": "Account Type",
+            "unique_at_record": true
+          },
+          {
+            "kind": "group",
+            "role": "combo box",
+            "group": "New Share Sub-Account",
+            "index": 0,
+            "unique_at_record": true
+          },
+          {
+            "kind": "path",
+            "role": "combo box",
+            "path": "0.1.0.0.0.6",
+            "unique_at_record": true
+          },
+          {
+            "kind": "coords",
+            "rel_x": 0.4839,
+            "rel_y": 0.4956,
+            "unique_at_record": true
+          }
+        ]
+      },
+      "extract": {
+        "output": "account_types",
+        "read": "options",
+        "parse": "text"
+      },
+      "risk": "safe",
+      "expect": [],
+      "timeout_ms": 8000
+    },
+    {
+      "id": "s5",
+      "intent": "Read the member's shares that can fund the new account.",
+      "action": "extract",
+      "target": {
+        "description": "combo box 'Fund From' in 'Open Sub-Account  [TRAN 0417]'",
+        "scope": {
+          "window": "main",
+          "container": "^Open Sub-Account  \\[TRAN 0417\\]$"
+        },
+        "strategies": [
+          {
+            "kind": "label",
+            "role": "combo box",
+            "label": "Fund From",
+            "unique_at_record": true
+          },
+          {
+            "kind": "group",
+            "role": "combo box",
+            "group": "New Share Sub-Account",
+            "index": 1,
+            "unique_at_record": true
+          },
+          {
+            "kind": "path",
+            "role": "combo box",
+            "path": "0.1.0.0.0.10",
+            "unique_at_record": true
+          },
+          {
+            "kind": "coords",
+            "rel_x": 0.5286,
+            "rel_y": 0.6926,
+            "unique_at_record": true
+          }
+        ]
+      },
+      "extract": {
+        "output": "fund_from",
+        "read": "options",
+        "parse": "text"
+      },
+      "risk": "safe",
+      "expect": [],
+      "timeout_ms": 8000
+    }
+  ],
+  "success": [],
+  "outcome_rules": [],
+  "inherit_outcome_rules": true,
+  "provenance": {
+    "discovered_by": "llm:claude-opus-5",
+    "discovery_run": "discover-20260926-160045-ab13",
+    "goal": "Open a new sub-account of type account_type for the member given by member_number, with opening deposit initial_deposit funded from the member's share whose suffix is fund_from. Post it and read the confirmation number.",
+    "tenant": "heritage",
+    "created_at": "2026-09-26T20:01:38+00:00",
+    "notes": [
+      "Derived from corelink.account.open_share_sub_account@1.0.0 (discovery run discover-20260926-160045-ab13): steps up to Load are reused unchanged; the two drop-downs are read as outputs instead of being filled. Nothing is posted."
+    ]
+  }
+}

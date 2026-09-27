@@ -203,6 +203,15 @@ With an API key set, the LLM assistant chooses capabilities as tools. With `--of
 small keyword router drives the same gateway. Irreversible actions wait for the person to press
 **Confirm**. Requests are logged as `member:<id>` or `staff:<id>`.
 
+Ask "What accounts can I open?" and the assistant replays the read-only
+`corelink.account.get_open_options` capability. It reads the account types this credit union offers, plus the
+member's own shares, live from CoreLink, and shows them as one-tap buttons. The assistant must check this before
+opening an account, so it never offers a product the tenant lacks or a share the member doesn't have. A request for
+an unavailable option returns the business outcome `INVALID_OPTION` with the valid choices.
+
+The operator console is also built into the portal at `http://127.0.0.1:8800/console/`. It watches the portal's own
+CoreLink session, so the **Operator console** link on the page always works.
+
 Useful demo links (the page signs in and asks the question for you):
 `http://127.0.0.1:8800/?member=12345&ask=What's my checking balance?` and
 `http://127.0.0.1:8800/?staff=sarah&ask=Checking balance for 12345`.
@@ -255,6 +264,7 @@ tokens and $25 per million output tokens:
 | ![Confirm](docs/screenshots/06-confirm-posting-dialog.png) **Irreversible.** Policy requires an approval grant or a human. | ![Posted](docs/screenshots/07-transaction-posted.png) **Output.** The confirmation number is extracted with a capture pattern. |
 | ![Override](docs/screenshots/08-supervisor-override.png) **Escalation.** The supervisor override goes to a human. | ![Tenant](docs/screenshots/09-second-tenant-lakeshore.png) **Second tenant.** The same capability replays through label and name overrides. |
 | ![Redacted](docs/screenshots/10-redacted-evidence.png) **Evidence** is redacted from accessibility bounds. | ![Confirm in chat](docs/screenshots/13-member-confirmation.png) **The member confirms** an irreversible action. |
+| ![Open options](docs/screenshots/16-open-account-options.png) **Valid choices only.** Account types and funding shares are read live and offered as buttons. | ![Operator console](docs/screenshots/11-operator-console.png) **Operator console,** also available inside the portal at `/console/`. |
 | ![Staff mode](docs/screenshots/14-staff-assistant.png) **Staff mode.** Sarah names the member in her request. | ![Portal landing](docs/screenshots/15-portal-landing.png) **Member Assistant** landing page, with member or staff sign-in. |
 
 ## Repository layout

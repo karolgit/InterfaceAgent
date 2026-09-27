@@ -1,0 +1,52 @@
+{"ts": "2026-09-27T03:21:47.681+00:00", "t_ms": 0, "event": "replay_started", "capability": "corelink.account.open_share_sub_account@1.0.0", "tenant": "heritage", "params": {"member_number": "[MEMBER_NUMBER]", "account_type": "Share Certificate", "initial_deposit": "100.00", "fund_from": "S01"}, "status": "draft"}
+{"ts": "2026-09-27T03:21:47.738+00:00", "t_ms": 62, "event": "sign_on_started"}
+{"ts": "2026-09-27T03:21:47.738+00:00", "t_ms": 62, "event": "step_started", "step": "so1", "intent": "Enter operator ID", "action": "set_text"}
+{"ts": "2026-09-27T03:21:47.758+00:00", "t_ms": 78, "event": "target_resolved", "step": "so1", "strategy": 0, "kind": "label", "ref": "w1.0.1.0.1"}
+{"ts": "2026-09-27T03:21:47.759+00:00", "t_ms": 78, "event": "policy", "step": "so1", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-27T03:21:47.764+00:00", "t_ms": 78, "event": "acted", "step": "so1", "action": "set_text", "target": "Operator ID field", "value_source": "secret"}
+{"ts": "2026-09-27T03:21:48.153+00:00", "t_ms": 467, "event": "step_started", "step": "so2", "intent": "Enter operator password", "action": "set_text"}
+{"ts": "2026-09-27T03:21:48.171+00:00", "t_ms": 483, "event": "target_resolved", "step": "so2", "strategy": 0, "kind": "label", "ref": "w1.0.1.0.3"}
+{"ts": "2026-09-27T03:21:48.171+00:00", "t_ms": 483, "event": "policy", "step": "so2", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-27T03:21:48.171+00:00", "t_ms": 483, "event": "acted", "step": "so2", "action": "set_text", "target": "Password field", "value_source": "secret"}
+{"ts": "2026-09-27T03:21:48.561+00:00", "t_ms": 875, "event": "step_started", "step": "so3", "intent": "Submit sign-on", "action": "click"}
+{"ts": "2026-09-27T03:21:48.569+00:00", "t_ms": 890, "event": "target_resolved", "step": "so3", "strategy": 0, "kind": "a11y", "ref": "w1.0.1.0.5"}
+{"ts": "2026-09-27T03:21:48.569+00:00", "t_ms": 890, "event": "policy", "step": "so3", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-27T03:21:48.573+00:00", "t_ms": 890, "event": "acted", "step": "so3", "action": "click", "target": "Sign On button", "value_source": null}
+{"ts": "2026-09-27T03:21:48.670+00:00", "t_ms": 983, "event": "checkpoint_met", "step": "so3", "checks": ["status bar confirms sign-on"]}
+{"ts": "2026-09-27T03:21:48.670+00:00", "t_ms": 983, "event": "sign_on_completed"}
+{"ts": "2026-09-27T03:21:48.678+00:00", "t_ms": 1000, "event": "step_started", "step": "s1", "intent": "Open the Open Sub-Account workflow.", "action": "click"}
+{"ts": "2026-09-27T03:21:48.687+00:00", "t_ms": 1015, "event": "target_resolved", "step": "s1", "strategy": 0, "kind": "a11y", "ref": "w0.0.1.1.2.0"}
+{"ts": "2026-09-27T03:21:48.687+00:00", "t_ms": 1015, "event": "policy", "step": "s1", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-27T03:21:48.690+00:00", "t_ms": 1015, "event": "acted", "step": "s1", "action": "click", "target": "menu item 'Open Sub-Account' in window 'CoreLink 7.4.1 - Heritage Federal Credit Union'", "value_source": null}
+{"ts": "2026-09-27T03:21:48.847+00:00", "t_ms": 1171, "event": "checkpoint_met", "step": "s1", "checks": ["work window 'Open Sub-Account  [TRAN 0417]' opened"]}
+{"ts": "2026-09-27T03:21:48.848+00:00", "t_ms": 1171, "event": "step_started", "step": "s2", "intent": "Enter the member number to load the member record.", "action": "set_text"}
+{"ts": "2026-09-27T03:21:48.873+00:00", "t_ms": 1187, "event": "target_resolved", "step": "s2", "strategy": 0, "kind": "label", "ref": "w0.0.1.0.1.0.0.1.0.0.0.1"}
+{"ts": "2026-09-27T03:21:48.873+00:00", "t_ms": 1187, "event": "policy", "step": "s2", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-27T03:21:48.878+00:00", "t_ms": 1203, "event": "acted", "step": "s2", "action": "set_text", "target": "text 'Member Number' in 'Open Sub-Account  [TRAN 0417]'", "value_source": "param"}
+{"ts": "2026-09-27T03:21:48.880+00:00", "t_ms": 1203, "event": "checkpoint_met", "step": "s2", "checks": ["field holds the entered value"]}
+{"ts": "2026-09-27T03:21:48.880+00:00", "t_ms": 1203, "event": "step_started", "step": "s3", "intent": "Load the member record to populate name and share list.", "action": "click"}
+{"ts": "2026-09-27T03:21:48.895+00:00", "t_ms": 1217, "event": "target_resolved", "step": "s3", "strategy": 0, "kind": "a11y", "ref": "w0.0.1.0.1.0.0.1.0.0.0.2"}
+{"ts": "2026-09-27T03:21:48.896+00:00", "t_ms": 1217, "event": "policy", "step": "s3", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-27T03:21:48.900+00:00", "t_ms": 1217, "event": "acted", "step": "s3", "action": "click", "target": "push button 'Load' in 'Open Sub-Account  [TRAN 0417]'", "value_source": null}
+{"ts": "2026-09-27T03:21:48.983+00:00", "t_ms": 1296, "event": "checkpoint_met", "step": "s3", "checks": ["status line shows 'MEMBER LOADED'"]}
+{"ts": "2026-09-27T03:21:48.983+00:00", "t_ms": 1296, "event": "step_started", "step": "s4", "intent": "Set the requested sub-account type.", "action": "select"}
+{"ts": "2026-09-27T03:21:48.991+00:00", "t_ms": 1312, "event": "target_resolved", "step": "s4", "strategy": 0, "kind": "label", "ref": "w0.0.1.0.1.0.0.1.0.0.0.6"}
+{"ts": "2026-09-27T03:21:48.992+00:00", "t_ms": 1312, "event": "policy", "step": "s4", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-27T03:21:48.994+00:00", "t_ms": 1312, "event": "acted", "step": "s4", "action": "select", "target": "combo box 'Account Type' in 'Open Sub-Account  [TRAN 0417]'", "value_source": "param"}
+{"ts": "2026-09-27T03:21:49.001+00:00", "t_ms": 1328, "event": "checkpoint_met", "step": "s4", "checks": ["field holds the entered value"]}
+{"ts": "2026-09-27T03:21:49.001+00:00", "t_ms": 1328, "event": "step_started", "step": "s5", "intent": "Enter the opening deposit amount.", "action": "set_text"}
+{"ts": "2026-09-27T03:21:49.008+00:00", "t_ms": 1328, "event": "target_resolved", "step": "s5", "strategy": 0, "kind": "label", "ref": "w0.0.1.0.1.0.0.1.0.0.0.8"}
+{"ts": "2026-09-27T03:21:49.010+00:00", "t_ms": 1328, "event": "policy", "step": "s5", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-27T03:21:49.014+00:00", "t_ms": 1328, "event": "acted", "step": "s5", "action": "set_text", "target": "text 'Initial Deposit' in 'Open Sub-Account  [TRAN 0417]'", "value_source": "param"}
+{"ts": "2026-09-27T03:21:49.027+00:00", "t_ms": 1342, "event": "checkpoint_met", "step": "s5", "checks": ["field holds the entered value"]}
+{"ts": "2026-09-27T03:21:49.028+00:00", "t_ms": 1342, "event": "step_started", "step": "s6", "intent": "Choose the funding share by suffix.", "action": "select"}
+{"ts": "2026-09-27T03:21:49.038+00:00", "t_ms": 1358, "event": "target_resolved", "step": "s6", "strategy": 0, "kind": "label", "ref": "w0.0.1.0.1.0.0.1.0.0.0.10"}
+{"ts": "2026-09-27T03:21:49.039+00:00", "t_ms": 1358, "event": "policy", "step": "s6", "verdict": "allow", "risk": "safe", "reason": "allowed"}
+{"ts": "2026-09-27T03:21:49.041+00:00", "t_ms": 1358, "event": "acted", "step": "s6", "action": "select", "target": "combo box 'Fund From' in 'Open Sub-Account  [TRAN 0417]'", "value_source": "param"}
+{"ts": "2026-09-27T03:21:49.044+00:00", "t_ms": 1358, "event": "checkpoint_met", "step": "s6", "checks": ["field holds the entered value"]}
+{"ts": "2026-09-27T03:21:49.045+00:00", "t_ms": 1358, "event": "step_started", "step": "s7", "intent": "Advance to the review/confirmation step before posting.", "action": "click"}
+{"ts": "2026-09-27T03:21:49.053+00:00", "t_ms": 1375, "event": "target_resolved", "step": "s7", "strategy": 0, "kind": "a11y", "ref": "w0.0.1.0.1.0.0.1.0.0.0.11"}
+{"ts": "2026-09-27T03:21:49.054+00:00", "t_ms": 1375, "event": "policy", "step": "s7", "verdict": "allow", "risk": "risky", "reason": "allowed"}
+{"ts": "2026-09-27T03:21:49.056+00:00", "t_ms": 1375, "event": "acted", "step": "s7", "action": "click", "target": "push button 'Review >>' in 'Open Sub-Account  [TRAN 0417]'", "value_source": null}
+{"ts": "2026-09-27T03:21:49.137+00:00", "t_ms": 1453, "event": "rule_matched", "rule": "validation_error", "kind": "business_outcome", "code": "VALIDATION_ERROR", "ui_text": "MINIMUM OPENING DEPOSIT FOR SHARE CERTIFICATE IS [AMOUNT]", "step": "s7"}
+{"ts": "2026-09-27T03:21:49.266+00:00", "t_ms": 1592, "event": "replay_finished", "status": "business_outcome", "outcome": {"code": "VALIDATION_ERROR", "message": "The application rejected an input value.", "ui_text": "MINIMUM OPENING DEPOSIT FOR SHARE CERTIFICATE IS [AMOUNT]", "step_id": "s7", "screenshot": "01-outcome-VALIDATION_ERROR.png"}, "failure": null, "duration_ms": 1578}

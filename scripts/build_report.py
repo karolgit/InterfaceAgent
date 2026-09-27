@@ -59,6 +59,98 @@ python -m portal.app --allow-draft                           # 7. member assista
 ```
 """
 
+RECORDING = """
+Recording does not capture mouse movements or video. It records **which control** was used, **where each value
+came from**, and **what changed on screen**. These examples come from the real Claude discovery run for "get
+savings balance".
+
+**Each turn of the discovery loop**
+
+1. **Look.** The surface driver reads the app's accessibility tree (roles, names, labels, states, bounds) and turns
+   it into an outline with short references. The model gets that outline plus a redacted screenshot:
+
+```
+[w0.0.1.1.1.0] menu item "Member Inquiry"   (in closed menu; clickable)
+[w0.0.1.0.1.0.1.0.0.1] text  label="Member #:"
+[w0.0.1.0.1.0.1.0.0.2] push button "Inquire"
+```
+
+2. **Decide.** The model picks exactly one action and states why, for example
+   `click(ref="w0.0.1.1.1.0", why="Open the Member Inquiry screen")`. Inputs are referenced by name
+   (`type_text(ref=..., param="member_number")`). The model never sees or types the value.
+3. **Check.** Policy verifies the action against the allowlist and assigns its risk class. Irreversible actions
+   pause for a human.
+4. **Act.** The driver performs the action through accessibility, not the physical mouse:
+
+| Action | How it is performed |
+|---|---|
+| Click a button or menu item | The control's accessibility action, the same effect as a click |
+| Type into a field | Sets the field's text through the accessible text interface. That focuses the field first, so "focus" is never a separate step. |
+| Press a key (F2, Enter, Esc) | Key events sent to the app window |
+| Choose from a drop-down | Selects the matching option. If the option doesn't exist, the result is `INVALID_OPTION`. |
+
+5. **Record.** For each action the trace keeps the target's role, name, label, panel, index path, and bounds. It
+   also keeps the value source (literal, input parameter, or named secret), the screen before and after, the
+   policy verdict, and the model's reason.
+
+**Compiling the trace into the capability**
+
+When the model calls `finish`, the compiler converts the trace into the artifact, independent of the model
+transcript:
+
+- **Targets become ranked locators**, each checked for uniqueness on the recorded screen. The order is
+  accessible name, then nearby label, then named panel, then index path, then relative coordinates as a last resort.
+- **Typed values become parameters or secret references**, never literal PII.
+- **Screen changes become checkpoints**: a new work window, a new dialog, a new status line (numbers
+  generalized, as in `INQUIRY COMPLETE - \\d+ SHARE\\(S\\)`), or a field holding a value.
+- **Policy verdicts become per-step risk classes.** The model's quoted proof becomes the final success check.
+
+```
+s2  set_text   value = input "member_number"
+    locate by: 1) name "Member #:"  2) label "Member #:"  3) index path  4) coordinates
+    checkpoint: field holds a value
+s3  click "Inquire"
+    checkpoint: status line matches "INQUIRY COMPLETE - \\d+ SHARE\\(S\\)"
+```
+
+In replay there is no model. Each step re-finds its control with those strategies, acts, and waits for its checkpoint,
+so a moved window or a slightly renamed label does not break it. Human actions during a handoff are recorded
+separately by the driver's input recorder: real clicks and keystrokes, with password fields stored as `[SECRET]`.
+"""
+
+SURFACES = """
+Only one component is specific to Java Swing: the **surface driver** (the bridge). Everything above it is
+technology-neutral and does not change:
+- the discovery agent;
+- the artifact schema;
+- the replay engine;
+- policy and redaction;
+- the capability gateway;
+- the operator console.
+
+Supporting another kind of application means writing another driver behind the same interface. It must provide
+observe (nodes with role, name, value, label, and bounds), the basic actions (click, set text, select, key, close),
+screenshots, and the control lock with input recording.
+
+| Application type | Driver | How it perceives and acts |
+|---|---|---|
+| Java desktop (CoreLink) | Accessibility bridge (**built**) | Java Accessibility API in-process; accessibility actions |
+| Modern or legacy web app | Browser driver (Playwright or CDP) | The browser's accessibility tree and page structure, including frames and framesets; browser input |
+| Windows desktop (.NET, Win32, Delphi, PowerBuilder) | Windows UI Automation driver | The Windows accessibility tree; invoke and value patterns, with synthesized input as a fallback |
+| Custom-drawn UIs, Citrix, or remote desktops | Vision driver | Screenshot, OCR, and a vision model produce nodes with role guesses and bounds; coordinate input |
+| Mainframe green screens (3270/5250) | Terminal-emulator driver | Screen buffer fields; keystrokes |
+
+**What changes per application.**
+- **App profile.** A new `configs/apps/<product>.yaml` declares the driver, the sign-on routine, the product's
+  error messages mapped to outcome codes, the PII labels, and tenant overrides.
+- **Scope.** `scope.window` may name a browser frame or page instead of a desktop window.
+
+**What does not change.**
+- **The artifact format and locator strategies.** Label proximity and relative coordinates are geometric, so a
+  vision driver fills them from OCR bounds exactly as the Swing driver fills them from accessibility bounds.
+- **Replay, the error taxonomy, human handoff, and redaction.** They work unchanged on top of any driver.
+"""
+
 SHOTS = [
     ("01-corelink-sign-on.png", "Sign-on. Credentials are resolved from the secret store by name."),
     ("02-member-inquiry.png", "Member Inquiry: the flow the first capability automates."),
@@ -73,6 +165,7 @@ SHOTS = [
     ("11-operator-console.png", "Operator console: the queue, context, redacted snapshot, and live session."),
     ("12-member-assistant.png", "Member assistant answering from a deterministic replay."),
     ("13-member-confirmation.png", "The member must confirm an irreversible action. The model cannot."),
+    ("16-open-account-options.png", "Valid account types and funding shares, read live from the core system, offered as buttons."),
     ("14-staff-assistant.png", "Staff mode: the employee names the member; follow-ups reuse it."),
     ("15-portal-landing.png", "Member Assistant landing page with member and staff sign-in."),
 ]
@@ -184,6 +277,10 @@ cross-tenant reuse with per-tenant overrides. Unattended replay is also gated on
 <h2>Requirements coverage</h2>{md(COVERAGE)}</section>
 
 <section class="pb"><h2>Architecture diagram</h2>{svg}</section>
+
+<section class="pb"><h2>How a capability is recorded</h2>{md(RECORDING)}</section>
+
+<section class="pb"><h2>Supporting applications that are not Java</h2>{md(SURFACES)}</section>
 
 <section class="pb">{md(report_md)}</section>
 

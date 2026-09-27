@@ -1,0 +1,24 @@
+{
+  "run_id": "06-balance-slow-host-20260926-232128-d329",
+  "capability": "corelink.member.get_share_savings_balance@1.0.0",
+  "status": "success",
+  "outputs": {
+    "savings_balance": "sha256:df7f4401d04c"
+  },
+  "outcome": null,
+  "failure": null,
+  "recoveries": [
+    {
+      "rule": "processing",
+      "code": "SLOW_RESPONSE",
+      "action": "wait",
+      "attempt": 1,
+      "step": "s3",
+      "ui_text": "PROCESSING..."
+    }
+  ],
+  "handoffs": [],
+  "locator_fallbacks": [],
+  "duration_ms": 6030,
+  "evidence_dir": "evidence\\replays\\06-balance-slow-host-20260926-232128-d329"
+}

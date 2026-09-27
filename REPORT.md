@@ -118,7 +118,7 @@ this order: capability rules, then tenant extras, then product rules.
 
 Sensitive outputs are returned to the caller but fingerprinted in the persisted `result.json`.
 
-**Evidence.** `evidence/replays/summary.md` shows 18 scenarios, all passing:
+**Evidence.** `evidence/replays/summary.md` shows 19 scenarios, all passing:
 - the happy path and a second tenant;
 - not-found, restricted, and invalid input;
 - a popup, a slow host, and session expiry, all recovered;
@@ -129,7 +129,9 @@ Sensitive outputs are returned to the caller but fingerprinted in the persisted 
 - the parameterized share-balance capability reading Share Draft Checking, and returning
   `SHARE_NOT_FOUND` for a share the member doesn't have;
 - a product this tenant doesn't offer, which returns `INVALID_OPTION` with the valid choices. It is found by
-  the replay's select action, not by a pre-listed rule, so a caller or AI agent can correct the request.
+  the replay's select action, not by a pre-listed rule, so a caller or AI agent can correct the request;
+- a read-only capability that lists the account types this tenant offers and the member's funding shares.
+  The assistant calls it before opening an account, so it only offers valid choices.
 
 **Drift (secondary).** Locator fallbacks are logged per step. A tenant can override label and name
 aliases without re-recording. Structural drift that breaks every strategy fails with `TARGET_NOT_FOUND`

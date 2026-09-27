@@ -1,0 +1,98 @@
+{
+  "intervention": "int-232207-babe",
+  "kind": "escalation",
+  "reason": "SUPERVISOR_OVERRIDE_REQUIRED: Amount exceeds the operator limit; a supervisor must key an override.",
+  "decision": "resume",
+  "operator": "sim-supervisor",
+  "notes": "SIMULATED operator: keyed supervisor override (sup01) and pressed OK",
+  "human_actions": 5,
+  "expired": false,
+  "events": [
+    {
+      "kind": "control_change",
+      "holder": "sim-supervisor",
+      "from": "paused",
+      "to": "human",
+      "seq": 6,
+      "ts": 1790479327711,
+      "mode": "human"
+    },
+    {
+      "kind": "click",
+      "actor": "human",
+      "target": {
+        "role": "text",
+        "name": "",
+        "window": "Supervisor Override Required"
+      },
+      "x": 924,
+      "y": 479,
+      "seq": 7,
+      "ts": 1790479328674,
+      "mode": "human"
+    },
+    {
+      "kind": "type",
+      "actor": "human",
+      "target": {
+        "role": "text",
+        "name": "",
+        "window": "Supervisor Override Required"
+      },
+      "text": "sup01",
+      "length": 5,
+      "seq": 8,
+      "ts": 1790479329283,
+      "mode": "human"
+    },
+    {
+      "kind": "click",
+      "actor": "human",
+      "target": {
+        "role": "password text",
+        "name": "",
+        "window": "Supervisor Override Required"
+      },
+      "x": 924,
+      "y": 503,
+      "seq": 9,
+      "ts": 1790479329283,
+      "mode": "human"
+    },
+    {
+      "kind": "type",
+      "actor": "human",
+      "target": {
+        "role": "password text",
+        "name": "",
+        "window": "Supervisor Override Required"
+      },
+      "text": "[SECRET]",
+      "length": 7,
+      "seq": 10,
+      "ts": 1790479329593,
+      "mode": "human"
+    },
+    {
+      "kind": "click",
+      "actor": "human",
+      "target": {
+        "role": "push button",
+        "name": "OK",
+        "window": "Supervisor Override Required"
+      },
+      "x": 761,
+      "y": 535,
+      "seq": 11,
+      "ts": 1790479329594,
+      "mode": "human"
+    },
+    {
+      "kind": "window_closed",
+      "window": "Supervisor Override Required",
+      "seq": 12,
+      "ts": 1790479329654,
+      "mode": "human"
+    }
+  ]
+}

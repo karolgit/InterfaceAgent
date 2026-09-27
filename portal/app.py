@@ -23,12 +23,13 @@ from typing import Any
 
 import uvicorn
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from pydantic import BaseModel
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from cua import console as console_mod  # noqa: E402
 from cua.gateway import CapabilityGateway, tool_name  # noqa: E402
 
 # The chat assistant only routes requests to capabilities, so a cheaper model is enough here.
@@ -46,6 +47,9 @@ Be brief and warm; answers may be read aloud, so avoid tables and markdown. Stat
 tool returns a business outcome (for example MEMBER_RESTRICTED or VALIDATION_ERROR), explain it in plain \
 words and suggest the next step. INVALID_OPTION includes the valid choices in "available"; offer those. \
 If a tool fails, apologize briefly and offer to connect them with staff. \
+Before opening an account, call the tool that lists open-account options: it returns the account types THIS \
+credit union offers and the member's own shares that can fund one. Offer only those (the app shows them as \
+buttons); never suggest other products, and never invent a share suffix. \
 For anything irreversible (opening an account, moving money): as soon as you know every input, call the tool \
 right away. Do NOT ask the member to confirm in chat first. Calling the tool does not execute anything; it \
 makes the app show the member a Confirm button, which is the one and only confirmation step. Then describe \
@@ -60,7 +64,9 @@ number; never guess one. Reuse the member number from earlier in the conversatio
 means the same member.
 
 Be brief and factual; answers may be read aloud, so avoid tables and markdown. Say which member you looked up. \
-Explain business outcomes (for example MEMBER_NOT_FOUND or SHARE_NOT_FOUND) in plain words. For anything \
+Explain business outcomes (for example MEMBER_NOT_FOUND or SHARE_NOT_FOUND) in plain words. Before opening \
+an account, call the open-account options tool for that member and offer only the account types and funding \
+shares it returns. For anything \
 irreversible: as soon as you know every input, call the tool right away without asking for confirmation in \
 chat. The call only makes the app show a Confirm button, which is the one and only confirmation step. Then ask \
 the employee to press Confirm, and never claim it is done until you receive the result."""
@@ -68,6 +74,18 @@ the employee to press Confirm, and never claim it is done until you receive the 
 STAFF_USERS = {"sarah": "Sarah (Contact Center)"}
 
 app = FastAPI(title="Member Assistant")
+OPTIONS_TOOL = tool_name("corelink.account.get_open_options")
+OPEN_TOOL = tool_name("corelink.account.open_share_sub_account")
+BALANCE_TOOL = tool_name("corelink.member.get_share_balance")
+
+
+@app.get("/console")
+def console_redirect():
+    return RedirectResponse("/console/")
+
+
+# The operator console is served by the portal too, watching the portal's own CoreLink session.
+app.mount("/console", console_mod.app)
 gateway: CapabilityGateway | None = None
 SESSIONS: dict[str, dict[str, Any]] = {}
 
@@ -165,7 +183,7 @@ def confirm(body: Confirm):
         result = gateway.confirm(body.pending_id)
         note = f"The {'employee' if _is_staff(sess) else 'member'} pressed Confirm. Result: {json.dumps(result)}"
     if llm_available():
-        reply = _llm_turn(sess, [{"type": "text", "text": f"(App notice, not typed by the member) {note}"}])
+        reply = _llm_turn(sess, [{"type": "text", "text": f"(App notice, not typed by the member) {note}"}])["text"]
     else:
         reply = _phrase(result, "open", sess)
     return {"reply": reply, "result": result}
@@ -173,7 +191,7 @@ def confirm(body: Confirm):
 
 # ----------------------------------------------------------------------------- LLM path
 
-def _llm_turn(sess: dict[str, Any], user_content: list[dict[str, Any]]) -> str | dict[str, Any]:
+def _llm_turn(sess: dict[str, Any], user_content: list[dict[str, Any]]) -> dict[str, Any]:
     import anthropic
 
     client = anthropic.Anthropic()
@@ -182,17 +200,18 @@ def _llm_turn(sess: dict[str, Any], user_content: list[dict[str, Any]]) -> str |
     tools = gateway.tools(bound=set() if _is_staff(sess) else {"member_number"})
     system = (SYSTEM_STAFF + f"\nThe signed-in employee is {sess['name']}." if _is_staff(sess)
               else SYSTEM + f"\nThe signed-in member's name is {sess['name']}.")
+    choices = None
     for _ in range(6):
         resp = client.messages.create(model=MODEL, max_tokens=4000,
                                       system=system,
                                       tools=tools, messages=msgs, thinking={"type": "adaptive"},
                                       output_config={"effort": "low"})
         if resp.stop_reason == "refusal":
-            return "Sorry, I can't help with that here. A staff member can assist you."
+            return {"text": "Sorry, I can't help with that here. A staff member can assist you.", "choices": choices}
         msgs.append({"role": "assistant", "content": [b.model_dump(exclude_none=True) for b in resp.content]})
         calls = [b for b in resp.content if b.type == "tool_use"]
         if not calls:
-            return " ".join(b.text for b in resp.content if b.type == "text").strip()
+            return {"text": " ".join(b.text for b in resp.content if b.type == "text").strip(), "choices": choices}
         results, pending = [], None
         for c in calls:
             try:
@@ -201,6 +220,8 @@ def _llm_turn(sess: dict[str, Any], user_content: list[dict[str, Any]]) -> str |
                 r = {"status": "rejected", "failure": {"code": "UNKNOWN_CAPABILITY"}}
             if r.get("status") == "needs_confirmation":
                 pending = r
+            if c.name == OPTIONS_TOOL and r.get("status") == "success":
+                choices = r.get("outputs")
             results.append({"type": "tool_result", "tool_use_id": c.id, "content": json.dumps(r)})
         msgs.append({"role": "user", "content": results})
         if pending:
@@ -209,15 +230,13 @@ def _llm_turn(sess: dict[str, Any], user_content: list[dict[str, Any]]) -> str |
                                           thinking={"type": "adaptive"}, output_config={"effort": "low"})
             msgs.append({"role": "assistant", "content": [b.model_dump(exclude_none=True) for b in resp.content]})
             text = " ".join(b.text for b in resp.content if b.type == "text").strip()
-            return {"text": text or "Please confirm to continue.", "pending": pending}
-    return "Sorry, that took too many steps. Please try again."
+            return {"text": text or "Please confirm to continue.", "pending": pending, "choices": None}
+    return {"text": "Sorry, that took too many steps. Please try again.", "choices": choices}
 
 
 def _chat_llm(sess: dict[str, Any], text: str) -> dict[str, Any]:
     out = _llm_turn(sess, [{"type": "text", "text": text}])
-    if isinstance(out, dict):
-        return {"reply": out["text"], "pending": out["pending"]}
-    return {"reply": out}
+    return {"reply": out["text"], "pending": out.get("pending"), "choices": out.get("choices")}
 
 
 # ----------------------------------------------------------------------------- offline fallback
@@ -238,42 +257,99 @@ def _staff_member(sess: dict[str, Any], text: str) -> str | None:
     return sess.get("last_member")
 
 
+def _pick_fund(funds: list[str], text: str) -> str | None:
+    t = text.lower()
+    for f in funds:  # "S01 Share Savings": match the suffix, the full name, or a clear keyword
+        suffix, _, desc = f.partition(" ")
+        if suffix.lower() in t.split() or desc.lower() in t:
+            return suffix
+    for word in ("checking", "savings", "money market"):
+        hits = [f for f in funds if word in f.lower()]
+        if word in t and len(hits) == 1:
+            return hits[0].partition(" ")[0]
+    return None
+
+
+def _open_flow(sess: dict[str, Any], args: dict[str, Any], text: str, asked_options: bool) -> dict[str, Any]:
+    """Guided account opening: read valid options from the core system, collect type, amount, and funding share."""
+    r = gateway.invoke(OPTIONS_TOOL, dict(args), _bound(sess), _requester(sess))
+    if r.get("status") != "success":
+        sess.pop("open_draft", None)
+        return {"reply": _phrase(r, "open", sess), "result": r}
+    types, funds = r["outputs"]["account_types"], r["outputs"]["fund_from"]
+    draft = sess.setdefault("open_draft", {})
+    t = text.lower()
+    for ty in types:
+        if ty.lower() in t:
+            draft["account_type"] = ty
+    known = next((i.enum for i in gateway.by_tool(OPEN_TOOL).inputs if i.name == "account_type"), None) or []
+    t_no_products = t
+    for k in known:  # "Youth Savings" must not be read as "fund it from savings"
+        t_no_products = t_no_products.replace(k.lower(), " ")
+    fund = _pick_fund(funds, t_no_products)
+    if fund:
+        draft["fund_from"] = fund
+    cleaned = re.sub(r"\bs\d{2}\b", " ", t)
+    if args.get("member_number"):
+        cleaned = cleaned.replace(args["member_number"], " ")
+    amt = _money(cleaned)
+    if amt and float(amt) > 0:
+        draft["initial_deposit"] = amt
+    whose = f"member {args['member_number']}" if _is_staff(sess) else "you"
+    not_offered = [k for k in known if k.lower() in t and k not in types]
+    if not_offered:
+        return {"reply": f"{not_offered[0]} isn't offered at this credit union. {whose.capitalize()} can open: "
+                         f"{', '.join(types)}. Which one would you like?",
+                "choices": {"account_types": types}}
+    if asked_options and not draft:
+        return {"reply": f"Here's what {whose} can open at this credit union: {', '.join(types)}. It can be funded "
+                         f"from: {', '.join(funds)}. Tap a choice, or tell me the type, amount, and account.",
+                "choices": {"account_types": types, "fund_from": funds}}
+    missing = [k for k in ("account_type", "initial_deposit", "fund_from") if k not in draft]
+    if missing:
+        ask = {"account_type": "which account type", "initial_deposit": "the opening deposit amount",
+               "fund_from": "which account to fund it from"}
+        choices = {}
+        if "account_type" in missing:
+            choices["account_types"] = types
+        if "fund_from" in missing:
+            choices["fund_from"] = funds
+        return {"reply": "Got it. I still need " + " and ".join(ask[m] for m in missing) + ".",
+                "choices": choices or None}
+    sess.pop("open_draft", None)
+    r = gateway.invoke(OPEN_TOOL, {**args, **draft}, _bound(sess), _requester(sess))
+    if r.get("status") == "needs_confirmation":
+        src = next((f for f in funds if f.startswith(draft["fund_from"])), draft["fund_from"])
+        return {"reply": f"I can open a {draft['account_type']} with ${draft['initial_deposit']} from {src}. "
+                         "Please press Confirm to go ahead.", "pending": r}
+    return {"reply": _phrase(r, "open", sess), "result": r}
+
+
 def _chat_offline(sess: dict[str, Any], text: str) -> dict[str, Any]:
     t = text.lower()
     args: dict[str, Any] = {}
-    text_wo_member = t
     if _is_staff(sess):
         member = _staff_member(sess, text)
         if member is None:
             return {"reply": "Which member? Please give me the 5-digit member number."}
         args["member_number"] = member
-        text_wo_member = t.replace(member, " ")
-    if "balance" in t or "how much" in t:
+    asked_options = any(k in t for k in ("what account", "which account", "can i open", "can be opened",
+                                          "options", "what can", "accounts can"))
+    wants_open = asked_options or "open" in t or "fund it" in t or "open_draft" in sess
+    if ("balance" in t or "how much" in t) and "open" not in t:
         share = ("Share Draft Checking" if "checking" in t or "draft" in t else
                  "Money Market" if "money market" in t else "Share Savings")
-        r = gateway.invoke(tool_name("corelink.member.get_share_balance"), {**args, "share_type": share},
-                           _bound(sess), _requester(sess))
+        r = gateway.invoke(BALANCE_TOOL, {**args, "share_type": share}, _bound(sess), _requester(sess))
         r["share_type"] = share
         r["member"] = args.get("member_number")
         return {"reply": _phrase(r, "balance", sess), "result": r}
-    if "open" in t or "certificate" in t or "money market" in t or "club" in t:
-        kind = ("Money Market" if "money market" in t else "Christmas Club" if "club" in t else "Share Certificate")
-        amt = _money(text_wo_member) or "500.00"
-        src = "S10" if "checking" in t else "S01"
-        r = gateway.invoke(tool_name("corelink.account.open_share_sub_account"),
-                           {**args, "account_type": kind, "initial_deposit": amt, "fund_from": src}, _bound(sess),
-                           _requester(sess))
-        whose = f"member {args['member_number']}'s" if _is_staff(sess) else "your"
-        if r.get("status") == "needs_confirmation":
-            return {"reply": f"I can open a {kind} with ${amt} from {whose} "
-                             f"{'checking' if src == 'S10' else 'savings'}. Please press Confirm to go ahead.",
-                    "pending": r}
-        return {"reply": _phrase(r, "open", sess), "result": r}
+    if wants_open:
+        return _open_flow(sess, args, text, asked_options)
     if _is_staff(sess):
-        return {"reply": f"I'm on member {args['member_number']}. I can read a share balance (savings, checking, "
-                         "money market) or open a certificate, money market, or club account."}
-    return {"reply": "I can check your savings or checking balance, or open a certificate, money market, or club "
-                     "account. What would you like to do?"}
+        return {"reply": f"I'm on member {args['member_number']}. I can read a share balance or help open an "
+                         "account. Ask \"what accounts can this member open?\" to see the options."}
+    return {"reply": "I can check your savings or checking balance, or help you open an account. Try \"What "
+                     "accounts can I open?\""}
 
 
 def _phrase(r: dict[str, Any], intent: str, sess: dict[str, Any] | None = None) -> str:
@@ -316,6 +392,7 @@ def main() -> None:
     OFFLINE = OFFLINE or a.offline
     gateway = CapabilityGateway(tenant=a.tenant, allow_draft=a.allow_draft,
                                 port=int(os.environ.get("CUA_GATEWAY_PORT", "8741")))
+    console_mod.BRIDGE = f"http://127.0.0.1:{gateway.port}"
     print(f"Member Assistant on http://127.0.0.1:{a.port}  mode={'llm' if llm_available() else 'offline'}")
     try:
         uvicorn.run(app, host="127.0.0.1", port=a.port, log_level="warning")

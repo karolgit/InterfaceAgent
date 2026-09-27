@@ -137,7 +137,7 @@ class RowMatch(BaseModel):
 
 class Extraction(BaseModel):
     output: str
-    read: Literal["value", "name", "table_cell"] = "value"
+    read: Literal["value", "name", "table_cell", "options"] = "value"  # options: list a drop-down's choices
     row_match: RowMatch | None = None
     column: str | None = None
     parse: Literal["text", "currency", "integer"] = "text"

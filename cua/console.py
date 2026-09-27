@@ -75,6 +75,7 @@ def live():
 
 
 PAGE = """<!doctype html><html><head><meta charset="utf-8"><title>Operator Console</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%231740e6'/%3E%3Cpath d='M16 16 L16 4 A12 12 0 0 1 28 16 Z' fill='%23ffc933'/%3E%3Ccircle cx='16' cy='16' r='5' fill='white'/%3E%3C/svg%3E">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 :root{--bg:#f4f5f7;--card:#fff;--ink:#1d2330;--muted:#5d6475;--line:#d9dde5;--accent:#1f3a68;
@@ -102,15 +103,15 @@ const colors={agent:'#8b0000',human:'#0b6b2e',paused:'#b06a00',free:'#555',offli
 async function j(u,o){const r=await fetch(u,o);if(!r.ok)alert(await r.text());return r.json()}
 async function act(id,verb,decision){
   const who=document.getElementById('who').value||'operator';
-  if(verb==='claim') await j(`/api/interventions/${id}/claim`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({operator:who})});
+  if(verb==='claim') await j(`api/interventions/${id}/claim`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({operator:who})});
   else{const notes=document.getElementById('n-'+id).value;
-    await j(`/api/interventions/${id}/resolve`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({decision,notes})});}
+    await j(`api/interventions/${id}/resolve`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({decision,notes})});}
   refresh();}
 function esc(s){return String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
 async function refresh(){
-  const s=await j('/api/session');const c=document.getElementById('ctl');
+  const s=await j('api/session');const c=document.getElementById('ctl');
   c.textContent='session: '+(s.mode||'offline')+(s.holder?' ('+s.holder+')':'');c.style.background=colors[s.mode]||'#555';
-  const items=await j('/api/interventions');const el=document.getElementById('list');
+  const items=await j('api/interventions');const el=document.getElementById('list');
   el.innerHTML=items.slice(0,12).map(r=>{
     const live=r.status==='open'||r.status==='claimed';
     const btns=r.status==='open'?`<button class="primary" onclick="act('${r.id}','claim')">Take control</button>`:
@@ -118,10 +119,10 @@ async function refresh(){
     return `<div class="card"><b>${esc(r.kind)}</b> <span class="pill" style="background:var(--${r.status==='open'?'open':r.status==='claimed'?'claimed':'done'})">${esc(r.status)}</span>
       <div>${esc(r.reason)}</div><div class="muted"><code>${esc(r.id)}</code> run <code>${esc(r.run_id)}</code> ${r.operator?'operator '+esc(r.operator):''}</div>
       <details ${live?'open':''}><summary>context</summary><pre style="white-space:pre-wrap">${esc(JSON.stringify(r.context,null,1))}</pre>
-      ${r.screenshot?`<img src="/shot/${r.id}.png" alt="screenshot at escalation (redacted)">`:''}</details>
+      ${r.screenshot?`<img src="shot/${r.id}.png" alt="screenshot at escalation (redacted)">`:''}</details>
       ${live?`<div class="row"><input id="n-${r.id}" placeholder="notes for the record" style="flex:1"></div><div class="row">${btns}</div>`:''}
       ${r.human_events?`<div class="muted">${r.human_events.filter(e=>e.actor==='human').length} human actions recorded</div>`:''}</div>`}).join('')||'<p class="muted">No requests.</p>';
-  document.getElementById('live').src='/live.png?'+Date.now();}
+  document.getElementById('live').src='live.png?'+Date.now();}
 refresh();setInterval(refresh,2000);
 </script></body></html>"""
 
