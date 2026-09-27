@@ -151,6 +151,66 @@ screenshots, and the control lock with input recording.
 - **Replay, the error taxonomy, human handoff, and redaction.** They work unchanged on top of any driver.
 """
 
+LAYOUT = """
+**Capability artifacts** are JSON files in `capabilities/`, named `<id>.v<version>.json`. Copies sit in
+`evidence/artifacts/`. Each file is one capability: its contract (inputs, outputs, business outcomes, risk)
+and its flow (steps, ranked locators, checkpoints). There are four today:
+
+| Capability | Origin | Risk |
+|---|---|---|
+| `corelink.member.get_share_savings_balance` | Discovered by Claude Opus 5 | Read-only |
+| `corelink.account.open_share_sub_account` | Discovered by Claude Opus 5 (post approved by a human) | Irreversible |
+| `corelink.member.get_share_balance` | Derived: row filter turned into a `share_type` input | Read-only |
+| `corelink.account.get_open_options` | Derived: reads the offered account types and funding shares | Read-only |
+
+**JSON Schemas** in `schemas/` are the formal rulebooks for the two file formats, generated from the Python models
+with `python -m cua schema`:
+- `capability.schema.json` defines what a valid capability artifact must contain. Reviewers, CI, or tools in other
+  languages can validate artifacts against it.
+- `run_result.schema.json` defines what a replay returns to its caller:
+  - `status`: success, business_outcome, failed, or rejected;
+  - `outputs`;
+  - `outcome`, or `failure` with step, expected, observed, and evidence;
+  - `recoveries`, `handoffs`, and `locator_fallbacks`.
+
+```
+computeruseagents/
+├─ README.md, REPORT.md          how to run it; the design write-up
+├─ .env.example                  settings template (copy to .env for API keys; .env is never committed)
+├─ mockcore/                     CoreLink: the legacy-style Java Swing target app, with faults and two tenants
+├─ bridge/                       Java agent loaded into CoreLink: accessibility tree, actions,
+│                                screenshots, control lock, human-input recorder
+├─ cua/                          the core system (Python)
+│  ├─ surface/                   driver interface (base.py) and the CoreLink driver (swing.py)
+│  ├─ agent/                     discovery loop, model tool surface, trace-to-artifact compiler
+│  ├─ artifact.py                capability and run-result models (schema v1)
+│  ├─ replay.py                  deterministic replay and outcome classification
+│  ├─ locate.py                  locator building (record time) and resolution (replay time)
+│  ├─ policy.py, redact.py       allowlist and risk classes; PII redaction
+│  ├─ handoff.py, console.py     control transfer, intervention queue, operator console
+│  ├─ gateway.py                 capability catalog and invoke path for agents
+│  └─ runtime.py, __main__.py    wiring and the `python -m cua` command line
+├─ configs/apps/corelink.yaml    vendor-product profile: sign-on, outcome rules, PII labels, tenant overrides
+├─ configs/policies/             safety policy (allowlist, risk rules)
+├─ tasks/                        capability requests given to discovery
+├─ capabilities/                 saved capability artifacts (JSON)
+├─ schemas/                      JSON Schemas for the artifact and the run result
+├─ portal/                       Member Assistant web app (chat, voice, staff mode, built-in console)
+├─ evidence/                     discovery runs, 19 replay scenarios, artifact copies (all redacted)
+├─ docs/                         this report, architecture diagram, screenshots
+├─ scripts/                      build, demo, scenario matrix, capability derivation, report builder,
+│                                screenshot capture, simulated operator
+└─ tests/                        unit tests: locators, policy, redaction, replay rules, evidence PII scan
+```
+
+These are generated or local only, and never committed:
+- `.venv/`, the Python environment;
+- `.tools/`, the portable JDK;
+- `runs/`, scratch runs and the intervention queue;
+- `.env`, with API keys;
+- the compiled Java output.
+"""
+
 SHOTS = [
     ("01-corelink-sign-on.png", "Sign-on. Credentials are resolved from the secret store by name."),
     ("02-member-inquiry.png", "Member Inquiry: the flow the first capability automates."),
@@ -281,6 +341,8 @@ cross-tenant reuse with per-tenant overrides. Unattended replay is also gated on
 <section class="pb"><h2>How a capability is recorded</h2>{md(RECORDING)}</section>
 
 <section class="pb"><h2>Supporting applications that are not Java</h2>{md(SURFACES)}</section>
+
+<section class="pb"><h2>Where things live in the repository</h2>{md(LAYOUT)}</section>
 
 <section class="pb">{md(report_md)}</section>
 

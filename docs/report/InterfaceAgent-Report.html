@@ -410,6 +410,84 @@ screenshots, and the control lock with input recording.</p>
   vision driver fills them from OCR bounds exactly as the Swing driver fills them from accessibility bounds.
 - <strong>Replay, the error taxonomy, human handoff, and redaction.</strong> They work unchanged on top of any driver.</p></section>
 
+<section class="pb"><h2>Where things live in the repository</h2><p><strong>Capability artifacts</strong> are JSON files in <code>capabilities/</code>, named <code>&lt;id&gt;.v&lt;version&gt;.json</code>. Copies sit in
+<code>evidence/artifacts/</code>. Each file is one capability: its contract (inputs, outputs, business outcomes, risk)
+and its flow (steps, ranked locators, checkpoints). There are four today:</p>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Origin</th>
+<th>Risk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>corelink.member.get_share_savings_balance</code></td>
+<td>Discovered by Claude Opus 5</td>
+<td>Read-only</td>
+</tr>
+<tr>
+<td><code>corelink.account.open_share_sub_account</code></td>
+<td>Discovered by Claude Opus 5 (post approved by a human)</td>
+<td>Irreversible</td>
+</tr>
+<tr>
+<td><code>corelink.member.get_share_balance</code></td>
+<td>Derived: row filter turned into a <code>share_type</code> input</td>
+<td>Read-only</td>
+</tr>
+<tr>
+<td><code>corelink.account.get_open_options</code></td>
+<td>Derived: reads the offered account types and funding shares</td>
+<td>Read-only</td>
+</tr>
+</tbody>
+</table>
+<p><strong>JSON Schemas</strong> in <code>schemas/</code> are the formal rulebooks for the two file formats, generated from the Python models
+with <code>python -m cua schema</code>:
+- <code>capability.schema.json</code> defines what a valid capability artifact must contain. Reviewers, CI, or tools in other
+  languages can validate artifacts against it.
+- <code>run_result.schema.json</code> defines what a replay returns to its caller:
+  - <code>status</code>: success, business_outcome, failed, or rejected;
+  - <code>outputs</code>;
+  - <code>outcome</code>, or <code>failure</code> with step, expected, observed, and evidence;
+  - <code>recoveries</code>, <code>handoffs</code>, and <code>locator_fallbacks</code>.</p>
+<pre><code>computeruseagents/
+├─ README.md, REPORT.md          how to run it; the design write-up
+├─ .env.example                  settings template (copy to .env for API keys; .env is never committed)
+├─ mockcore/                     CoreLink: the legacy-style Java Swing target app, with faults and two tenants
+├─ bridge/                       Java agent loaded into CoreLink: accessibility tree, actions,
+│                                screenshots, control lock, human-input recorder
+├─ cua/                          the core system (Python)
+│  ├─ surface/                   driver interface (base.py) and the CoreLink driver (swing.py)
+│  ├─ agent/                     discovery loop, model tool surface, trace-to-artifact compiler
+│  ├─ artifact.py                capability and run-result models (schema v1)
+│  ├─ replay.py                  deterministic replay and outcome classification
+│  ├─ locate.py                  locator building (record time) and resolution (replay time)
+│  ├─ policy.py, redact.py       allowlist and risk classes; PII redaction
+│  ├─ handoff.py, console.py     control transfer, intervention queue, operator console
+│  ├─ gateway.py                 capability catalog and invoke path for agents
+│  └─ runtime.py, __main__.py    wiring and the `python -m cua` command line
+├─ configs/apps/corelink.yaml    vendor-product profile: sign-on, outcome rules, PII labels, tenant overrides
+├─ configs/policies/             safety policy (allowlist, risk rules)
+├─ tasks/                        capability requests given to discovery
+├─ capabilities/                 saved capability artifacts (JSON)
+├─ schemas/                      JSON Schemas for the artifact and the run result
+├─ portal/                       Member Assistant web app (chat, voice, staff mode, built-in console)
+├─ evidence/                     discovery runs, 19 replay scenarios, artifact copies (all redacted)
+├─ docs/                         this report, architecture diagram, screenshots
+├─ scripts/                      build, demo, scenario matrix, capability derivation, report builder,
+│                                screenshot capture, simulated operator
+└─ tests/                        unit tests: locators, policy, redaction, replay rules, evidence PII scan
+</code></pre>
+<p>These are generated or local only, and never committed:
+- <code>.venv/</code>, the Python environment;
+- <code>.tools/</code>, the portable JDK;
+- <code>runs/</code>, scratch runs and the intervention queue;
+- <code>.env</code>, with API keys;
+- the compiled Java output.</p></section>
+
 <section class="pb"><h2>1. Architecture</h2>
 <p><strong>Target choice.</strong> The proxy is CoreLink, a Java Swing desktop client I built to look like a legacy
 core-banking teller app. It uses an MDI desktop, modal option dialogs, upper-case status-bar errors, and no
