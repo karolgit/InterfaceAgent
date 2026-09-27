@@ -146,7 +146,8 @@
           "enum": [
             "value",
             "name",
-            "table_cell"
+            "table_cell",
+            "options"
           ],
           "title": "Read",
           "type": "string"
@@ -195,6 +196,18 @@
           ],
           "default": null,
           "title": "Pattern"
+        },
+        "no_match_outcome": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "No Match Outcome"
         }
       },
       "required": [
@@ -466,6 +479,18 @@
           "title": "Required",
           "type": "boolean"
         },
+        "default": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Default"
+        },
         "sensitive": {
           "default": false,
           "title": "Sensitive",
@@ -627,19 +652,39 @@
       "type": "object"
     },
     "RowMatch": {
+      "description": "Pick the table row whose `column` contains a fixed text OR the value of an input parameter.",
       "properties": {
         "column": {
           "title": "Column",
           "type": "string"
         },
         "contains": {
-          "title": "Contains",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Contains"
+        },
+        "contains_param": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Contains Param"
         }
       },
       "required": [
-        "column",
-        "contains"
+        "column"
       ],
       "title": "RowMatch",
       "type": "object"
