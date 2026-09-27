@@ -15,8 +15,7 @@ from .base import Observation
 ROOT = Path(__file__).resolve().parents[2]
 
 
-class SurfaceError(RuntimeError):
-    pass
+from .base import SurfaceError  # noqa: E402  (re-exported for existing imports)
 
 
 class SwingSurface:

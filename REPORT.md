@@ -111,14 +111,14 @@ this order: capability rules, then tenant extras, then product rules.
 
 | Class | Result `status` | Examples in CoreLink | Handling |
 |---|---|---|---|
-| Business outcome | `business_outcome` + `code` | `MEMBER_NOT_FOUND`, `MEMBER_RESTRICTED`, `MEMBER_CLOSED`, `VALIDATION_ERROR`, `PERMISSION_DENIED`, `OPERATOR_DECLINED` | Stop, return the code, the UI's own message, and a screenshot. This is not an error. |
+| Business outcome | `business_outcome` + `code` | `MEMBER_NOT_FOUND`, `MEMBER_RESTRICTED`, `MEMBER_CLOSED`, `VALIDATION_ERROR`, `PERMISSION_DENIED`, `OPERATOR_DECLINED`, `SHARE_NOT_FOUND`, `INVALID_OPTION` (with the valid choices) | Stop, return the code, the UI's own message, and a screenshot. This is not an error. |
 | Recoverable | `success` with `recoveries[]` | `UNEXPECTED_DIALOG` (dismiss), `SLOW_RESPONSE` (keep waiting, bounded), `SESSION_EXPIRED` (dismiss, re-sign-on, restart once) | Bounded attempts. Every recovery is recorded in the result. |
-| Hard failure | `failed` + `failure` | `HOST_ERROR`, `TARGET_NOT_FOUND`, `CHECKPOINT_NOT_MET`, `EXTRACTION_FAILED`, `POLICY_DENIED`, `RECOVERY_EXHAUSTED`, `HUMAN_TIMEOUT` | Stop. Report the step id and intent, what was expected, what was observed, a redacted screenshot, and a redacted tree snapshot. |
+| Hard failure | `failed` + `failure` | `HOST_ERROR`, `TARGET_NOT_FOUND`, `CHECKPOINT_NOT_MET`, `EXTRACTION_FAILED`, `POLICY_DENIED`, `RECOVERY_EXHAUSTED`, `HUMAN_TIMEOUT`, `ACTION_FAILED` | Stop. Report the step id and intent, what was expected, what was observed, a redacted screenshot, and a redacted tree snapshot. |
 | Escalate | continues or `failed` | `SUPERVISOR_OVERRIDE_REQUIRED`, `SIGN_ON_REJECTED`, tenant `DISCLOSURE_CONFIRMATION` | Human handoff on the live session, then re-verify the checkpoint (section 5). |
 
 Sensitive outputs are returned to the caller but fingerprinted in the persisted `result.json`.
 
-**Evidence.** `evidence/replays/summary.md` shows 17 scenarios, all passing:
+**Evidence.** `evidence/replays/summary.md` shows 18 scenarios, all passing:
 - the happy path and a second tenant;
 - not-found, restricted, and invalid input;
 - a popup, a slow host, and session expiry, all recovered;
@@ -127,7 +127,9 @@ Sensitive outputs are returned to the caller but fingerprinted in the persisted 
 - a validation error and a permission denial;
 - the supervisor handoff;
 - the parameterized share-balance capability reading Share Draft Checking, and returning
-  `SHARE_NOT_FOUND` for a share the member doesn't have.
+  `SHARE_NOT_FOUND` for a share the member doesn't have;
+- a product this tenant doesn't offer, which returns `INVALID_OPTION` with the valid choices. It is found by
+  the replay's select action, not by a pre-listed rule, so a caller or AI agent can correct the request.
 
 **Drift (secondary).** Locator fallbacks are logged per step. A tenant can override label and name
 aliases without re-recording. Structural drift that breaks every strategy fails with `TARGET_NOT_FOUND`

@@ -108,10 +108,13 @@ class CapabilityGateway:
         self.pending.pop(pid, None)
 
     def _run(self, cap: Capability, params: dict[str, Any], approve: bool) -> dict[str, Any]:
-        with self.lock:
-            s = self._ensure_app()
-            res = run_replay(cap, params, s, self.tenant, approve_irreversible=approve,
-                             allow_draft=self.allow_draft, run_prefix="gateway", handoff_timeout_s=300)
+        try:
+            with self.lock:
+                s = self._ensure_app()
+                res = run_replay(cap, params, s, self.tenant, approve_irreversible=approve,
+                                 allow_draft=self.allow_draft, run_prefix="gateway", handoff_timeout_s=300)
+        except Exception as e:  # a caller always gets a structured result, never a raw 500
+            return {"status": "failed", "failure": {"code": "GATEWAY_ERROR", "observed": f"{type(e).__name__}: {e}"}}
         return res.model_dump(exclude_none=True, include={"status", "outputs", "outcome", "failure", "run_id",
                                                           "recoveries", "handoffs"})
 

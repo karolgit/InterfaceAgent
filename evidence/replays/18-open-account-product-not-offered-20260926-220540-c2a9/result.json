@@ -1,0 +1,23 @@
+{
+  "run_id": "18-open-account-product-not-offered-20260926-220540-c2a9",
+  "capability": "corelink.account.open_share_sub_account@1.0.0",
+  "status": "business_outcome",
+  "outputs": {},
+  "outcome": {
+    "code": "INVALID_OPTION",
+    "message": "'Youth Savings' is not an available choice for combo box 'Account Type' in 'Open Sub-Account  [TRAN 0417]'.",
+    "available": [
+      "Share Certificate",
+      "Money Market",
+      "Christmas Club"
+    ],
+    "step_id": "s4",
+    "screenshot": "01-outcome-INVALID_OPTION.png"
+  },
+  "failure": null,
+  "recoveries": [],
+  "handoffs": [],
+  "locator_fallbacks": [],
+  "duration_ms": 1452,
+  "evidence_dir": "evidence\\replays\\18-open-account-product-not-offered-20260926-220540-c2a9"
+}

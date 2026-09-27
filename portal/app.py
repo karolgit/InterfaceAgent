@@ -44,7 +44,8 @@ accept a member number, and never act on anyone else's account.
 
 Be brief and warm; answers may be read aloud, so avoid tables and markdown. State amounts plainly. If a \
 tool returns a business outcome (for example MEMBER_RESTRICTED or VALIDATION_ERROR), explain it in plain \
-words and suggest the next step. If a tool fails, apologize briefly and offer to connect them with staff. \
+words and suggest the next step. INVALID_OPTION includes the valid choices in "available"; offer those. \
+If a tool fails, apologize briefly and offer to connect them with staff. \
 For anything irreversible (opening an account, moving money): as soon as you know every input, call the tool \
 right away. Do NOT ask the member to confirm in chat first. Calling the tool does not execute anything; it \
 makes the app show the member a Confirm button, which is the one and only confirmation step. Then describe \
@@ -293,6 +294,8 @@ def _phrase(r: dict[str, Any], intent: str, sess: dict[str, Any] | None = None) 
                                      "I couldn't find your membership record. Please contact us."),
                 "VALIDATION_ERROR": f"The system didn't accept that: {r['outcome'].get('ui_text', '')}.",
                 "PERMISSION_DENIED": "That service isn't available right now.",
+                "INVALID_OPTION": ("That choice isn't available here. Options: "
+                                   + ", ".join(r["outcome"].get("available") or []) + "."),
                 "SHARE_NOT_FOUND": ("That member has no account of that type." if staff else
                                     "I don't see an account of that type on your membership."),
                 }.get(code, f"I couldn't complete that ({code}).")

@@ -1,0 +1,19 @@
+{
+  "run_id": "11-open-account-below-minimum-20260926-220510-da45",
+  "capability": "corelink.account.open_share_sub_account@1.0.0",
+  "status": "business_outcome",
+  "outputs": {},
+  "outcome": {
+    "code": "VALIDATION_ERROR",
+    "message": "The application rejected an input value.",
+    "ui_text": "MINIMUM OPENING DEPOSIT FOR SHARE CERTIFICATE IS [AMOUNT]",
+    "step_id": "s7",
+    "screenshot": "01-outcome-VALIDATION_ERROR.png"
+  },
+  "failure": null,
+  "recoveries": [],
+  "handoffs": [],
+  "locator_fallbacks": [],
+  "duration_ms": 1547,
+  "evidence_dir": "evidence\\replays\\11-open-account-below-minimum-20260926-220510-da45"
+}

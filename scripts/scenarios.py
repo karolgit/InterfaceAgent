@@ -52,6 +52,8 @@ SCENARIOS = {
                                   "heritage", {}, "success"),
     "17-share-balance-share-not-found": (SHARE, {"member_number": "12345", "share_type": "Money Market"}, {},
                                          "heritage", {}, "SHARE_NOT_FOUND"),
+    "18-open-account-product-not-offered": (OPEN, {**OPEN_OK, "account_type": "Youth Savings"}, {}, "heritage",
+                                            {"approve_irreversible": True}, "INVALID_OPTION"),
 }
 
 

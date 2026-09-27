@@ -30,7 +30,7 @@ from .policy import Policy, Verdict
 from .profile import AppProfile
 from .redact import Redactor, fingerprint
 from .secrets import SecretStore
-from .surface.base import Observation
+from .surface.base import Observation, SurfaceError
 
 TEXT_ROLES = {"label", "table", "text", "option pane", "internal frame", "dialog"}
 
@@ -257,14 +257,26 @@ class ReplayEngine:
                     self.red.register(val, step.extract.output)
             self.ev.log("extracted", step=step.id, output=step.extract.output, value=str(val))
             return
-        if op == "click":
-            self.s.act("click", ref=node.ref)
-        elif op == "set_text":
-            self.s.act("set_text", ref=node.ref, text=self._value(step, params))
-        elif op == "select":
-            self.s.act("select", ref=node.ref, option=self._value(step, params))
-        elif op == "key":
-            self.s.act("key", key=step.key)
+        try:
+            if op == "click":
+                self.s.act("click", ref=node.ref)
+            elif op == "set_text":
+                self.s.act("set_text", ref=node.ref, text=self._value(step, params))
+            elif op == "select":
+                self.s.act("select", ref=node.ref, option=self._value(step, params))
+            elif op == "key":
+                self.s.act("key", key=step.key)
+        except SurfaceError as e:
+            if op == "select" and "option not found" in str(e):
+                # The app does not offer this value (e.g. a product another tenant has, or a share the member
+                # lacks). That is a business outcome the caller can fix, so return the valid choices.
+                shot = self.ev.screenshot(self.s, obs, "outcome-INVALID_OPTION")
+                raise _Stop(self.result.model_copy(update={"status": "business_outcome", "outcome": {
+                    "code": "INVALID_OPTION",
+                    "message": f"'{self._value(step, params)}' is not an available choice for "
+                               f"{step.target.description if step.target else 'this field'}.",
+                    "available": list(node.options or []), "step_id": step.id, "screenshot": shot}}))
+            self._fail("ACTION_FAILED", step, f"{op} to succeed", str(e), obs)
         if self.demo_delay_s:
             time.sleep(self.demo_delay_s)
         self.ev.log("acted", step=step.id, action=op, target=step.target and step.target.description,

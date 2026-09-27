@@ -1,0 +1,26 @@
+{
+  "run_id": "15-open-account-supervisor-handoff-20260926-220528-7e17",
+  "capability": "corelink.account.open_share_sub_account@1.0.0",
+  "status": "success",
+  "outputs": {
+    "confirmation_number": "CL-104221-S33"
+  },
+  "outcome": null,
+  "failure": null,
+  "recoveries": [],
+  "handoffs": [
+    {
+      "intervention": "int-220530-268d",
+      "kind": "escalation",
+      "reason": "SUPERVISOR_OVERRIDE_REQUIRED: Amount exceeds the operator limit; a supervisor must key an override.",
+      "decision": "resume",
+      "operator": "sim-supervisor",
+      "notes": "SIMULATED operator: keyed supervisor override (sup01) and pressed OK",
+      "human_actions": 5,
+      "expired": false
+    }
+  ],
+  "locator_fallbacks": [],
+  "duration_ms": 5391,
+  "evidence_dir": "evidence\\replays\\15-open-account-supervisor-handoff-20260926-220528-7e17"
+}

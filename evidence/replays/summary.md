@@ -17,3 +17,4 @@
 | 15-open-account-supervisor-handoff | heritage | - | success | success | - | yes |
 | 16-share-balance-checking | heritage | - | success | success | - | yes |
 | 17-share-balance-share-not-found | heritage | - | business_outcome | SHARE_NOT_FOUND | - | yes |
+| 18-open-account-product-not-offered | heritage | - | business_outcome | INVALID_OPTION | - | yes |

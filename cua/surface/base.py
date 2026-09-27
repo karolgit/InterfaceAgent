@@ -13,6 +13,10 @@ import json
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
+class SurfaceError(RuntimeError):
+    """An action or observation the surface could not perform (e.g. option not in a list)."""
+
+
 STRUCTURAL_ROLES = {"panel", "root pane", "layered pane", "viewport", "filler", "scroll bar", "desktop pane"}
 INPUT_ROLES = {"text", "password text", "combo box", "check box", "radio button"}
 

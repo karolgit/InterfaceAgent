@@ -425,7 +425,7 @@ this order: capability rules, then tenant extras, then product rules.</p>
 <tr>
 <td>Business outcome</td>
 <td><code>business_outcome</code> + <code>code</code></td>
-<td><code>MEMBER_NOT_FOUND</code>, <code>MEMBER_RESTRICTED</code>, <code>MEMBER_CLOSED</code>, <code>VALIDATION_ERROR</code>, <code>PERMISSION_DENIED</code>, <code>OPERATOR_DECLINED</code></td>
+<td><code>MEMBER_NOT_FOUND</code>, <code>MEMBER_RESTRICTED</code>, <code>MEMBER_CLOSED</code>, <code>VALIDATION_ERROR</code>, <code>PERMISSION_DENIED</code>, <code>OPERATOR_DECLINED</code>, <code>SHARE_NOT_FOUND</code>, <code>INVALID_OPTION</code> (with the valid choices)</td>
 <td>Stop, return the code, the UI's own message, and a screenshot. This is not an error.</td>
 </tr>
 <tr>
@@ -437,7 +437,7 @@ this order: capability rules, then tenant extras, then product rules.</p>
 <tr>
 <td>Hard failure</td>
 <td><code>failed</code> + <code>failure</code></td>
-<td><code>HOST_ERROR</code>, <code>TARGET_NOT_FOUND</code>, <code>CHECKPOINT_NOT_MET</code>, <code>EXTRACTION_FAILED</code>, <code>POLICY_DENIED</code>, <code>RECOVERY_EXHAUSTED</code>, <code>HUMAN_TIMEOUT</code></td>
+<td><code>HOST_ERROR</code>, <code>TARGET_NOT_FOUND</code>, <code>CHECKPOINT_NOT_MET</code>, <code>EXTRACTION_FAILED</code>, <code>POLICY_DENIED</code>, <code>RECOVERY_EXHAUSTED</code>, <code>HUMAN_TIMEOUT</code>, <code>ACTION_FAILED</code></td>
 <td>Stop. Report the step id and intent, what was expected, what was observed, a redacted screenshot, and a redacted tree snapshot.</td>
 </tr>
 <tr>
@@ -449,7 +449,7 @@ this order: capability rules, then tenant extras, then product rules.</p>
 </tbody>
 </table>
 <p>Sensitive outputs are returned to the caller but fingerprinted in the persisted <code>result.json</code>.</p>
-<p><strong>Evidence.</strong> <code>evidence/replays/summary.md</code> shows 17 scenarios, all passing:
+<p><strong>Evidence.</strong> <code>evidence/replays/summary.md</code> shows 18 scenarios, all passing:
 - the happy path and a second tenant;
 - not-found, restricted, and invalid input;
 - a popup, a slow host, and session expiry, all recovered;
@@ -458,7 +458,9 @@ this order: capability rules, then tenant extras, then product rules.</p>
 - a validation error and a permission denial;
 - the supervisor handoff;
 - the parameterized share-balance capability reading Share Draft Checking, and returning
-  <code>SHARE_NOT_FOUND</code> for a share the member doesn't have.</p>
+  <code>SHARE_NOT_FOUND</code> for a share the member doesn't have;
+- a product this tenant doesn't offer, which returns <code>INVALID_OPTION</code> with the valid choices. It is found by
+  the replay's select action, not by a pre-listed rule, so a caller or AI agent can correct the request.</p>
 <p><strong>Drift (secondary).</strong> Locator fallbacks are logged per step. A tenant can override label and name
 aliases without re-recording. Structural drift that breaks every strategy fails with <code>TARGET_NOT_FOUND</code>
 and a full evidence bundle.</p>
@@ -789,6 +791,15 @@ python -m portal.app --allow-draft                           # 7. member assista
 <td>-</td>
 <td>business_outcome</td>
 <td>SHARE_NOT_FOUND</td>
+<td>-</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>18-open-account-product-not-offered</td>
+<td>heritage</td>
+<td>-</td>
+<td>business_outcome</td>
+<td>INVALID_OPTION</td>
 <td>-</td>
 <td>yes</td>
 </tr>
