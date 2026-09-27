@@ -1,5 +1,7 @@
 # REPORT
 
+Demo video: https://youtu.be/NMyKIrVkQq4 · Printable version with diagrams and evidence: [docs/InterfaceAgent-Report.pdf](docs/InterfaceAgent-Report.pdf)
+
 ## 1. Architecture
 
 **Target choice.** The proxy is CoreLink, a Java Swing desktop client I built to look like a legacy

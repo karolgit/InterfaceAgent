@@ -2,12 +2,16 @@
 
 Computer-use automation for legacy banking software that has no API.
 
+**[▶ Watch the 2-minute demo video](https://youtu.be/NMyKIrVkQq4)** · [Design report (PDF)](docs/InterfaceAgent-Report.pdf) · [REPORT.md](REPORT.md)
+
+[![Demo video: Interface Agent](docs/video-thumbnail.jpg)](https://youtu.be/NMyKIrVkQq4)
+
 An LLM agent learns a task once by operating the real application. The run is compiled into a typed,
 versioned **capability** artifact. From then on, the capability replays deterministically with no model in
 the loop. It returns typed outputs or a classified outcome, and it hands the live session to a human
 when it cannot safely continue.
 
-The target is **CoreLink**, a deliberately legacy-style Java Swing desktop client for a fictional credit
+The target is **CoreLink**, a deliberately legacy-style Java Swing desktop client for a mockup credit
 union. It has no DOM and no test IDs, some form labels aren't wired to their fields, it uses internal frames
 and modal dialogs, and faults can be injected at runtime. All data is fake.
 
@@ -277,5 +281,5 @@ tokens and $25 per million output tokens:
 
 ## License and data
 
-This is a take-home project. All member data, SSNs, operators, and institutions are fictional. SSNs use
+This is a demonstration project. The credit union is a mockup; all member data, SSNs, operators, and institutions are fictional. SSNs use
 the never-issued 900 series.

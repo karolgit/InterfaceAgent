@@ -21,6 +21,7 @@ BROWSERS = [r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
             r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
             r"C:\Program Files\Google\Chrome\Application\chrome.exe"]
 REPO = "https://github.com/karolgit/InterfaceAgent"
+VIDEO = "https://youtu.be/NMyKIrVkQq4"
 
 COVERAGE = """
 | Brief requirement | How it is met | Where in the repo |
@@ -246,18 +247,30 @@ code { font: 8.6pt Consolas, "Courier New", monospace; background: #f3f5f8; padd
 pre { background: #f5f7fa; border: 1px solid #dde2ea; border-radius: 4px; padding: 7pt; font-size: 8.2pt; white-space: pre-wrap;
       page-break-inside: avoid; }
 pre code { background: none; padding: 0; }
-.cover { height: 245mm; display: flex; flex-direction: column; justify-content: center; }
+.cover { min-height: 245mm; display: flex; flex-direction: column; justify-content: center; }
 .cover .kicker { color: #5b6474; font-size: 11pt; letter-spacing: .5px; text-transform: uppercase; }
 .cover h1 { font-size: 30pt; margin: 8pt 0; }
 .cover .sub { font-size: 13pt; color: #3c4658; max-width: 150mm; }
 .cover .meta { margin-top: 26pt; font-size: 10.5pt; color: #3c4658; line-height: 1.7; }
-.cover img { margin-top: 26pt; width: 100%; border: 1px solid #dde2ea; border-radius: 6px; }
 .pb { page-break-before: always; }
 .fig { width: 100%; border: 1px solid #dde2ea; border-radius: 4px; }
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10pt; }
 .grid figure { margin: 0; page-break-inside: avoid; }
 .grid img { width: 100%; border: 1px solid #dde2ea; border-radius: 4px; }
 figcaption { font-size: 8.4pt; color: #4b5566; margin-top: 2pt; }
+.video { display: flex; gap: 12pt; align-items: center; margin-top: 18pt; padding: 10pt; text-decoration: none;
+         color: #17202e; border: 1.5px solid #9bb7e8; border-radius: 8px; background: #f3f7ff; }
+.video img { width: 62mm; border-radius: 5px; border: 1px solid #c9d3e3; }
+.video b { color: #1f3a68; font-size: 12.5pt; }
+.video small { color: #4b5566; }
+a { color: #1f4fd1; }
+.toc { margin-top: 16pt; font-size: 9.6pt; color: #3c4658; line-height: 1.55; border-top: 1px solid #dde2ea; padding-top: 10pt; }
+.part { height: 230mm; display: flex; flex-direction: column; justify-content: center; }
+.part h1 { font-size: 34pt; }
+.part .kicker { color: #5b6474; font-size: 12pt; letter-spacing: 1px; text-transform: uppercase; }
+.diagram { margin: 12pt 0 0; page-break-inside: avoid; }
+.diagram svg, .diagram img { width: 100%; }
+h2.pb { page-break-before: always; }
 .note { border-left: 3px solid #b39200; background: #fffbe8; padding: 6pt 9pt; font-size: 9.2pt; margin: 8pt 0; }
 """
 
@@ -299,62 +312,82 @@ def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     report_md = (ROOT / "REPORT.md").read_text(encoding="utf-8")
     report_md = re.sub(r"^# REPORT\s*", "", report_md)
+    report_md = re.sub(r"^Demo video:[^\n]*\n+", "", report_md)  # the PDF cover already links it
     summary = ROOT / "evidence" / "replays" / "summary.md"
     scen = md(summary.read_text()) if summary.exists() else "<p>(run scripts/scenarios.py)</p>"
     svg = (ROOT / "docs" / "architecture.svg").read_text(encoding="utf-8")
     svg = svg.replace('width="1300" height="640"', 'width="100%"')
     shots = "".join(f'<figure><img src="../screenshots/{f}"><figcaption>{c}</figcaption></figure>'
                     for f, c in SHOTS if (ROOT / "docs" / "screenshots" / f).exists())
+    # Part 1 is REPORT.md: the seven required sections, each starting on a new page, with the component
+    # diagram placed inside section 1 (Architecture).
+    part1 = md(report_md)
+    part1 = part1.replace("<h2>2. Artifact schema</h2>",
+                          '<figure class="diagram">' + svg + '<figcaption>Component view: what each part does and '
+                          'how the parts connect.</figcaption></figure>\n<h2>2. Artifact schema</h2>', 1)
+    part1 = part1.replace("<h2>", '<h2 class="pb">').replace('<h2 class="pb">1. Architecture</h2>',
+                                                             "<h2>1. Architecture</h2>", 1)
     html = f"""<!doctype html><html><head><meta charset="utf-8"><title>InterfaceAgent Report</title>
 <style>{CSS}</style></head><body>
 <section class="cover">
-  <div class="kicker">interface.ai take-home · Computer-Use Automation System</div>
+  <div class="kicker">Computer-Use Automation System for legacy banking applications</div>
   <h1>InterfaceAgent</h1>
   <div class="sub">An LLM discovers how to do a task in a legacy banking app once. The run becomes a typed, versioned
   capability that replays deterministically, classifies runtime errors, stays inside safety policy, and hands the
   live session to a human when it must.</div>
-  <div class="meta">Karol Stuart · {date.today().strftime('%B %d, %Y')}<br>Repository: {REPO}</div>
-  <img src="../user-flow.png">
+  <a class="video" href="{VIDEO}">
+    <img src="../video-thumbnail.jpg" alt="Demo video thumbnail">
+    <span><b>&#9654; Watch the 2-minute demo video</b><br>{VIDEO}<br>
+    <small>The business story: a teller's day in the legacy app, then the same work done instantly through the
+    assistant.</small></span></a>
+  <div class="meta">Karol Stuart · {date.today().strftime('%B %d, %Y')}<br>
+    Repository: <a href="{REPO}">{REPO}</a></div>
+  <div class="toc"><b>How this report is organized</b><br>
+    <b>Part 1 · Report:</b> the seven sections required by the brief: 1. Architecture, 2. Artifact schema,
+    3. Determinism &amp; error handling, 4. Heterogeneity &amp; multi-tenant, 5. Escalation &amp; handoff, 6. Safety,
+    7. Cuts.<br>
+    <b>Part 2 · Additional notes:</b> how a capability is recorded, non-Java applications, where things live in the
+    repository, requirements coverage, demo commands, replay results, an artifact excerpt, and screens.</div>
 </section>
 
-<section class="pb"><h2>Summary</h2>
-{md('''The target is **CoreLink**, a legacy-style Java Swing core-banking desktop client built as the proxy app. It has no
-DOM and no test IDs, its labels aren't linked to their fields, it uses internal frames and modal dialogs, and faults can
-be injected at runtime. All data is fake. Four pieces carry the design:
-
-- **A surface driver.** A Java agent reads the unmodified app's accessibility tree, acts through accessibility
-  actions, and owns the human-handoff control lock.
-- **A discovery agent.** A pluggable LLM planner (Claude or Gemini) acts on element references and never sees raw PII.
-- **A capability artifact.** It has a contract part for calling agents and a flow part for replay.
-- **A replay engine.** It sorts every run into a business outcome, a recovered condition, or a hard failure.
-
-The thread runs end to end: goal, LLM run, saved capability, deterministic replay with parameters, outputs, and error
-handling, human handoff on the live session, and evidence for each. Every core requirement in the brief is covered, as
-the matrix below shows. The stretch goals built are the agent-facing capability interface and
-cross-tenant reuse with per-tenant overrides. Unattended replay is also gated on draft or approved status.
-''')}
+<section class="pb"><h2>At a glance</h2>
+{md('''The target is **CoreLink**, a mockup legacy-style Java Swing core-banking desktop client built as the proxy app
+(not a real credit union; all data is fictional). It has no DOM and no test IDs, its labels aren't linked to their
+fields, it uses internal frames and modal dialogs, and faults can be injected at runtime. The system runs the full
+thread the brief asks for: a goal, a real LLM discovery run, a saved capability, deterministic replay with parameters,
+outputs, and error handling, human handoff on the live session, and evidence for each.''')}
+<figure class="diagram"><img class="fig" src="../user-flow.png"><figcaption>User flow: learn once with AI, then run
+many times with deterministic replay.</figcaption></figure>
 {discovery_status()}
-<h2>Requirements coverage</h2>{md(COVERAGE)}</section>
+</section>
 
-<section class="pb"><h2>Architecture diagram</h2>
-<p>The cover shows the user flow. This is the component view: what each part does and how the parts connect.</p>{svg}</section>
+<div class="part pb"><div class="kicker">Part 1</div><h1>Report</h1>
+<p>The seven sections required by the brief, in the brief's order.</p></div>
+<section>{part1}</section>
 
-<section class="pb"><h2>How a capability is recorded</h2>{md(RECORDING)}</section>
+<div class="part pb"><div class="kicker">Part 2</div><h1>Additional notes</h1>
+<p>Supporting detail that goes beyond the seven required sections.</p></div>
 
-<section class="pb"><h2>Supporting applications that are not Java</h2>{md(SURFACES)}</section>
+<section><h2>A. How a capability is recorded</h2>{md(RECORDING)}</section>
 
-<section class="pb"><h2>Where things live in the repository</h2>{md(LAYOUT)}</section>
+<section class="pb"><h2>B. Supporting applications that are not Java</h2>{md(SURFACES)}</section>
 
-<section class="pb">{md(report_md)}</section>
+<section class="pb"><h2>C. Where things live in the repository</h2>{md(LAYOUT)}</section>
 
-<section class="pb"><h2>Appendix A. Demo commands</h2>{md(DEMO)}
-<h2>Appendix B. Replay scenario results</h2>{scen}
+<section class="pb"><h2>D. Requirements coverage</h2>
+<p>Every core requirement in the brief, mapped to where it is met. The stretch goals built are the agent-facing
+capability interface, canonicalization (one capability, many inputs), and cross-tenant reuse with per-tenant
+overrides. Unattended replay is also gated on draft or approved status.</p>{md(COVERAGE)}</section>
+
+<section class="pb"><h2>E. Demo commands</h2>
+<p>Demo video: <a href="{VIDEO}">{VIDEO}</a></p>{md(DEMO)}
+<h2>F. Replay scenario results</h2>{scen}
 <p>Each scenario runs in a fresh app instance. The evidence for each is in <code>evidence/replays/&lt;scenario&gt;/</code>.
 Scenarios 14 and 15 use a clearly labeled simulated operator in place of a person at the keyboard.</p></section>
 
-<section class="pb"><h2>Appendix C. Artifact excerpt</h2>{artifact_excerpt()}</section>
+<section class="pb"><h2>G. Artifact excerpt</h2>{artifact_excerpt()}</section>
 
-<section class="pb"><h2>Appendix D. Screens</h2><div class="grid">{shots}</div></section>
+<section class="pb"><h2>H. Screens</h2><div class="grid">{shots}</div></section>
 </body></html>"""
     html_path = OUT_DIR / "InterfaceAgent-Report.html"
     html_path.write_text(html, encoding="utf-8")
