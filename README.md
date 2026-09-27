@@ -25,25 +25,11 @@ Run evidence is in [evidence/](evidence/).
 
 ## How it works
 
-```mermaid
-flowchart LR
-    subgraph Discover["Discover (LLM, once)"]
-        G[Goal + typed inputs/outputs] --> A[Agent loop<br/>observe, decide, act]
-        A -->|policy check| S
-    end
-    subgraph Surface["Surface driver"]
-        S[Java bridge<br/>accessibility tree,<br/>actions, screenshots,<br/>control lock]
-    end
-    A --> C[Compiler]
-    C --> K[(Capability artifact<br/>JSON, versioned)]
-    K --> R[Replay engine<br/>no LLM]
-    R -->|policy check| S
-    R --> O[Result: success, business outcome,<br/>or failure with evidence]
-    R -. stuck / needs approval .-> H[Operator console<br/>human takes the live session]
-    H -. resume .-> R
-    P[Member assistant<br/>chat + voice] --> GW[Capability gateway] --> R
-    S --- APP[CoreLink desktop app]
-```
+![How InterfaceAgent works: learn once, run many times](docs/user-flow.png)
+
+The top lane runs once per capability, and the AI is only used there. The bottom lane is the production path,
+a deterministic replay with no AI cost. The component view is the architecture diagram at the top of this page;
+[REPORT.md](REPORT.md) explains the design.
 
 - **Surface driver.** A small Java agent (`bridge/`) attaches to the unmodified app with `-javaagent`.
   It serves the app's accessibility tree, the same data the Windows Java Access Bridge gives screen readers.

@@ -314,7 +314,7 @@ def main() -> None:
   capability that replays deterministically, classifies runtime errors, stays inside safety policy, and hands the
   live session to a human when it must.</div>
   <div class="meta">Karol Stuart · {date.today().strftime('%B %d, %Y')}<br>Repository: {REPO}</div>
-  <img src="../architecture.png">
+  <img src="../user-flow.png">
 </section>
 
 <section class="pb"><h2>Summary</h2>
@@ -336,7 +336,8 @@ cross-tenant reuse with per-tenant overrides. Unattended replay is also gated on
 {discovery_status()}
 <h2>Requirements coverage</h2>{md(COVERAGE)}</section>
 
-<section class="pb"><h2>Architecture diagram</h2>{svg}</section>
+<section class="pb"><h2>Architecture diagram</h2>
+<p>The cover shows the user flow. This is the component view: what each part does and how the parts connect.</p>{svg}</section>
 
 <section class="pb"><h2>How a capability is recorded</h2>{md(RECORDING)}</section>
 

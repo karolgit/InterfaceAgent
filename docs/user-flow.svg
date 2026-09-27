@@ -1,0 +1,179 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 790" width="1400" height="790" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#3c4658"/></marker>
+    <marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2e8a4a"/></marker>
+    <marker id="aa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#a15c00"/></marker>
+    <style>
+      .h{font-size:24px;font-weight:700;fill:#16202f}
+      .lane{font-size:13px;font-weight:800;letter-spacing:1.2px}
+      .t{font-size:15px;font-weight:700;fill:#16202f}
+      .s{font-size:12.5px;fill:#3c4658}
+      .l{font-size:12px;fill:#3c4658;font-style:italic}
+      .n{font-size:13px;font-weight:800;fill:#fff}
+      .card{fill:#fff;stroke:#c9d1de;stroke-width:1.3}
+      .ic{fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+    </style>
+    <!-- icons, drawn in a 44x44 box -->
+    <g id="i-person" class="ic"><circle cx="22" cy="14" r="8"/><path d="M6 40c2-9 9-14 16-14s14 5 16 14"/></g>
+    <g id="i-doc" class="ic"><path d="M11 4h16l9 9v27H11z"/><path d="M27 4v9h9"/><path d="M16 22h14M16 28h14M16 34h9"/></g>
+    <g id="i-ai" class="ic"><path d="M20 4l4 12 12 4-12 4-4 12-4-12-12-4 12-4z"/><path d="M35 30l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/></g>
+    <g id="i-compile" class="ic"><path d="M6 10h14M6 18h10M6 26h14M6 34h8"/><path d="M24 22h10"/><path d="M30 16l6 6-6 6"/><rect x="36" y="12" width="6" height="20" rx="1"/></g>
+    <g id="i-json" class="ic"><path d="M9 4h18l9 9v27H9z"/><path d="M27 4v9h9"/><path d="M18 20c-3 0-3 2-3 4s-1 3-3 3c2 0 3 1 3 3s0 4 3 4"/><path d="M27 20c3 0 3 2 3 4s1 3 3 3c-2 0-3 1-3 3s0 4-3 4"/></g>
+    <g id="i-check" class="ic"><circle cx="22" cy="22" r="17"/><path d="M13 22l6 6 12-12"/></g>
+    <g id="i-chat" class="ic"><path d="M5 8h34v22H18l-8 8v-8H5z"/><path d="M12 16h20M12 22h13"/></g>
+    <g id="i-mic" class="ic"><rect x="16" y="4" width="12" height="22" rx="6"/><path d="M9 20c0 7 6 12 13 12s13-5 13-12M22 32v8M15 40h14"/></g>
+    <g id="i-shield" class="ic"><path d="M22 4l15 6v11c0 10-7 17-15 20C14 38 7 31 7 21V10z"/><path d="M15 22l5 5 9-10"/></g>
+    <g id="i-gear" class="ic"><circle cx="22" cy="22" r="6"/><path d="M22 4v6M22 34v6M4 22h6M34 22h6M9.3 9.3l4.2 4.2M30.5 30.5l4.2 4.2M9.3 34.7l4.2-4.2M30.5 13.5l4.2-4.2"/><circle cx="22" cy="22" r="12"/></g>
+    <g id="i-plug" class="ic"><path d="M15 4v10M29 4v10"/><path d="M10 14h24v8c0 7-5 12-12 12s-12-5-12-12z"/><path d="M22 34v8"/></g>
+    <g id="i-legacy" class="ic"><rect x="3" y="6" width="38" height="30" rx="2"/><path d="M3 13h38"/><path d="M9 20h12M9 26h12M25 20h10M25 26h10M9 31h26"/><path d="M15 40h14"/></g>
+    <g id="i-headset" class="ic"><path d="M7 26v-4a15 15 0 0 1 30 0v4"/><rect x="5" y="25" width="8" height="12" rx="3"/><rect x="31" y="25" width="8" height="12" rx="3"/><path d="M35 37c0 3-4 5-9 5h-3"/></g>
+    <g id="i-lock" class="ic"><rect x="9" y="19" width="26" height="20" rx="3"/><path d="M15 19v-6a7 7 0 0 1 14 0v6"/><circle cx="22" cy="29" r="2.5"/></g>
+    <g id="i-log" class="ic"><rect x="8" y="6" width="28" height="34" rx="3"/><path d="M16 6V3h12v3"/><path d="M14 16h16M14 23h16M14 30h10"/></g>
+    <g id="i-vm" class="ic"><rect x="4" y="5" width="36" height="25" rx="2"/><path d="M15 38h14M22 30v8"/><path d="M11 13h4M11 19h10"/></g>
+  </defs>
+
+  <rect width="1400" height="790" fill="#ffffff"/>
+  <text x="40" y="44" class="h">How InterfaceAgent works: learn once, run many times</text>
+
+  <!-- ===== Lane A: learn once ===== -->
+  <rect x="20" y="66" width="1010" height="262" rx="14" fill="#eef4fe" stroke="#9bb7e8"/>
+  <text x="40" y="92" class="lane" fill="#2c5aa8">LEARN ONCE · AI DISCOVERY</text>
+  <text x="40" y="318" class="l" fill="#2c5aa8">one-time: a few minutes, about $0.30 to $0.90 per capability</text>
+
+  <g transform="translate(45,110)"><rect class="card" width="200" height="190" rx="12"/>
+    <circle cx="22" cy="22" r="13" fill="#4a78c4"/><text x="22" y="27" text-anchor="middle" class="n">1</text>
+    <use href="#i-person" x="60" y="18" stroke="#4a78c4"/><use href="#i-doc" x="104" y="18" stroke="#4a78c4"/>
+    <text x="100" y="98" text-anchor="middle" class="t">Engineer sets a goal</text>
+    <text x="100" y="120" text-anchor="middle" class="s">"Look up a member and</text>
+    <text x="100" y="137" text-anchor="middle" class="s">read the savings balance",</text>
+    <text x="100" y="154" text-anchor="middle" class="s">with typed inputs and outputs</text></g>
+
+  <g transform="translate(285,110)"><rect class="card" width="200" height="190" rx="12" stroke="#4a78c4" stroke-width="2"/>
+    <circle cx="22" cy="22" r="13" fill="#4a78c4"/><text x="22" y="27" text-anchor="middle" class="n">2</text>
+    <use href="#i-ai" x="78" y="18" stroke="#4a78c4"/>
+    <text x="100" y="98" text-anchor="middle" class="t">AI agent works the app</text>
+    <text x="100" y="120" text-anchor="middle" class="s">Sees a redacted screen,</text>
+    <text x="100" y="137" text-anchor="middle" class="s">takes one action per turn,</text>
+    <text x="100" y="154" text-anchor="middle" class="s">never sees personal data</text></g>
+
+  <g transform="translate(525,110)"><rect class="card" width="200" height="190" rx="12"/>
+    <circle cx="22" cy="22" r="13" fill="#4a78c4"/><text x="22" y="27" text-anchor="middle" class="n">3</text>
+    <use href="#i-compile" x="78" y="18" stroke="#4a78c4"/>
+    <text x="100" y="98" text-anchor="middle" class="t">Compiler writes a recipe</text>
+    <text x="100" y="120" text-anchor="middle" class="s">Steps, ways to find each</text>
+    <text x="100" y="137" text-anchor="middle" class="s">control, checks, and the</text>
+    <text x="100" y="154" text-anchor="middle" class="s">known error outcomes</text></g>
+
+  <g transform="translate(765,110)"><rect class="card" width="240" height="190" rx="12" stroke="#b39200" stroke-width="2" fill="#fffbea"/>
+    <circle cx="22" cy="22" r="13" fill="#4a78c4"/><text x="22" y="27" text-anchor="middle" class="n">4</text>
+    <use href="#i-json" x="76" y="18" stroke="#8a6d00"/><use href="#i-check" x="122" y="18" stroke="#2e8a4a"/>
+    <text x="120" y="98" text-anchor="middle" class="t">Capability, reviewed</text>
+    <text x="120" y="120" text-anchor="middle" class="s">A versioned JSON file.</text>
+    <text x="120" y="137" text-anchor="middle" class="s">A person approves it before</text>
+    <text x="120" y="154" text-anchor="middle" class="s">it may run unattended</text></g>
+
+  <path d="M245,205 H283" stroke="#3c4658" stroke-width="1.8" fill="none" marker-end="url(#a)"/>
+  <path d="M485,205 H523" stroke="#3c4658" stroke-width="1.8" fill="none" marker-end="url(#a)"/>
+  <path d="M725,205 H763" stroke="#3c4658" stroke-width="1.8" fill="none" marker-end="url(#a)"/>
+
+
+  <!-- ===== Lane B: run many times ===== -->
+  <rect x="20" y="344" width="1010" height="290" rx="14" fill="#edf7f0" stroke="#9fd0ae"/>
+  <text x="40" y="370" class="lane" fill="#1f6b37">RUN MANY TIMES · DETERMINISTIC REPLAY</text>
+  <text x="392" y="370" class="l" fill="#1f6b37">every request: about 1.5 seconds, no AI cost</text>
+
+  <g transform="translate(45,390)"><rect class="card" width="200" height="170" rx="12"/>
+    <circle cx="22" cy="22" r="13" fill="#2e8a4a"/><text x="22" y="27" text-anchor="middle" class="n">1</text>
+    <use href="#i-person" x="56" y="16" stroke="#2e8a4a"/><use href="#i-mic" x="102" y="16" stroke="#2e8a4a"/>
+    <text x="100" y="94" text-anchor="middle" class="t">Member or staff asks</text>
+    <text x="100" y="116" text-anchor="middle" class="s">"What's my checking</text>
+    <text x="100" y="133" text-anchor="middle" class="s">balance?" by chat or voice</text></g>
+
+  <g transform="translate(285,390)"><rect class="card" width="200" height="170" rx="12"/>
+    <circle cx="22" cy="22" r="13" fill="#2e8a4a"/><text x="22" y="27" text-anchor="middle" class="n">2</text>
+    <use href="#i-chat" x="78" y="16" stroke="#7a55c0"/>
+    <text x="100" y="94" text-anchor="middle" class="t">Assistant picks a skill</text>
+    <text x="100" y="116" text-anchor="middle" class="s">Chooses the approved</text>
+    <text x="100" y="133" text-anchor="middle" class="s">capability for the request</text></g>
+
+  <g transform="translate(525,390)"><rect class="card" width="200" height="170" rx="12"/>
+    <circle cx="22" cy="22" r="13" fill="#2e8a4a"/><text x="22" y="27" text-anchor="middle" class="n">3</text>
+    <use href="#i-shield" x="78" y="16" stroke="#7a55c0"/>
+    <text x="100" y="94" text-anchor="middle" class="t">Gateway guards it</text>
+    <text x="100" y="116" text-anchor="middle" class="s">Locks to the signed-in</text>
+    <text x="100" y="133" text-anchor="middle" class="s">member; money moves wait</text>
+    <text x="100" y="150" text-anchor="middle" class="s">for the person's Confirm</text></g>
+
+  <g transform="translate(765,420)"><rect class="card" width="240" height="140" rx="12" stroke="#2e8a4a" stroke-width="2"/>
+    <circle cx="22" cy="22" r="13" fill="#2e8a4a"/><text x="22" y="27" text-anchor="middle" class="n">4</text>
+    <use href="#i-gear" x="98" y="12" stroke="#2e8a4a"/>
+    <text x="120" y="84" text-anchor="middle" class="t">Replay engine (no AI)</text>
+    <text x="120" y="106" text-anchor="middle" class="s">Runs the recipe the same way</text>
+    <text x="120" y="123" text-anchor="middle" class="s">every time; sorts the outcome</text></g>
+
+  <path d="M245,475 H283" stroke="#3c4658" stroke-width="1.8" fill="none" marker-end="url(#a)"/>
+  <path d="M485,475 H523" stroke="#3c4658" stroke-width="1.8" fill="none" marker-end="url(#a)"/>
+  <path d="M725,490 H763" stroke="#3c4658" stroke-width="1.8" fill="none" marker-end="url(#a)"/>
+  <!-- answer returns -->
+  <path d="M885,560 V598 H145 V562" stroke="#2e8a4a" stroke-width="2.2" fill="none" marker-end="url(#ag)"/>
+
+  <!-- ===== Bot workstation ===== -->
+  <rect x="1060" y="96" width="320" height="538" rx="14" fill="#f2f4f8" stroke="#8a93a4" stroke-width="1.5"/>
+  <use href="#i-vm" x="1076" y="104" stroke="#44506a"/>
+  <text x="1126" y="124" class="t">Bot workstation</text>
+  <text x="1126" y="142" class="s">Windows VM, inside the bank</text>
+
+  <g transform="translate(1100,160)"><rect class="card" width="118" height="450" rx="10" stroke="#44506a" stroke-width="1.8"/>
+    <use href="#i-plug" x="37" y="16" stroke="#44506a"/>
+    <text x="59" y="86" text-anchor="middle" class="t">Bridge</text>
+    <text x="59" y="112" text-anchor="middle" class="s">reads the</text><text x="59" y="128" text-anchor="middle" class="s">screen</text>
+    <text x="59" y="156" text-anchor="middle" class="s">clicks and</text><text x="59" y="172" text-anchor="middle" class="s">types</text>
+    <use href="#i-lock" x="37" y="196" stroke="#b8453b"/>
+    <text x="59" y="262" text-anchor="middle" class="s">locks out</text><text x="59" y="278" text-anchor="middle" class="s">humans while</text><text x="59" y="294" text-anchor="middle" class="s">automating</text>
+    <text x="59" y="330" text-anchor="middle" class="s">records the</text><text x="59" y="346" text-anchor="middle" class="s">human during</text><text x="59" y="362" text-anchor="middle" class="s">a handoff</text></g>
+
+  <g transform="translate(1240,160)"><rect class="card" width="124" height="450" rx="10"/>
+    <use href="#i-legacy" x="40" y="16" stroke="#1f3a68"/>
+    <text x="62" y="86" text-anchor="middle" class="t">CoreLink</text>
+    <text x="62" y="108" text-anchor="middle" class="s">legacy core</text>
+    <text x="62" y="124" text-anchor="middle" class="s">banking app,</text>
+    <text x="62" y="140" text-anchor="middle" class="s">unmodified</text>
+    <text x="62" y="172" text-anchor="middle" class="s">no API,</text>
+    <text x="62" y="188" text-anchor="middle" class="s">no test IDs</text></g>
+  <path d="M1218,300 H1238" stroke="#3c4658" stroke-width="1.8" fill="none" marker-end="url(#a)"/>
+  <path d="M1238,330 H1220" stroke="#3c4658" stroke-width="1.8" fill="none" marker-end="url(#a)"/>
+
+  <!-- ===== edges drawn last so no box hides them ===== -->
+  <path d="M385,110 V104 C385,84 395,80 415,80 H1040 C1062,80 1072,92 1072,112 V150 H1098" stroke="#4a78c4" stroke-width="2" fill="none" stroke-dasharray="7 5" marker-end="url(#a)"/>
+  <text x="560" y="74" class="l" fill="#2c5aa8">drives the real app through the bridge, every action policy-checked</text>
+  <path d="M885,300 V418" stroke="#b39200" stroke-width="2.2" fill="none" marker-end="url(#a)"/>
+  <text x="877" y="400" text-anchor="end" class="l">loaded by replay</text>
+  <path d="M1005,490 H1098" stroke="#2e8a4a" stroke-width="2.4" fill="none" marker-end="url(#ag)"/>
+  <text x="1033" y="470" text-anchor="middle" class="l" fill="#1f6b37">runs</text>
+  <text x="1033" y="484" text-anchor="middle" class="l" fill="#1f6b37">the app</text>
+  <circle cx="515" cy="598" r="13" fill="#2e8a4a"/><text x="515" y="603" text-anchor="middle" class="n">5</text>
+  <text x="538" y="575" class="s" fill="#1f6b37" font-weight="700">Answer in seconds: a balance, a business outcome</text>
+  <text x="538" y="591" class="s" fill="#1f6b37" font-weight="700">("member not found"), or a confirmation number</text>
+  <!-- ===== Bottom row: guardrails, evidence, human ===== -->
+  <g transform="translate(20,654)"><rect width="500" height="112" rx="12" fill="#fcebea" stroke="#d99a94"/>
+    <use href="#i-shield" x="16" y="14" stroke="#b8453b"/>
+    <text x="72" y="36" class="t">Guardrails on every action</text>
+    <text x="72" y="58" class="s">Allowlist of actions and windows · risk classes</text>
+    <text x="72" y="76" class="s">Irreversible steps need approval · personal data</text>
+    <text x="72" y="94" class="s">masked in logs, screenshots, and AI prompts</text></g>
+
+  <g transform="translate(540,654)"><rect width="490" height="112" rx="12" fill="#f6f7f9" stroke="#b9c0cc"/>
+    <use href="#i-log" x="16" y="14" stroke="#44506a"/>
+    <text x="72" y="36" class="t">Evidence for every run</text>
+    <text x="72" y="58" class="s">Step-by-step logs with the reason for each action,</text>
+    <text x="72" y="76" class="s">redacted screenshots, and screen snapshots when</text>
+    <text x="72" y="94" class="s">something fails</text></g>
+
+  <g transform="translate(1060,654)"><rect width="320" height="112" rx="12" fill="#fdf1e0" stroke="#d9a35a"/>
+    <use href="#i-headset" x="14" y="14" stroke="#a15c00"/>
+    <text x="68" y="36" class="t">Human operator (Sarah)</text>
+    <text x="68" y="58" class="s">Gets a request when replay is</text>
+    <text x="68" y="76" class="s">stuck or needs approval, takes</text>
+    <text x="68" y="94" class="s">the live screen, then resumes</text></g>
+  <path d="M1220,610 V652" stroke="#a15c00" stroke-width="2" fill="none" stroke-dasharray="6 4" marker-start="url(#aa)" marker-end="url(#aa)"/>
+</svg>
