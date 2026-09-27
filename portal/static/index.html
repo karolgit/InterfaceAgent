@@ -275,13 +275,29 @@ function confirmCard(p){const d=document.createElement('div');d.className='confi
 $('f').onsubmit=e=>{e.preventDefault();send($('t').value)};
 
 // Voice input: browser speech recognition (Chrome/Edge). Falls back to typing.
+// Every failure is reported in the chat, so the Mic button never fails silently.
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-if(!SR){$('mic').disabled=true;$('mic').title='Voice input needs Chrome or Edge'}
-else{const rec=new SR();rec.lang='en-US';rec.interimResults=true;
-  rec.onresult=e=>{const t=[...e.results].map(r=>r[0].transcript).join('');$('t').value=t;
-    if(e.results[e.results.length-1].isFinal){$('mic').classList.remove('on');send(t)}};
-  rec.onend=()=>$('mic').classList.remove('on');
-  $('mic').onclick=()=>{speechSynthesis.cancel();$('mic').classList.add('on');rec.start()}}
+const MIC_HELP={
+  'not-allowed':'Microphone access is blocked. Click the lock/site icon in the address bar, allow the microphone, and reload. Also check Windows Settings > Privacy > Microphone.',
+  'service-not-allowed':'This browser blocked speech recognition. Use Chrome or Edge, or press Windows+H to dictate into the text box.',
+  'audio-capture':'No microphone was found. Check that a mic is plugged in and selected as the default input device in Windows sound settings.',
+  'no-speech':"I didn't hear anything. Press Mic and start speaking within a few seconds.",
+  'network':'Speech recognition needs an internet connection (the browser sends audio to its speech service). Check your connection, or press Windows+H to dictate.',
+  'aborted':'Listening was stopped.'};
+let listening=false, heard=false, micNote=null;
+function micStatus(text){if(micNote)micNote.remove();micNote=text?add('sys',text):null}
+if(!SR||!window.isSecureContext){$('mic').disabled=true;
+  $('mic').title=!SR?'Voice input needs Chrome or Edge (or press Windows+H to dictate)':'Voice input needs https or localhost'}
+else{const rec=new SR();rec.lang='en-US';rec.interimResults=true;rec.continuous=false;rec.maxAlternatives=1;
+  rec.onstart=()=>{listening=true;heard=false;$('mic').classList.add('on');$('mic').textContent='Stop';micStatus('Listening... speak now.')};
+  rec.onresult=e=>{heard=true;const t=[...e.results].map(r=>r[0].transcript).join('');$('t').value=t;
+    if(e.results[e.results.length-1].isFinal){micStatus(null);rec.stop();send(t)}};
+  rec.onerror=e=>{micStatus('Mic: '+(MIC_HELP[e.error]||('speech recognition error "'+e.error+'". You can type instead, or press Windows+H to dictate.')))};
+  rec.onend=()=>{listening=false;$('mic').classList.remove('on');$('mic').textContent='Mic';
+    if(micNote&&micNote.textContent.startsWith('Listening'))micStatus(heard?null:"I didn't catch that. Press Mic and try again.")};
+  $('mic').onclick=()=>{if(listening){rec.stop();return}
+    speechSynthesis.cancel();
+    try{rec.start()}catch(err){micStatus('Mic: could not start ('+err.message+'). Reload the page and try again.')}}}
 </script>
 </body>
 </html>
