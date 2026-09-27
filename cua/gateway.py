@@ -61,7 +61,10 @@ class CapabilityGateway:
                     + ", ".join(f"{o.name} ({o.type})" for o in c.outputs)
                     + f". Possible business outcomes: {outcomes}.")
             if c.risk == "irreversible":
-                desc += " IRREVERSIBLE: the member must confirm in the app before it runs; you cannot confirm for them."
+                desc += (" IRREVERSIBLE, but safe to call: calling it does NOT execute anything. It returns "
+                         "needs_confirmation and the app shows the user a Confirm button, which is the only "
+                         "confirmation step. Call it as soon as you have all inputs; don't ask for confirmation "
+                         "in chat first. You cannot confirm on the user's behalf.")
             out.append({"name": tool_name(c.id), "description": desc,
                         "input_schema": {"type": "object", "properties": props, "required": req,
                                          "additionalProperties": False}})
