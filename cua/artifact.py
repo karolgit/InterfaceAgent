@@ -265,5 +265,6 @@ class RunResult(BaseModel):
     recoveries: list[dict[str, Any]] = []
     handoffs: list[dict[str, Any]] = []
     locator_fallbacks: list[dict[str, Any]] = []
+    notes: list[str] = []
     duration_ms: int = 0
     evidence_dir: str | None = None

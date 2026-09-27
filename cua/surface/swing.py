@@ -110,7 +110,7 @@ def wait_port_free(port: int, timeout_s: float = 15.0) -> None:
 def launch_corelink(tenant: str = "heritage", port: int = 8740, faults_file: Path | None = None,
                     idle_timeout_s: int = 900, log_file: Path | None = None) -> tuple[subprocess.Popen, SwingSurface]:
     """Start the CoreLink mock with the bridge attached and wait until the bridge answers."""
-    jar = ROOT / "bridge" / "cua-bridge.jar"
+    jar = Path(os.environ.get("CUA_BRIDGE_JAR", str(ROOT / "bridge" / "cua-bridge.jar")))  # override for testing
     classes = ROOT / "mockcore" / "out"
     if not jar.exists() or not classes.exists():
         raise SurfaceError("build first: scripts/build.ps1 (missing bridge jar or mockcore classes)")

@@ -39,6 +39,10 @@ class _Restart(Exception):
     pass
 
 
+class _FastForward(Exception):
+    """The operator completed the rest of the flow during a handoff; only outputs remain to be read."""
+
+
 class _Stop(Exception):
     def __init__(self, result: RunResult):
         self.result = result
@@ -93,6 +97,7 @@ class ReplayEngine:
         self.rules: list[OutcomeRule] = []
         self.rule_hits: dict[str, int] = {}
         self.baseline: Observation | None = None
+        self._cap: Capability | None = None
         self.result = RunResult(run_id=evidence.run_id, capability="", status="failed",
                                 evidence_dir=str(evidence.dir))
 
@@ -101,6 +106,7 @@ class ReplayEngine:
         t0 = time.monotonic()
         self.result.capability = f"{cap.id}@{cap.version}"
         self.rules = self.profile.rules_for(self.tenant, cap.outcome_rules, cap.inherit_outcome_rules)
+        self._cap = cap
         for spec in cap.inputs:  # register sensitive inputs BEFORE anything is logged
             if spec.sensitive and params.get(spec.name) not in (None, ""):
                 self.red.register(str(params[spec.name]), spec.name)
@@ -115,8 +121,16 @@ class ReplayEngine:
                     self._ensure_session()
                     self._reset_workspace()
                     outputs: dict[str, Any] = {}
-                    for step in cap.steps:
-                        self._run_step(cap, step, params, outputs)
+                    try:
+                        for step in cap.steps:
+                            self._run_step(cap, step, params, outputs)
+                    except _FastForward:
+                        note = "operator completed the flow during a handoff; outputs read from the final screen"
+                        self.result.notes.append(note)
+                        self.ev.log("fast_forward", reason=note)
+                        for step in cap.steps:
+                            if step.action == "extract":
+                                self._run_step(cap, step, params, outputs)
                     self._verify_success(cap, outputs)
                     self._finish_success(cap, outputs)
                     break
@@ -460,13 +474,20 @@ class ReplayEngine:
         if rule.kind == "escalate":
             ctx = {"capability": self.result.capability, "step": step and step.id,
                    "step_intent": step and step.intent, "rule": rule.id, "ui_text": ui_text}
-            res = self.handoff.request("escalation", f"{rule.code}: {rule.message}", ctx, obs)
+            cleared = None
+            if rule.when_dialog:
+                def cleared(pat=rule.when_dialog):  # the blocking dialog is gone
+                    return not any(w.modal and re.search(pat, w.title) for w in self.s.observe().windows)
+            res = self.handoff.request("escalation", f"{rule.code}: {rule.message}", ctx, obs, cleared=cleared)
             self.result.handoffs.append(res)
             if res["decision"] in ("abort", "deny"):
                 self._fail("HUMAN_ABORTED" if not res["expired"] else "HUMAN_TIMEOUT", step,
                            "operator to resolve the escalation", f"operator decision: {res['decision']}",
                            self.s.observe())
-            # Human resolved it on the live session: refresh baseline so their state change counts.
+            # Human resolved it on the live session. If they went on to finish the whole flow,
+            # don't replay steps that are already done: jump to reading the outputs.
+            if self._cap is not None and self._success_met(self.s.settle(timeout_s=2)):
+                raise _FastForward()
             return "human"
         return None
 
@@ -544,6 +565,14 @@ class ReplayEngine:
                 self._fail("SUCCESS_CHECK_FAILED", None, f"{c.kind} {c.pattern} {c.description}",
                            self._describe(obs), obs)
         self.ev.log("success_verified", checks=[c.description or c.kind for c in cap.success])
+
+    def _success_met(self, obs: Observation) -> bool:
+        """True if every final success check of the running capability already holds on screen."""
+        if not self._cap or not self._cap.success:
+            return False
+        lines = visible_lines(obs)
+        return all(any(re.search(c.pattern or "", l) for l in lines) if c.kind == "text_present"
+                   else self._checkpoint(obs, c) for c in self._cap.success)
 
     def _finish_success(self, cap: Capability, outputs: dict[str, Any]) -> None:
         obs = self.s.observe()

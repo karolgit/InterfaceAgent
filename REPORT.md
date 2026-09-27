@@ -196,6 +196,10 @@ agent --request--> paused --operator claims--> human --operator resolves--> agen
 - **`human`:** the operator works in the same CoreLink window, with the same process, session, and
   signed-on operator. The bridge records their clicks, typing, and keys, with targets described
   semantically. Password fields are recorded as `[SECRET]`.
+- **Auto-resume:** operators often just fix the problem in the app without touching the console. When the dialog
+  that caused the escalation is gone and the person has been idle for 3 seconds, the automation resumes by
+  itself. If the person also finished the rest of the flow, replay detects the success screen, reads the
+  outputs, and reports success with the note that the operator completed it, instead of repeating steps.
 - **Resolve:** the operator chooses resume, approve, deny, or abort. The recorded actions are attached to the
   intervention and the run evidence, control returns to `agent`, and the engine re-verifies the current
   step's checkpoint. It never assumes the human left the app in the expected state.

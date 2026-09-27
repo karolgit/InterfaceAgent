@@ -35,7 +35,7 @@ figcaption { font-size: 8.4pt; color: #4b5566; margin-top: 2pt; }
   <div class="sub">An LLM discovers how to do a task in a legacy banking app once. The run becomes a typed, versioned
   capability that replays deterministically, classifies runtime errors, stays inside safety policy, and hands the
   live session to a human when it must.</div>
-  <div class="meta">Karol Stuart · September 26, 2026<br>Repository: https://github.com/karolgit/InterfaceAgent</div>
+  <div class="meta">Karol Stuart · September 27, 2026<br>Repository: https://github.com/karolgit/InterfaceAgent</div>
   <img src="../user-flow.png">
 </section>
 
@@ -756,6 +756,10 @@ then product. That makes an override a small reviewable diff, not a fork.</p>
 <li><strong><code>human</code>:</strong> the operator works in the same CoreLink window, with the same process, session, and
   signed-on operator. The bridge records their clicks, typing, and keys, with targets described
   semantically. Password fields are recorded as <code>[SECRET]</code>.</li>
+<li><strong>Auto-resume:</strong> operators often just fix the problem in the app without touching the console. When the dialog
+  that caused the escalation is gone and the person has been idle for 3 seconds, the automation resumes by
+  itself. If the person also finished the rest of the flow, replay detects the success screen, reads the
+  outputs, and reports success with the note that the operator completed it, instead of repeating steps.</li>
 <li><strong>Resolve:</strong> the operator chooses resume, approve, deny, or abort. The recorded actions are attached to the
   intervention and the run evidence, control returns to <code>agent</code>, and the engine re-verifies the current
   step's checkpoint. It never assumes the human left the app in the expected state.</li>

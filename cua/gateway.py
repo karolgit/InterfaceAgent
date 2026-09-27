@@ -116,7 +116,7 @@ class CapabilityGateway:
         except Exception as e:  # a caller always gets a structured result, never a raw 500
             return {"status": "failed", "failure": {"code": "GATEWAY_ERROR", "observed": f"{type(e).__name__}: {e}"}}
         return res.model_dump(exclude_none=True, include={"status", "outputs", "outcome", "failure", "run_id",
-                                                          "recoveries", "handoffs"})
+                                                          "recoveries", "handoffs", "notes"})
 
     def shutdown(self) -> None:
         if self.proc:

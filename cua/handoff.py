@@ -111,7 +111,8 @@ class HandoffController:
         self.announce = announce
 
     def request(self, kind: str, reason: str, context: dict[str, Any], obs: Observation,
-                resume_mode: str = "agent") -> dict[str, Any]:
+                resume_mode: str = "agent", cleared: Callable[[], bool] | None = None,
+                idle_s: float = 3.0) -> dict[str, Any]:
         """Pause automation, hand the live session to a human, block until they resolve."""
         shot = self.evidence.screenshot(self.surface, obs, f"handoff-{kind}")
         self.surface.set_control("paused", "awaiting-operator")
@@ -140,6 +141,17 @@ class HandoffController:
                 self.evidence.log("handoff_claimed", intervention=iid, operator=rec.get("operator"))
             if rec["status"] in RESOLVED:
                 break
+            # Operators often just fix the problem in the app without touching the console. If the condition
+            # that caused the escalation is gone and the human has been idle for a moment, resume by itself.
+            if cleared is not None and rec["status"] in ("open", "claimed"):
+                evs, _ = self.surface.events(cursor)
+                human_evs = [e for e in evs if e.get("actor") == "human" and e.get("kind") in ("click", "type", "key")]
+                if human_evs and time.time() * 1000 - human_evs[-1].get("ts", 0) > idle_s * 1000 and cleared():
+                    rec = self.store.update(iid, status="resume", resolved_at=_now(),
+                                            operator=rec.get("operator") or "operator (in app)",
+                                            notes="auto-resumed: the operator cleared the condition in the app")
+                    self.evidence.log("handoff_auto_resumed", intervention=iid)
+                    break
             time.sleep(0.4)
         else:
             rec = self.store.update(iid, status="expired", resolved_at=_now())

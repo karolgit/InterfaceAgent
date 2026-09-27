@@ -147,6 +147,14 @@
       "title": "Locator Fallbacks",
       "type": "array"
     },
+    "notes": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Notes",
+      "type": "array"
+    },
     "duration_ms": {
       "default": 0,
       "title": "Duration Ms",

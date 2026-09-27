@@ -148,7 +148,7 @@ public final class BridgeAgent {
             return;
         }
         if (synthetic) return; // agent actions are logged by the controller, not here
-        if (!"human".equals(mode) && !"free".equals(mode)) return;
+        if (!"human".equals(mode) && !"free".equals(mode) && !"paused".equals(mode)) return;
         if (e instanceof MouseEvent me && me.getID() == MouseEvent.MOUSE_CLICKED) {
             flushTyping();
             Map<String, Object> ev = new LinkedHashMap<>();
